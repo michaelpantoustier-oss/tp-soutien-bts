@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/Aurlom/Downloads/index_4.html -->
-<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription TP Soutien — BTS Biologie Médicale</title>
-<link href="./Inscription TP Soutien — BTS Biologie Médicale_files/css2" rel="stylesheet">
-<script src="./Inscription TP Soutien — BTS Biologie Médicale_files/email.min.js.téléchargement"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root {
     --violet: #C57AFF;
@@ -104,63 +104,9 @@
     <p>Inscris-toi à un créneau de travaux pratiques encadrés. Places limitées — premiers arrivés, premiers servis.<br>1 seul TP par matière autorisé par étudiant.</p>
   </div>
 
-  <div class="counter-row" id="counters">
-    <div class="counter-card">
-      <div class="counter-label">Places restantes</div>
-      <div class="counter-val">39</div>
-      <div class="counter-sub">sur 108 au total</div>
-    </div>
-    <div class="counter-card">
-      <div class="counter-label">Inscrits</div>
-      <div class="counter-val">69</div>
-      <div class="counter-sub">toutes séances</div>
-    </div></div>
+  <div class="counter-row" id="counters"></div>
 
-  <div class="slots-grid" id="slotsGrid">
-      <div class="slot-card " onclick="selectSlot(&#39;Vendredi 8 mai — Biochimie 10h-13h&#39;, false)">
-        <div class="slot-date">Vendredi 8 mai</div>
-        <div class="slot-title">Biochimie</div>
-        <div class="slot-time">10h – 13h</div>
-        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:41.17647058823529%"></div></div>
-        <div class="slot-count">
-          <span>14 / 34 inscrits</span>
-          <span class="remaining">20 places restantes</span>
-          <span class="full-badge">Complet</span>
-        </div>
-      </div>
-      <div class="slot-card " onclick="selectSlot(&#39;Vendredi 8 mai — Hématologie 14h-17h&#39;, false)">
-        <div class="slot-date">Vendredi 8 mai</div>
-        <div class="slot-title">Hématologie</div>
-        <div class="slot-time">14h – 17h</div>
-        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:95%"></div></div>
-        <div class="slot-count">
-          <span>19 / 20 inscrits</span>
-          <span class="remaining">1 place restante</span>
-          <span class="full-badge">Complet</span>
-        </div>
-      </div>
-      <div class="slot-card " onclick="selectSlot(&#39;Dimanche 10 mai — Biochimie 10h-13h&#39;, false)">
-        <div class="slot-date">Dimanche 10 mai</div>
-        <div class="slot-title">Biochimie</div>
-        <div class="slot-time">10h – 13h</div>
-        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:58.82352941176471%"></div></div>
-        <div class="slot-count">
-          <span>20 / 34 inscrits</span>
-          <span class="remaining">14 places restantes</span>
-          <span class="full-badge">Complet</span>
-        </div>
-      </div>
-      <div class="slot-card " onclick="selectSlot(&#39;Dimanche 10 mai — Hématologie 14h-17h&#39;, false)">
-        <div class="slot-date">Dimanche 10 mai</div>
-        <div class="slot-title">Hématologie</div>
-        <div class="slot-time">14h – 17h</div>
-        <div class="slot-bar-wrap"><div class="slot-bar-fill" style="width:80%"></div></div>
-        <div class="slot-count">
-          <span>16 / 20 inscrits</span>
-          <span class="remaining">4 places restantes</span>
-          <span class="full-badge">Complet</span>
-        </div>
-      </div></div>
+  <div class="slots-grid" id="slotsGrid"></div>
 
   <div class="form-card">
     <h2>Ton inscription</h2>
@@ -198,13 +144,13 @@
       La liste complète est centralisée dans Google Sheets — <strong>accessible uniquement par l'administration</strong>.
     </div>
     <div class="filter-tabs" id="filterTabs">
-      <button class="tab active" onclick="setFilter(&#39;all&#39;, this)">Tous</button>
-      <button class="tab" onclick="setFilter(&#39;Vendredi 8 mai — Biochimie 10h-13h&#39;, this)">V. Biochim 10h</button>
-      <button class="tab" onclick="setFilter(&#39;Vendredi 8 mai — Hématologie 14h-17h&#39;, this)">V. Hémato 14h</button>
-      <button class="tab" onclick="setFilter(&#39;Dimanche 10 mai — Biochimie 10h-13h&#39;, this)">D. Biochim 10h</button>
-      <button class="tab" onclick="setFilter(&#39;Dimanche 10 mai — Hématologie 14h-17h&#39;, this)">D. Hémato 14h</button>
+      <button class="tab active" onclick="setFilter('all', this)">Tous</button>
+      <button class="tab" onclick="setFilter('Vendredi 8 mai — Biochimie 10h-13h', this)">V. Biochim 10h</button>
+      <button class="tab" onclick="setFilter('Vendredi 8 mai — Hématologie 14h-17h', this)">V. Hémato 14h</button>
+      <button class="tab" onclick="setFilter('Dimanche 10 mai — Biochimie 10h-13h', this)">D. Biochim 10h</button>
+      <button class="tab" onclick="setFilter('Dimanche 10 mai — Hématologie 14h-17h', this)">D. Hémato 14h</button>
     </div>
-    <div id="inscritsList"><div class="empty-state">Aucune inscription dans cette session.</div></div>
+    <div id="inscritsList"></div>
   </div>
 
 </div>
@@ -239,10 +185,10 @@ function saveLocalInscrits(arr) {
 
 // Compteurs globaux (persistants dans localStorage, mis à jour à chaque inscription)
 let _counts = {
-  'Vendredi 8 mai — Biochimie 10h-13h': 14,
-  'Vendredi 8 mai — Hématologie 14h-17h': 19,
+  'Vendredi 8 mai — Biochimie 10h-13h': 16,
+  'Vendredi 8 mai — Hématologie 14h-17h': 20,
   'Dimanche 10 mai — Biochimie 10h-13h': 20,
-  'Dimanche 10 mai — Hématologie 14h-17h': 16
+  'Dimanche 10 mai — Hématologie 14h-17h': 15
 };
 
 async function fetchCounts() {
@@ -495,6 +441,5 @@ emailjs.init(EMAILJS_PUBLIC_KEY);
   renderInscrits();
 })();
 </script>
-
-
-</body></html>
+</body>
+</html>

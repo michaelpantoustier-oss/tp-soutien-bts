@@ -149,6 +149,8 @@
       <button class="tab" onclick="setFilter('Vendredi 8 mai — Hématologie 14h-17h', this)">V. Hémato 14h</button>
       <button class="tab" onclick="setFilter('Dimanche 10 mai — Biochimie 10h-13h', this)">D. Biochim 10h</button>
       <button class="tab" onclick="setFilter('Dimanche 10 mai — Hématologie 14h-17h', this)">D. Hémato 14h</button>
+      <button class="tab" onclick="setFilter('Jeudi 14 mai — Biochimie 10h-13h', this)">J. Biochim 10h</button>
+      <button class="tab" onclick="setFilter('Jeudi 14 mai — Biochimie 14h-17h', this)">J. Biochim 14h</button>
     </div>
     <div id="inscritsList"></div>
   </div>
@@ -163,10 +165,12 @@ const ADMIN_EMAIL         = 'michael.pantoustier@aurlom.com';
 const SHEETS_URL          = 'https://script.google.com/macros/s/AKfycbxw2OxpZzVhE2H_ktaoE_oiKddsO4dVLbFOND423uT04vFSkPeG1KZgUhVsRjcq_TDs/exec';
 
 const SLOTS = [
-  { id: 'v-biochim', label: 'Biochimie',   date: 'Vendredi 8 mai',  time: '10h – 13h', key: 'Vendredi 8 mai — Biochimie 10h-13h',   type: 'biochim', max: 34 },
-  { id: 'v-hemato',  label: 'Hématologie', date: 'Vendredi 8 mai',  time: '14h – 17h', key: 'Vendredi 8 mai — Hématologie 14h-17h', type: 'hemato',  max: 20 },
-  { id: 'd-biochim', label: 'Biochimie',   date: 'Dimanche 10 mai', time: '10h – 13h', key: 'Dimanche 10 mai — Biochimie 10h-13h',  type: 'biochim', max: 34 },
-  { id: 'd-hemato',  label: 'Hématologie', date: 'Dimanche 10 mai', time: '14h – 17h', key: 'Dimanche 10 mai — Hématologie 14h-17h',type: 'hemato',  max: 20 },
+  { id: 'v-biochim', label: 'Biochimie',   date: 'Vendredi 8 mai',   time: '10h – 13h', key: 'Vendredi 8 mai — Biochimie 10h-13h',    type: 'biochim', max: 34 },
+  { id: 'v-hemato',  label: 'Hématologie', date: 'Vendredi 8 mai',   time: '14h – 17h', key: 'Vendredi 8 mai — Hématologie 14h-17h',  type: 'hemato',  max: 20 },
+  { id: 'd-biochim', label: 'Biochimie',   date: 'Dimanche 10 mai',  time: '10h – 13h', key: 'Dimanche 10 mai — Biochimie 10h-13h',   type: 'biochim', max: 34 },
+  { id: 'd-hemato',  label: 'Hématologie', date: 'Dimanche 10 mai',  time: '14h – 17h', key: 'Dimanche 10 mai — Hématologie 14h-17h', type: 'hemato',  max: 20 },
+  { id: 'j-biochim-am', label: 'Biochimie', date: 'Jeudi 14 mai',   time: '10h – 13h', key: 'Jeudi 14 mai — Biochimie 10h-13h',      type: 'biochim2', max: 32 },
+  { id: 'j-biochim-pm', label: 'Biochimie', date: 'Jeudi 14 mai',   time: '14h – 17h', key: 'Jeudi 14 mai — Biochimie 14h-17h',      type: 'biochim2', max: 32 },
 ];
 
 const LS_KEY = 'tp-soutien-inscrits-v3';
@@ -188,7 +192,9 @@ let _counts = {
   'Vendredi 8 mai — Biochimie 10h-13h': 33,
   'Vendredi 8 mai — Hématologie 14h-17h': 20,
   'Dimanche 10 mai — Biochimie 10h-13h': 27,
-  'Dimanche 10 mai — Hématologie 14h-17h': 20
+  'Dimanche 10 mai — Hématologie 14h-17h': 20,
+  'Jeudi 14 mai — Biochimie 10h-13h': 0,
+  'Jeudi 14 mai — Biochimie 14h-17h': 0
 };
 
 async function fetchCounts() {
@@ -347,7 +353,7 @@ async function submitForm() {
 
   const slotObj = SLOTS.find(s => s.key === selectedSlot);
 
-  // Vérifier doublon via Sheets (source de vérité)
+  // Vérifier doublon exact (même email + même créneau)
   try {
     const csvUrl = 'https://docs.google.com/spreadsheets/d/1tesqi4JzuzlmLMuP9Zh9ZqGAn7H30_TmHI3fR7Y2F5Y/export?format=csv&gid=0';
     const r = await fetch(csvUrl);
@@ -358,17 +364,16 @@ async function submitForm() {
       if (cols.length < 6) continue;
       const rowEmail = cols[2].trim().toLowerCase().replace(/^"|"$/g, '');
       const rowCreneau = cols[5].trim().replace(/^"|"$/g, '');
-      const rowSlot = SLOTS.find(s => s.key === rowCreneau);
-      if (rowEmail === email.toLowerCase() && rowSlot?.type === slotObj.type) {
-        showFeedback('error', `Tu es déjà inscrit(e) à un TP de <strong>${slotObj.label}</strong> (${rowCreneau}).<br>Un seul TP par matière est autorisé.`);
+      if (rowEmail === email.toLowerCase() && rowCreneau === selectedSlot) {
+        showFeedback('error', `Tu es déjà inscrit(e) à ce créneau (${rowCreneau}).`);
         return;
       }
     }
   } catch(e) {
-    // fallback local si Sheets inaccessible
-    const existingSlot = existingSlotForMatiere(email, slotObj.type);
-    if (existingSlot) {
-      showFeedback('error', `Tu es déjà inscrit(e) à un TP de <strong>${slotObj.label}</strong> (${existingSlot}).<br>Un seul TP par matière est autorisé.`);
+    // fallback local
+    const already = getLocalInscrits().find(i => i.email.toLowerCase() === email.toLowerCase() && i.slot === selectedSlot);
+    if (already) {
+      showFeedback('error', `Tu es déjà inscrit(e) à ce créneau.`);
       return;
     }
   }

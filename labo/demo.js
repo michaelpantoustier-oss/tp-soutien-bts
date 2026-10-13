@@ -1,10 +1,10 @@
 /*
- * Hôte navigateur de LaboCore : stockage localStorage et formatage des dates.
- * Sert au mode démonstration (API_URL vide dans app.js) et à l'affichage.
+ * Hôte navigateur de LaboCore : formatage des dates et mode démonstration
+ * (stockage localStorage, données entièrement fictives).
  */
 var LaboNav = (function () {
   var TZ = 'Europe/Paris';
-  var CLE = 'labo-demo-v1';
+  var CLE = 'labo-demo-v2';
 
   function parties(d) {
     var f = new Intl.DateTimeFormat('fr-FR', {
@@ -31,95 +31,150 @@ var LaboNav = (function () {
     return new Date(naif - (vu - naif));
   }
 
-  var env = { now: function () { return new Date(); }, format: format, parseLocal: parseLocal, notify: null };
-
-  function charger() {
-    try { return JSON.parse(localStorage.getItem(CLE)) || null; } catch (e) { return null; }
+  function aleatoire(n) {
+    var s = '';
+    var b = new Uint8Array(n);
+    (typeof crypto !== 'undefined' && crypto.getRandomValues ? crypto.getRandomValues(b) : b.forEach(function (x, i) { b[i] = Math.random() * 256; }));
+    for (var i = 0; i < n; i++) s += '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'[b[i] % 34];
+    return s;
   }
-  function sauver(db) {
-    try { localStorage.setItem(CLE, JSON.stringify(db)); } catch (e) { /* stockage indisponible : la démo reste en mémoire */ }
+
+  // Empreinte simple : suffisante pour une démo locale, jamais utilisée en production.
+  function empreinte(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0).toString(16);
   }
 
   var memoire = null;
-
-  function store() {
+  function charger() { try { return JSON.parse(localStorage.getItem(CLE)) || null; } catch (e) { return null; } }
+  function sauver() { try { localStorage.setItem(CLE, JSON.stringify(memoire)); } catch (e) { /* démo en mémoire seulement */ } }
+  function base() {
     if (!memoire) memoire = charger() || {};
     Object.keys(LaboCore.TABLES).forEach(function (t) { if (!memoire[t]) memoire[t] = []; });
+    if (!memoire._cache) memoire._cache = {};
+    if (!memoire._sessions) memoire._sessions = {};
+    return memoire;
+  }
+
+  var env = {
+    now: function () { return new Date(); },
+    format: format,
+    parseLocal: parseLocal,
+    random: aleatoire,
+    randomToken: function () { return aleatoire(40); },
+    hashPin: function (id, pin) { return empreinte('demo|' + id + '|' + pin); },
+    cache: {
+      get: function (k) { var v = base()._cache[k]; return v && v.exp > Date.now() ? v.v : null; },
+      put: function (k, v, s) { base()._cache[k] = { v: v, exp: Date.now() + s * 1000 }; sauver(); },
+      remove: function (k) { delete base()._cache[k]; sauver(); }
+    },
+    sessions: {
+      put: function (j, o) { base()._sessions[empreinte(j)] = o; sauver(); },
+      get: function (j) { return base()._sessions[empreinte(j)] || null; },
+      remove: function (j) { delete base()._sessions[empreinte(j)]; sauver(); }
+    },
+    notify: null,
+    pilotage: null
+  };
+
+  function store() {
+    base();
     function copie(o) { return JSON.parse(JSON.stringify(o)); }
     return {
       all: function (t) { return copie(memoire[t]); },
-      get: function (t, id) {
-        var r = memoire[t].filter(function (x) { return String(x.id) === String(id); })[0];
-        return r ? copie(r) : null;
-      },
-      insert: function (t, o) { memoire[t].push(copie(o)); sauver(memoire); },
+      get: function (t, id) { var r = memoire[t].filter(function (x) { return String(x.id) === String(id); })[0]; return r ? copie(r) : null; },
+      insert: function (t, o) { memoire[t].push(copie(o)); sauver(); },
       update: function (t, id, patch) {
         var r = memoire[t].filter(function (x) { return String(x.id) === String(id); })[0];
         if (!r) throw new Error('Ligne introuvable');
         Object.keys(patch).forEach(function (k) { r[k] = patch[k]; });
-        sauver(memoire);
+        sauver();
       }
     };
   }
 
-  function decaler(jours) {
-    var d = new Date(Date.now() + jours * 86400000);
-    return format(d, 'yyyy-MM-dd');
-  }
+  function decaler(j) { return format(new Date(Date.now() + j * 86400000), 'yyyy-MM-dd'); }
 
-  // Données fictives de démonstration.
+  var COMPTES = [
+    ['T1', 'Technicienne A', 'technicienne.a@demo.local', 'technicienne', '', '', '111111', '30'],
+    ['T2', 'Technicienne B', 'technicienne.b@demo.local', 'technicienne', '', '', '222222', '30'],
+    ['L1', 'Aide-laborantine C', 'aide.c@demo.local', 'aide_laborantine', '', '', '333333', '20'],
+    ['E1', 'Enseignant BIOMED microbiologie', 'prof.biomed@demo.local', 'enseignant', 'BIOMED', 'Microbiologie', '444444', ''],
+    ['E2', 'Enseignante BIOALC biochimie', 'prof.bioalc@demo.local', 'enseignant', 'BIOALC', 'Biochimie', '555555', ''],
+    ['R1', 'Prof référent', 'referent@demo.local', 'prof_referent', '', '', '666666', ''],
+    ['C1', 'Coordinateur pédagogique', 'coordination@demo.local', 'coordinateur', '', '', '777777', ''],
+    ['D1', 'Directeur du campus', 'direction@demo.local', 'directeur', '', '', '888888', '']
+  ];
+
   function amorcer(core) {
     var s = store();
     if (s.all('Utilisateurs').length) return;
-    [
-      { id: 'T1', nom: 'Technicienne A', role: 'technicienne', pin: '1111', email: '', taux_horaire: '30', actif: 'oui' },
-      { id: 'T2', nom: 'Technicienne B', role: 'technicienne', pin: '2222', email: '', taux_horaire: '30', actif: 'oui' },
-      { id: 'P1', nom: 'Enseignant biochimie', role: 'enseignant', pin: '3333', email: '', taux_horaire: '', actif: 'oui' },
-      { id: 'P2', nom: 'Enseignante microbiologie', role: 'enseignant', pin: '4444', email: '', taux_horaire: '', actif: 'oui' },
-      { id: 'R1', nom: 'Responsable labo', role: 'responsable', pin: '0000', email: '', taux_horaire: '', actif: 'oui' }
-    ].forEach(function (u) { s.insert('Utilisateurs', u); });
-
-    var T1 = { id: 'T1', pin: '1111' }, T2 = { id: 'T2', pin: '2222' };
-    var P1 = { id: 'P1', pin: '3333' }, P2 = { id: 'P2', pin: '4444' }, R1 = { id: 'R1', pin: '0000' };
-    function q(auth, action, data) { return core.handle({ action: action, auth: auth, data: data }); }
-
-    var d1 = q(P1, 'demande', {
-      date_tp: decaler(2), creneau: '10h15 – 11h45', labo: 'Labo Robert Koch', classe: 'BM1', discipline: 'Biochimie',
-      competence: LaboCore.CONFIG.blocs.BM[1], titre: 'Doser les transaminases ALAT et ASAT', effectif: '16',
-      besoin: '1 coffret ALAT + 1 coffret ASAT, Exatrol N et P, spectrophotomètre, cuves, micropipettes P1000 et P200'
-    }).data;
-    var d2 = q(P2, 'demande', {
-      date_tp: decaler(18), creneau: '14h30 – 16h00', labo: 'Labo Gerty Cori', classe: 'BIOALC1', discipline: 'Microbiologie',
-      competence: LaboCore.CONFIG.blocs.BIOAC[1], titre: 'Couler des milieux de culture en conditions stériles', effectif: '14',
-      besoin: 'Becs Bunsen, gélose Drigalski et EMB en poudre, boîtes de Petri stériles, alcool'
-    }).data;
-    q(P2, 'demande', {
-      date_tp: decaler(0), creneau: '16h15 – 17h45', labo: 'Labo Marie Curie', classe: 'BM1', discipline: 'Hématologie / Immunologie',
-      competence: LaboCore.CONFIG.blocs.BM[1], titre: 'Reconnaître les globules blancs sur frottis', effectif: '12',
-      besoin: 'Frottis sanguins colorés, microscopes, huile à immersion'
+    COMPTES.forEach(function (c) {
+      s.insert('Utilisateurs', { id: c[0], nom: c[1], email: c[2], role: c[3], filiere: c[4], disciplines: c[5], pin: '', pin_hash: env.hashPin(c[0], c[6]), taux_horaire: c[7], actif: 'oui' });
     });
-    q(T1, 'majDemande', { id: d1.id, prendre: true });
-    q(T1, 'message', { demande_id: d1.id, texte: 'Exatrol P à 0 dans l\'inventaire : je passe commande ou on travaille avec N seul ?' });
-    q(P1, 'message', { demande_id: d1.id, texte: 'N seul suffira pour ce TP.' });
-    q(T2, 'majDemande', { id: d2.id, prendre: true });
+    var jetons = {};
+    COMPTES.forEach(function (c) { jetons[c[0]] = core.handle({ action: 'connexion', data: { email: c[2], pin: c[6] } }).data.jeton; });
+    function q(id, action, data) {
+      var r = core.handle({ action: action, jeton: jetons[id], data: data });
+      if (!r.ok && typeof console !== 'undefined') console.warn('démo', action, r.error);
+      return r.data;
+    }
 
-    // Présences du mois passé, saisies puis validées.
+    // Programme fictif inspiré des intitulés de référentiel (pas d'extrait du scénario réel).
+    [
+      ['P1', 'BIOMED', '1A', 'Biochimie', 'BC2', 'S3-5', decaler(-3), decaler(25), 'Spectrophotométrie et gamme d\'étalonnage', 'Gamme d\'étalonnage des protéines totales (biuret), dosage d\'inconnus', 'Recherche de la limite de linéarité', 'Spectrophotomètre | Cuves | Réactif de biuret | Micropipettes et cônes'],
+      ['P2', 'BIOMED', '1A', 'Microbiologie', 'BC2', 'S4-6', decaler(4), decaler(30), 'Examen microscopique et coloration de Gram', 'État frais et coloration de Gram sur souches non pathogènes', 'Lecture de lames et identification présomptive', 'Microscopes | Lames et lamelles | Kit coloration de Gram | Huile à immersion | Anses / öses'],
+      ['P3', 'BIOMED', '1A', 'HAI', 'BC2', 'S5-7', decaler(10), decaler(38), 'Frottis sanguin et formule leucocytaire', 'Réalisation et coloration MGG de frottis', 'Formule leucocytaire sur lames commentées', 'Lames et lamelles | Colorant MGG | Microscopes | Huile à immersion'],
+      ['P4', 'BIOALC', '1A', 'Biochimie', 'BC02', 'S5-11', decaler(1), decaler(45), 'Paramètres physico-chimiques d\'un produit', 'Mesures de pH, conductivité et extrait sec sur eau de process et lait', 'Exploitation des mesures et conformité', 'pH-mètre | Conductimètre | Balance analytique | Étuve | Verrerie jaugée'],
+      ['P5', 'BIOALC', '1A', 'Microbiologie', 'BC02', 'S6-9', decaler(8), decaler(40), 'Dénombrement de la flore d\'un produit alimentaire', 'Ensemencement en masse et dénombrement sur PCA', 'Calcul et expression des résultats', 'Gélose PCA | Boîtes de Petri | Eau peptonée | Bain-marie | Étuve'],
+      ['P6', 'BIOALC', '1A', 'Biologie cellulaire', 'BC02', 'S7-10', decaler(15), decaler(50), 'Numération cellulaire et viabilité', 'Numération sur cellule de Malassez et test au bleu trypan', 'Comparaison de méthodes de numération', 'Cellule de Malassez | Bleu trypan | Microscopes | Micropipettes et cônes']
+    ].forEach(function (p) {
+      s.insert('Programme', { id: p[0], filiere: p[1], annee: p[2], matiere: p[3], bloc: p[4], semaines: p[5], debut: p[6], fin: p[7], titre: p[8], tp: p[9], renforcement: p[10], materiel: p[11] });
+    });
+
+    [
+      ['Fournisseur verrerie (démo)', 'Laboratoire', 'Verrerie | Petit matériel | Consommable', '', '', '', 'Exemple fictif'],
+      ['Fournisseur microbiologie (démo)', 'Laboratoire', 'Milieu de culture | Petit matériel', '', '', '', 'Exemple fictif'],
+      ['Fournisseur réactifs (démo)', 'Laboratoire', 'Réactif / coffret', '', '', '', 'Exemple fictif'],
+      ['Fournisseur équipements (démo)', 'Laboratoire', 'Équipement', '', '', '', 'Exemple fictif']
+    ].forEach(function (f) { s.insert('Fournisseurs', { nom: f[0], domaine: f[1], categories: f[2], contact: f[3], email: f[4], telephone: f[5], notes: f[6] }); });
+
+    var art = {};
+    [
+      ['biuret', 'BIOMED', 'Réactif / coffret', 'Réactif de biuret', 'REF-DEMO-01', 'Fournisseur réactifs (démo)', 2, 'flacon', 2, decaler(400)],
+      ['gram', 'Commun', 'Réactif / coffret', 'Kit coloration de Gram', 'REF-DEMO-02', 'Fournisseur microbiologie (démo)', 1, 'kit', 1, decaler(200)],
+      ['mgg', 'BIOMED', 'Réactif / coffret', 'Colorant MGG', 'REF-DEMO-03', 'Fournisseur réactifs (démo)', 3, 'flacon', 1, decaler(20)],
+      ['cones', 'Commun', 'Consommable', 'Cônes 200 µL', 'REF-DEMO-04', 'Fournisseur verrerie (démo)', 6, 'sachet de 1000', 2, ''],
+      ['lames', 'Commun', 'Consommable', 'Lames et lamelles', 'REF-DEMO-05', 'Fournisseur verrerie (démo)', 8, 'boîte', 3, ''],
+      ['pca', 'BIOALC', 'Milieu de culture', 'Gélose PCA déshydratée', 'REF-DEMO-06', 'Fournisseur microbiologie (démo)', 0, 'pot 500 g', 1, decaler(300)],
+      ['petri', 'Commun', 'Consommable', 'Boîtes de Petri stériles', 'REF-DEMO-07', 'Fournisseur verrerie (démo)', 4, 'carton de 500', 2, ''],
+      ['huile', 'Commun', 'Consommable', 'Huile à immersion', 'REF-DEMO-08', 'Fournisseur équipements (démo)', 1, 'flacon', 1, '']
+    ].forEach(function (a) {
+      art[a[0]] = q('T1', 'article', { filiere: a[1], categorie: a[2], designation: a[3], reference: a[4], fournisseur: a[5], quantite: a[6], unite: a[7], seuil: a[8], peremption: a[9], emplacement: 'Réserve' }).id;
+    });
+
+    var d1 = q('E1', 'demande', { date_tp: decaler(2), creneau: LaboCore.CONFIG.creneaux[1], labo: 'Labo Gerty Cori', classe: 'BM1', discipline: 'Microbiologie', competence: 'RNCP40027 BC2 – Analyses médicales les plus courantes', sequence_id: 'P2', titre: 'Réaliser une coloration de Gram et l\'interpréter', effectif: '15', besoin: 'Souches non pathogènes en bouillon, kit Gram, lames, microscopes, huile à immersion' });
+    q('E2', 'demande', { date_tp: decaler(0), creneau: LaboCore.CONFIG.creneaux[3], labo: 'Labo Fleming', classe: 'BIOALC1', discipline: 'Biochimie', competence: 'RNCP38884 BC02 – Réalisation des analyses dans le cadre d\'un contrôle qualité', sequence_id: 'P4', titre: 'Mesurer le pH et la conductivité d\'une eau de process', effectif: '12', besoin: 'pH-mètres étalonnés, solutions tampons pH 4/7/10, conductimètres, échantillons d\'eau' });
+    q('E2', 'demande', { date_tp: decaler(20), creneau: LaboCore.CONFIG.creneaux[2], labo: 'Labo Marie Curie', classe: 'BIOALC1', discipline: 'Microbiologie', competence: '', sequence_id: 'P5', titre: 'Dénombrer la flore aérobie mésophile d\'un lait', effectif: '12', besoin: 'Gélose PCA, boîtes de Petri, eau peptonée tamponnée, bain-marie 45 °C' });
+    q('T1', 'majDemande', { id: d1.id, prendre: true });
+    q('T1', 'message', { demande_id: d1.id, texte: 'Il ne reste qu\'un kit de Gram : suffisant pour 15 élèves en binômes ?' });
+    q('E1', 'message', { demande_id: d1.id, texte: 'Oui, en binômes ça passe.' });
+
     var missions = LaboCore.CONFIG.missions;
-    [[-9, '08:00', '12:30', T1], [-8, '13:30', '18:00', T1], [-7, '08:15', '12:00', T2], [-3, '09:00', '17:30', T2], [-2, '08:00', '11:45', T1]]
+    [[-9, '08:00', '12:30', 'T1'], [-8, '13:30', '18:00', 'T1'], [-7, '08:15', '12:00', 'T2'], [-3, '09:00', '17:30', 'T2'], [-2, '08:00', '11:45', 'T1'], [-2, '13:00', '16:00', 'L1']]
       .forEach(function (x, i) {
-        var r = q(x[3], 'saisieManuelle', {
-          date: decaler(x[0]), debut: x[1], fin: x[2], labo: LaboCore.CONFIG.labos[i % 4],
-          missions: [missions[i % 2], missions[2]], motif: 'Reprise de l\'émargement papier (démo)'
-        }).data;
-        if (i < 3) q(R1, 'validerSession', { id: r.id, decision: 'validee' });
+        var r = q(x[3], 'saisieManuelle', { date: decaler(x[0]), debut: x[1], fin: x[2], labo: LaboCore.CONFIG.labos[i % 4], missions: [missions[i % 2], missions[2]], motif: 'Reprise de l\'émargement papier (démo)' });
+        if (r && i < 3) q('R1', 'validerSession', { id: r.id, decision: 'validee' });
       });
 
-    q(T2, 'rangement', {
-      labo: 'Labo Gerty Cori', controles: { 'Pipettes verre': 'ok', 'Becs Bunsen': 'ok', 'DASRI': 'nc', 'Microscopes': 'ok' },
-      remarques: 'Collecteur DASRI plein, pas de collecteur de rechange.'
-    });
-    q(T1, 'incident', { labo: 'Labo Robert Koch', categorie: 'Équipement en panne', gravite: 'Bloquant', description: 'Spectrophotomètre n° 2 : lampe qui ne s\'allume plus.' });
-    q(T1, 'incident', { labo: 'Labo Fleming', categorie: 'Réactif périmé', gravite: 'Gênant', description: 'Kit acide urique (réf. 80351) périmé depuis le 01/10/2026 selon l\'inventaire.' });
+    q('T2', 'rangement', { labo: 'Labo Gerty Cori', controles: { 'Pipettes verre': 'ok', 'Becs Bunsen': 'ok', 'DASRI': 'nc', 'Microscopes': 'ok' }, remarques: 'Collecteur DASRI plein, pas de collecteur de rechange.' });
+    q('T1', 'incident', { labo: 'Labo Robert Koch', categorie: 'Équipement en panne', gravite: 'Bloquant', description: 'Spectrophotomètre n° 2 : la lampe ne s\'allume plus.' });
+    q('T2', 'mouvement', { article_id: art.cones, delta: -1, motif: 'Consommation TP' });
+
+    q('T2', 'commande', { filiere: 'BIOALC', designation: 'Gélose PCA déshydratée 500 g', reference: 'REF-DEMO-06', quantite: 2, prix_unitaire_ttc: 85, fournisseur: 'Fournisseur microbiologie (démo)', justification: 'TP dénombrement flore aérobie mésophile BIOALC1 (séquence P5) : stock à 0.', article_id: art.pca, sequence_id: 'P5' });
+    var c2 = q('T1', 'commande', { filiere: 'BIOMED', designation: 'Colorant MGG 1 L', quantite: 2, prix_unitaire_ttc: 40, fournisseur: 'Fournisseur réactifs (démo)', justification: 'Frottis sanguins BM1 (séquence P3), lot actuel proche de la péremption.', article_id: art.mgg, sequence_id: 'P3' });
+    if (c2) q('R1', 'majCommande', { id: c2.id, statut: 'approuvee' });
   }
 
   function reinitialiser() {
@@ -127,5 +182,5 @@ var LaboNav = (function () {
     try { localStorage.removeItem(CLE); } catch (e) { /* rien */ }
   }
 
-  return { env: env, store: store, amorcer: amorcer, reinitialiser: reinitialiser, format: format };
+  return { env: env, store: store, amorcer: amorcer, reinitialiser: reinitialiser, format: format, comptes: COMPTES };
 })();

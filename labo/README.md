@@ -1,79 +1,91 @@
 # Suivi labo TP
 
-Application web pour les deux techniciennes de laboratoire en freelance, les enseignants de TP et la responsable des labos, pour les BTS Bioanalyses en laboratoire de contrôle (RNCP38884) et Biologie médicale (RNCP40027). Elle remplace les quatre classeurs Excel utilisés jusqu'en 2025-2026.
+Application web des laboratoires de TP du campus pour le BTS Biologie médicale (BIOMED, RNCP40027) et le BTS Bioanalyses en laboratoire de contrôle (BIOALC, RNCP38884). Elle couvre la présence et la facturation des prestataires du labo, les demandes de préparation de TP, le programme des TP tiré des scénarios pédagogiques, l'inventaire, les commandes, le rangement et les incidents.
 
-Démo en ligne une fois la branche publiée sur GitHub Pages : `…/labo/`. Sans configuration, la page tourne en **mode démonstration** avec des données fictives stockées dans le navigateur (PIN : techniciennes 1111 et 2222, enseignants 3333 et 4444, responsable 0000).
+Sans configuration, la page tourne en **mode démonstration** : données fictives stockées dans le navigateur, un bouton par compte fictif sur l'écran de connexion.
 
-## Ce que l'application remplace
+Ce dépôt est public. Il ne contient **que du code** : aucune donnée de l'école (scénarios, inventaire, fournisseurs, comptes) n'y est versée. Les données vivent dans un classeur Google Sheets privé, lu par un script Google Apps Script qui contrôle chaque accès.
 
-| Ancien fichier | Constat sur le fichier 2025-2026 | Dans l'application |
-|---|---|---|
-| Tableau de suivi des TP (onglet Hebdomadaire) | 199 TP saisis, dont 162 sans préparateur renseigné et 56 sans validation du besoin matériel. Aucun échange tracé entre enseignant et préparateur. | Onglet **Demandes de TP** : l'enseignant dépose sa demande, une technicienne la prend en charge, le fil d'échange est daté. Les demandes arrivées à moins de 15 jours sont signalées. |
-| Feuille d'émargement rangement | Aucune date ni nom par ligne, seulement des initiales. Les problèmes relevés ne remontent nulle part. | Onglet **Rangement** : contrôle par labo, horodaté, au nom de la technicienne. Chaque point non conforme ouvre un incident. |
-| Inventaire biochimie / immuno | La règle « délai de 15 jours pour préparer le TP » y figure. Au 13/10/2026, l'Exatrol-P est à 0 et l'acide urique (réf. 80351) est périmé depuis le 01/10/2026. | Le délai de 15 jours alimente les alertes. Les ruptures et péremptions passent par **Signaler** (catégories « Stock bas ou rupture » et « Réactif périmé »). L'inventaire lui-même n'est pas repris dans cette version. |
-| Commandes labo | Suivi des commandes fournisseurs. | Non repris : les besoins de commande remontent comme incidents « Stock bas ». |
-| (rien) | Les heures des prestataires n'étaient tracées nulle part. | Onglets **Présence**, **Mes heures** et **Heures et facturation** : déclaration d'arrivée et de départ, validation par la responsable, relevé mensuel imprimable et export CSV. |
+## Qui fait quoi
 
-Chiffres calculés le 13/10/2026 sur `Tableau_de_suivi_des_TP_-_BTS_ABM_BM_BIOALC_-_2025_2026.xlsx` et `INVENTAIRE_BIOCHIMIE_IMMUNO.xlsx`.
+| Rôle | Ce qu'il voit et fait |
+|---|---|
+| Technicienne de laboratoire | Déclare sa présence (arrivée, départ, missions), prend en charge et prépare les TP, gère l'inventaire, propose des commandes, réceptionne les livraisons, contrôle le rangement, traite les incidents. Voit ses propres heures, sans montant. |
+| Aide-laborantine | Mêmes droits que la technicienne. |
+| Enseignant·e BIOMED ou BIOALC | Dépose ses demandes de TP et échange avec la préparatrice, consulte le programme de sa filière et le stock, déclare ce qu'il consomme, propose des commandes, signale un problème. Ne voit que ses propres demandes. |
+| Prof référent | Tableau de bord, **approbation des commandes**, validation des présences, activité des techniciennes (heures, missions, TP préparés) **sans aucune donnée financière**, attribution des TP. Ne peut pas approuver sa propre commande : elle part au directeur. |
+| Coordinateur pédagogique | Tableau de bord, activité des techniciennes sans montant, pilotage des demandes de TP, programme, inventaire, incidents. N'approuve pas les commandes et ne valide pas les présences. |
+| Directeur du campus | Tout, plus **la facturation** : taux horaires, montants HT, relevés de prestations à joindre aux factures. Seul rôle à recevoir ces données du serveur. |
 
-## Qui voit quoi
+Le filtrage se fait côté serveur (`core.js`) : une donnée que le rôle n'a pas le droit de voir ne quitte jamais le classeur, même en inspectant le navigateur.
 
-- **Technicienne** : déclare son arrivée et son départ (heure du serveur Google, pas du téléphone), coche les missions faites et les TP concernés, prend en charge les demandes, enregistre les contrôles de rangement, signale et suit les incidents, consulte son relevé mensuel.
-- **Enseignant·e** : dépose ses demandes de préparation (date, créneau, labo, classe, bloc de compétences, besoin matériel), échange avec la technicienne, marque le TP réalisé ou annulé, signale un problème.
-- **Responsable** : tableau de bord (présentes, présences à valider, incidents, TP sans préparatrice), validation ou contestation de chaque présence, relevé mensuel par prestataire avec montant HT, attribution des demandes.
+## Commandes : la règle des trois devis
 
-Traçabilité : chaque écriture est copiée dans la feuille `Journal` (qui, quoi, quand). Une présence n'est jamais modifiée sans trace : un départ oublié, un badge hors connexion ou une saisie après coup sont marqués comme tels et passent en validation.
+- Toute demande d'achat porte une justification pédagogique (TP, séquence, bloc) et part au prof référent.
+- Le formulaire rappelle toujours la règle d'achat. Au-delà de `seuilTroisDevisTTC` (1 000 € TTC par défaut, réglable dans `core.js`), trois devis de fournisseurs différents sont exigés, sinon la demande est refusée par le serveur.
+- Une commande approuvée est recopiée dans le classeur « Pilotage dépenses » existant, onglet de la filière, avec un identifiant de la forme `BIOMED-2026-008`, le statut « Validé » et le nom de l'approbateur. Les colonnes calculées par formule ne sont pas touchées.
+- « Commandée » puis « Livrée » mettent à jour le statut dans le Pilotage. La réception ajoute la quantité reçue au stock.
 
-## Un point d'attention : le statut de freelance
+## Programme et recommandations
 
-L'outil sert à **attester le service fait** pour la facturation. Il ne doit pas devenir un outil de contrôle d'horaires imposés. La Cour de cassation définit le lien de subordination par le pouvoir de donner des ordres, d'en contrôler l'exécution et de sanctionner les manquements (Cass. soc., 13 novembre 1996, n° 94-13.187). En 2018, elle a requalifié en salariat la relation d'un coursier indépendant suivi par géolocalisation et soumis à des sanctions (Cass. soc., 28 novembre 2018, n° 17-20.079, Take Eat Easy). La présomption de non-salariat des indépendants immatriculés (article L8221-6 du Code du travail) tombe quand ce lien est établi.
+`outils/preparer_import.py` lit les deux scénarios pédagogiques et garde les séquences avec manipulation au labo (dates, tronc commun, renforcement du mercredi). Il repère le matériel cité dans chaque séquence à partir d'un dictionnaire d'environ 70 termes. L'onglet **Programme** rapproche ce matériel de l'inventaire :
 
-Concrètement, l'application est construite pour que la prestataire **déclare** ses présences et ses missions, et que l'école **valide** la prestation. Évite d'y ajouter des retards sanctionnés, des horaires fixés unilatéralement ou des consignes détaillées sur la façon de travailler. Les demandes de TP décrivent un résultat attendu (une paillasse prête pour tel TP), pas une méthode. Fais relire le dispositif par votre juriste ou l'expert-comptable avant le lancement.
+- en stock, stock bas, péremption proche ou absent de l'inventaire ;
+- « Préparer la demande de TP » préremplit la demande de l'enseignant à partir de la séquence ;
+- « Proposer une commande » préremplit l'achat avec la justification de la séquence, et propose les fournisseurs déjà utilisés par l'école pour cette catégorie (feuille Fournisseurs, tirée de l'historique des commandes).
 
-## Mise en service (30 minutes environ)
+Le rapprochement se fait sur les mots de la désignation : c'est une aide à l'anticipation, pas une liste d'achat automatique.
 
-1. **Classeur.** Crée un Google Sheets vide nommé par exemple « Suivi labo 2026-2027 », dans un Drive de l'école.
-2. **Apps Script.** Dans le classeur : Extensions > Apps Script.
-   - Renomme `Code.gs` existant et colle le contenu de `labo/apps-script/Code.gs`.
-   - Ajoute un fichier `Core.gs` et colle le contenu intégral de `labo/core.js`.
-   - Paramètres du projet (roue dentée) : fuseau horaire `Europe/Paris`.
-3. **Installation.** Dans l'éditeur, choisis la fonction `installer` et clique sur Exécuter. Accepte les autorisations (Sheets, e-mail). Les feuilles `Utilisateurs`, `Sessions`, `Rangements`, `Incidents`, `Demandes`, `Messages` et `Journal` sont créées, avec un compte `RESP1` (PIN `000000`).
-4. **Comptes.** Dans la feuille `Utilisateurs`, une ligne par personne :
-   - `id` : court et unique (T1, T2, P1…) ;
-   - `role` : `technicienne`, `enseignant` ou `responsable` ;
-   - `pin` : 4 à 6 chiffres, différent pour chacun. Mets la colonne au format Texte (Format > Nombre > Texte brut) avant de saisir, sinon un PIN commençant par 0 perd ce zéro ;
-   - `email` : pour recevoir les alertes et les messages ;
-   - `taux_horaire` : taux HT de la prestataire, tel que dans son devis ou contrat de prestation ;
-   - `actif` : `oui` (mettre `non` pour désactiver un compte sans perdre son historique).
-   Change le PIN de `RESP1`.
-5. **Déploiement.** Déployer > Nouveau déploiement > type Application Web. Exécuter en tant que : moi. Accès : tout le monde. Copie l'URL qui se termine par `/exec`.
-6. **Brancher la page.** Dans `labo/app.js`, colle cette URL dans `var API_URL = '';`, puis commite. Le bandeau « Démonstration » disparaît.
-7. **Diffusion.** Envoie le lien `…/labo/` aux techniciennes et aux enseignants avec leur PIN. Sur téléphone, « Ajouter à l'écran d'accueil » donne un raccourci.
+## Sécurité
 
-Après une modification de `core.js` ou `Code.gs` : recopie le fichier dans Apps Script, puis Déployer > Gérer les déploiements > modifier > Nouvelle version. L'URL ne change pas.
+- **Connexion** par e-mail et code PIN de 6 chiffres minimum. Le PIN est remplacé dans le classeur par une empreinte SHA-256 salée dès sa saisie (le PIN en clair n'est jamais conservé).
+- **Session** par jeton aléatoire de 7 jours, stocké haché côté serveur, révocable (« Se déconnecter », ou menu « Déconnecter tout le monde » dans le classeur).
+- **Forçage bloqué** : 5 PIN erronés bloquent le compte 15 minutes ; messages identiques que l'e-mail existe ou non.
+- **Aspiration bloquée** : aucune donnée sans jeton valide, aucune réponse en GET, limite de 120 requêtes par minute et par session, 30 tentatives de connexion par minute au total.
+- **Page** : `noindex`, politique de sécurité du contenu stricte (aucun script tiers, connexions limitées à Google Apps Script), aucune donnée dans les fichiers publiés, échappement de tout contenu affiché.
+- **Classeur** : cellules en texte brut, saisies commençant par `=`, `+`, `-` ou `@` neutralisées (pas d'injection de formule), exports CSV protégés de même.
+- **Traçabilité** : chaque action et chaque connexion, réussie ou refusée, est écrite dans la feuille Journal.
 
-Pour couper les e-mails : `var ENVOYER_MAILS = false;` dans `Code.gs`.
+À ta charge : garder le classeur de suivi et le classeur Pilotage **non partagés par lien**, et ne les partager qu'avec les comptes Google qui doivent les ouvrir.
 
-## Ajuster les listes
+## Le statut de freelance
 
-Les labos, créneaux, classes, disciplines, missions, points de rangement, catégories d'incident et le délai de 15 jours sont dans l'objet `CONFIG` en tête de `core.js`. Les intitulés des blocs BTS BioAC viennent de la fiche France Compétences RNCP38884. Pour le BTS BM, seuls BC1 et BC2 sont saisis (arrêté du 27 novembre 2024) : ajoute les autres blocs si des TP s'y rattachent.
+L'outil sert à attester le service fait. Il ne doit pas devenir un contrôle d'horaires imposés : la Cour de cassation définit le lien de subordination par le pouvoir de donner des ordres, d'en contrôler l'exécution et de sanctionner (Cass. soc., 13 novembre 1996, n° 94-13.187), et a requalifié en salariat un indépendant suivi par géolocalisation et sanctionné (Cass. soc., 28 novembre 2018, n° 17-20.079). La prestataire déclare, l'école valide. Fais relire le dispositif par votre juriste ou l'expert-comptable.
 
-## Facturation, mois par mois
+## Mise en service
 
-1. Chaque soir ou chaque semaine, la responsable valide les présences (Tableau de bord). Une présence contestée porte son motif, visible par la prestataire.
-2. En fin de mois, onglet Heures et facturation : choisir la prestataire et le mois, puis « Imprimer le relevé » (PDF avec zones de signature) ou « Exporter en CSV ».
-3. La prestataire joint le relevé à sa facture. Les heures facturées doivent correspondre au total validé.
+1. **Classeur.** Crée un Google Sheets vide, par exemple « Suivi labo 2026-2027 ». Ne le partage pas par lien.
+2. **Script.** Extensions > Apps Script. Colle `apps-script/Code.gs` dans `Code.gs`, crée `Core.gs` et colles-y `core.js`. Paramètres du projet : fuseau `Europe/Paris`.
+3. **Pilotage dépenses.** Dans `Code.gs`, renseigne `PILOTAGE_ID` avec l'identifiant du classeur Pilotage (la partie entre `/d/` et `/edit` de son adresse). Le compte qui déploie le script doit pouvoir modifier ce classeur.
+4. **Installation.** Exécute la fonction `installer` et accepte les autorisations. Les feuilles sont créées, avec un compte `DIR` à ton adresse.
+5. **Données de départ.** En local, avec Python et `openpyxl` :
+   ```
+   python3 outils/preparer_import.py --biomed BIOMED_SPG.xlsx --bioalc BIOALC_SPG.xlsx \
+     --inventaire INVENTAIRE.xlsx --commandes COMMANDES_LABO.xlsx --sortie import
+   ```
+   Pour chaque CSV produit, ouvre la feuille du même nom puis Fichier > Importer > Importer > « Remplacer la feuille actuelle ». Ne mets pas ces CSV dans le dépôt.
+6. **Comptes.** Feuille `Utilisateurs`, une ligne par personne : `id` court et unique, `nom`, `email`, `role` (`technicienne`, `aide_laborantine`, `enseignant`, `prof_referent`, `coordinateur`, `directeur`), `filiere` (`BIOMED` ou `BIOALC` pour les enseignants), `disciplines`, `taux_horaire` pour les prestataires, `actif` = `oui`. Tape le PIN (6 chiffres) dans la colonne `pin` : il est remplacé par son empreinte. Si ce n'est pas le cas, menu Suivi labo > « Sécuriser les codes PIN saisis ». Donne ton propre PIN à la ligne `DIR`.
+7. **Déploiement.** Déployer > Nouveau déploiement > Application Web. Exécuter en tant que : moi. Accès : tout le monde. Copie l'adresse `/exec`.
+8. **Brancher la page.** Colle cette adresse dans `var API_URL = '';` en tête de `app.js`, commite. Le mode démonstration disparaît.
+9. **Diffusion.** Envoie le lien de la page et, séparément, à chacun son PIN.
+
+Après une modification de `core.js` ou `Code.gs` : recopie dans Apps Script, puis Déployer > Gérer les déploiements > Modifier > Nouvelle version (l'adresse ne change pas).
+
+## Réglages
+
+Dans l'objet `CONFIG` de `core.js` : labos, créneaux, classes, disciplines et blocs par filière, missions, points de rangement, catégories, seuil des trois devis, délai de préparation (15 jours), alerte de péremption (30 jours), durée de session, nombre d'essais. Dans `Code.gs` : `PILOTAGE_ID`, `ENVOYER_MAILS`.
 
 ## Limites connues
 
-- Authentification par PIN : suffisant pour un usage interne, pas pour des données sensibles. Les PIN sont lisibles par qui a accès au classeur.
-- Hors connexion, seuls l'arrivée et le départ sont mis en file d'attente sur le téléphone (avec l'heure du téléphone, signalée « hors connexion »).
-- Les données d'un mode démonstration restent dans le navigateur et ne rejoignent jamais le classeur.
-- Volume prévu : quelques milliers de lignes par an. Au-delà, archiver le classeur à chaque rentrée.
+- Le PIN est un secret partagé faible face à quelqu'un qui le voit taper : il protège contre les robots et les curieux, pas contre un collègue malveillant à côté.
+- Hors connexion, seuls l'arrivée et le départ sont gardés sur le téléphone puis envoyés.
+- Le rapprochement programme / inventaire repose sur des mots communs : un article nommé différemment n'est pas reconnu.
+- Volume prévu : quelques milliers de lignes par an. Archiver le classeur à chaque rentrée.
 
 ## Fichiers
 
-- `index.html`, `style.css`, `app.js` : l'interface (charte interne Aurlom BTS+).
-- `core.js` : les règles métier, communes au navigateur et à Apps Script.
-- `demo.js` : stockage navigateur et données fictives du mode démonstration.
-- `apps-script/Code.gs` : le serveur Google Apps Script.
+- `index.html`, `style.css`, `app.js` : interface (charte interne Aurlom BTS+).
+- `core.js` : règles métier et droits, communs au navigateur et à Apps Script.
+- `demo.js` : hôte navigateur et données fictives du mode démonstration.
+- `apps-script/Code.gs` : serveur Google Apps Script.
+- `outils/preparer_import.py` : préparation des CSV d'import à partir des fichiers Excel de l'école.

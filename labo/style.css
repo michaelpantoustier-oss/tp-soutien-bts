@@ -138,6 +138,13 @@ tfoot td { border-top: var(--filet-encre); border-bottom: 0; font-weight: 700; }
 .deux { display: grid; grid-template-columns: 1fr; gap: var(--space-5); }
 @media (min-width: 860px) { .deux { grid-template-columns: 1fr 1fr; } }
 
+/* Programme et commandes */
+ul.materiel { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); font-size: 14px; }
+ul.materiel li::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--violet); margin-right: var(--space-2); vertical-align: middle; }
+fieldset.devis { border: var(--filet-fin); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); margin: var(--space-4) 0 0; }
+fieldset.devis legend { padding: 0 var(--space-2); }
+.devis-ligne + .devis-ligne { margin-top: var(--space-3); padding-top: var(--space-3); border-top: var(--filet-fin); }
+
 /* Impression du relevé mensuel */
 .imprimable { display: none; }
 @media print {

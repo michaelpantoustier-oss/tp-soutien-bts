@@ -1,0 +1,5 @@
+# Données de l école : jamais dans ce dépôt public
+labo/**/*.csv
+labo/**/*.xlsx
+labo/outils/import/
+__pycache__/

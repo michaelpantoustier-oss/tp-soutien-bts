@@ -21,6 +21,9 @@ var LaboCore = (function () {
     alerteSessionHeures: 11,
     seuilTroisDevisTTC: 1000, // à ajuster : au-delà, trois devis concurrents obligatoires
     alertePeremptionJours: 30,
+    // Facturation : une heure de pause déjeuner est retirée de chaque journée qui
+    // couvre la plage 12 h – 14 h, moins le temps déjà badgé en sortie dans cette plage.
+    pauseDejeuner: { minutes: 60, debut: '12:00', fin: '14:00' },
     dureeSessionJours: 7,
     essaisMax: 5,
     blocageMinutes: 15,
@@ -130,6 +133,13 @@ var LaboCore = (function () {
   }
   function exiger(user, droit) { if (!peut(user, droit)) throw erreur('Action non autorisée pour ton rôle.'); }
 
+  // Filières d'une personne (« BIOMED,BIOALC ») ; liste vide = les deux.
+  function filieresDe(u) {
+    return String(u.filiere || '').split(/[,;| ]+/).filter(function (f) { return CONFIG.filieres[f]; });
+  }
+  function aFiliere(u, f) { var l = filieresDe(u); return !l.length || l.indexOf(f) !== -1; }
+  function filiereUnique(u) { var l = filieresDe(u); return l.length === 1 ? l[0] : ''; }
+
   function filiereDeClasse(classe) {
     for (var k in CONFIG.filieres) if (CONFIG.filieres[k].classes.indexOf(classe) !== -1) return k;
     return '';
@@ -211,7 +221,7 @@ var LaboCore = (function () {
       if (!env.notify) return;
       actifs().forEach(function (u) {
         if (roles.indexOf(u.role) === -1 || !u.email) return;
-        if (filiere && u.filiere && u.filiere !== filiere && u.role !== 'directeur') return;
+        if (filiere && !aFiliere(u, filiere) && u.role !== 'directeur') return;
         env.notify(u.email, sujet, corps);
       });
     }
@@ -294,7 +304,7 @@ var LaboCore = (function () {
       var debut = env.format(new Date(now().getTime() - 14 * 86400000), 'yyyy-MM-dd');
       var fin = env.format(new Date(now().getTime() + 70 * 86400000), 'yyyy-MM-dd');
       r.programme = store.all('Programme').filter(function (p) {
-        return (!p.fin || p.fin >= debut) && (!p.debut || p.debut <= fin) && (!estProf || !user.filiere || p.filiere === user.filiere);
+        return (!p.fin || p.fin >= debut) && (!p.debut || p.debut <= fin) && (!estProf || aFiliere(user, p.filiere));
       });
 
       if (peut(user, 'piloterTP') || peut(user, 'voirEquipe') || peut(user, 'approuverCommande')) {
@@ -402,13 +412,37 @@ var LaboCore = (function () {
       var sessions = store.all('Sessions').filter(function (s) {
         return String(s.user_id) === String(cible) && String(s.date).slice(0, 7) === mois;
       }).sort(function (a, b) { return a.arrivee < b.arrivee ? -1 : 1; });
-      var minutes = sessions.filter(function (s) { return s.statut === 'validee'; })
-        .reduce(function (t, s) { return t + (Number(s.duree_min) || 0); }, 0);
+      // Journées validées : temps brut, pause déjeuner retirée, temps facturable.
+      var P = CONFIG.pauseDejeuner;
+      function minuteDuJour(isoStr) { var hm = env.format(new Date(isoStr), 'HH:mm'); return +hm.slice(0, 2) * 60 + +hm.slice(3, 5); }
+      var pDeb = +P.debut.slice(0, 2) * 60 + +P.debut.slice(3, 5), pFin = +P.fin.slice(0, 2) * 60 + +P.fin.slice(3, 5);
+      var parJour = {};
+      sessions.forEach(function (s) { if (s.statut === 'validee' && s.depart) (parJour[s.date] = parJour[s.date] || []).push(s); });
+      var jours = Object.keys(parJour).sort().map(function (date) {
+        var l = parJour[date];
+        var brut = l.reduce(function (t, s) { return t + (Number(s.duree_min) || 0); }, 0);
+        var debut = Math.min.apply(null, l.map(function (s) { return minuteDuJour(s.arrivee); }));
+        var fin = Math.max.apply(null, l.map(function (s) { return minuteDuJour(s.depart); }));
+        var pause = 0;
+        if (debut < pDeb && fin > pFin) {
+          var dejaBadge = 0;
+          for (var i = 1; i < l.length; i++) {
+            var g1 = minuteDuJour(l[i - 1].depart), g2 = minuteDuJour(l[i].arrivee);
+            dejaBadge += Math.max(0, Math.min(g2, pFin) - Math.max(g1, pDeb));
+          }
+          pause = Math.min(brut, Math.max(0, P.minutes - dejaBadge));
+        }
+        return { date: date, minutes_brutes: brut, pause_min: pause, minutes_facturables: brut - pause };
+      });
+      var brutes = jours.reduce(function (t, j) { return t + j.minutes_brutes; }, 0);
+      var pauses = jours.reduce(function (t, j) { return t + j.pause_min; }, 0);
+      var minutes = brutes - pauses;
       var demandes = store.all('Demandes');
       var prep = demandes.filter(function (d) { return String(d.prepa_id) === String(cible) && String(d.date_tp).slice(0, 7) === mois; })
         .map(function (d) { return { id: d.id, date_tp: d.date_tp, creneau: d.creneau, classe: d.classe, titre: d.titre, statut: d.statut }; });
       var r = {
         personne: { id: tech.id, nom: tech.nom, role: tech.role }, mois: mois, sessions: sessions,
+        minutes_brutes: brutes, minutes_pause: pauses, jours: jours,
         minutes_validees: minutes, heures_validees: arrondi(minutes / 60),
         non_validees: sessions.filter(function (s) { return s.statut !== 'validee'; }).length,
         preparations: prep, edite_le: iso(now())
@@ -491,7 +525,7 @@ var LaboCore = (function () {
       if (!titre || !besoin) throw erreur('Le titre du TP et le besoin matériel sont obligatoires.');
       var h = now(), classe = texte(data.classe, 40);
       var d = {
-        id: nouvelId('D'), cree_le: iso(h), prof_id: user.id, prof_nom: user.nom, filiere: filiereDeClasse(classe) || user.filiere || '',
+        id: nouvelId('D'), cree_le: iso(h), prof_id: user.id, prof_nom: user.nom, filiere: filiereDeClasse(classe) || filiereUnique(user),
         date_tp: data.date_tp, creneau: texte(data.creneau, 40), labo: texte(data.labo, 80), classe: classe,
         discipline: texte(data.discipline, 80), competence: texte(data.competence, 200), sequence_id: texte(data.sequence_id, 40), tp_ref: texte(data.tp_ref, 20),
         titre: titre, besoin: besoin, effectif: texte(data.effectif, 10), delai_jours: joursEntre(jour(h), data.date_tp),
@@ -619,7 +653,7 @@ var LaboCore = (function () {
       if (!(pu >= 0)) throw erreur('Prix unitaire TTC estimé obligatoire (0 si inconnu).');
       var justification = texte(data.justification, 1500);
       if (!justification) throw erreur('La justification pédagogique est obligatoire (TP, séquence, bloc visé).');
-      var filiere = ['BIOMED', 'BIOALC'].indexOf(data.filiere) !== -1 ? data.filiere : (user.filiere || '');
+      var filiere = ['BIOMED', 'BIOALC'].indexOf(data.filiere) !== -1 ? data.filiere : filiereUnique(user);
       if (!filiere) throw erreur('Choisis la filière qui porte la dépense.');
       var total = arrondi(quantite * pu);
       var devis = (Array.isArray(data.devis) ? data.devis : []).map(function (d) {
@@ -749,7 +783,7 @@ var LaboCore = (function () {
   return {
     create: create, CONFIG: CONFIG, TABLES: TABLES, DROITS: DROITS,
     STATUTS_DEMANDE: STATUTS_DEMANDE, STATUTS_COMMANDE: STATUTS_COMMANDE,
-    joursEntre: joursEntre, filiereDeClasse: filiereDeClasse, peut: peut
+    joursEntre: joursEntre, filiereDeClasse: filiereDeClasse, filieresDe: filieresDe, peut: peut
   };
 })();
 

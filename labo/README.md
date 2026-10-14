@@ -55,6 +55,10 @@ L'ancien accès par code PIN depuis une page hébergée hors Google reste dans l
 
 À ta charge, dans la console d'administration Google Workspace : imposer la validation en deux étapes aux comptes de l'école. Pour les prestataires sans compte @aurlom.com, il faut leur en créer un.
 
+## Pause déjeuner dans la facturation
+
+Le relevé mensuel retire une heure de pause déjeuner (réglage `pauseDejeuner` dans `core.js`) de chaque journée validée qui couvre la plage 12 h – 14 h. Si la prestataire a badgé une sortie dans cette plage, ce temps est décompté de l'heure retirée : une sortie badgée de 12 h 30 à 13 h 30 ne retire rien de plus, une sortie de 30 minutes en retire 30. Une demi-journée (matin seul ou après-midi seul) n'est pas concernée. Le relevé affiche, journée par journée, la présence validée, la pause retirée et le temps facturable ; le montant HT se calcule sur ce dernier.
+
 ## Le statut de freelance
 
 L'outil sert à attester le service fait. Il ne doit pas devenir un contrôle d'horaires imposés : la Cour de cassation définit le lien de subordination par le pouvoir de donner des ordres, d'en contrôler l'exécution et de sanctionner (Cass. soc., 13 novembre 1996, n° 94-13.187), et a requalifié en salariat un indépendant suivi par géolocalisation et sanctionné (Cass. soc., 28 novembre 2018, n° 17-20.079). La prestataire déclare, l'école valide. Fais relire le dispositif par votre juriste ou l'expert-comptable.
@@ -77,7 +81,7 @@ L'outil sert à attester le service fait. Il ne doit pas devenir un contrôle d'
      --inventaire INVENTAIRE.xlsx --commandes COMMANDES_LABO.xlsx --sortie import
    ```
    Pour chaque CSV, ouvre la feuille du même nom puis Fichier > Importer > « Remplacer la feuille actuelle ». Ne mets pas ces CSV dans le dépôt.
-6. **Comptes.** Importe `Utilisateurs.csv` (préparé hors du dépôt) dans la feuille `Utilisateurs`, ou saisis une ligne par personne : `id` court et unique, `nom`, `email` (adresse @aurlom.com), `role` (`technicienne`, `aide_laborantine`, `enseignant`, `prof_referent`, `coordinateur`, `directeur`), `filiere` (`BIOMED` ou `BIOALC` pour les enseignants), `disciplines`, `taux_horaire` pour les prestataires, `actif` = `oui`. Les colonnes `pin` et `pin_hash` restent vides.
+6. **Comptes.** Importe `Utilisateurs.csv` (préparé hors du dépôt) dans la feuille `Utilisateurs`, ou saisis une ligne par personne : `id` court et unique, `nom`, `email` (adresse @aurlom.com), `role` (`technicienne`, `aide_laborantine`, `enseignant`, `prof_referent`, `coordinateur`, `directeur`), `filiere` (`BIOMED`, `BIOALC` ou `BIOMED,BIOALC` pour les enseignants), `disciplines`, `taux_horaire` pour les prestataires, `actif` = `oui`. Les colonnes `pin` et `pin_hash` restent vides.
 7. **Déploiement.** Déployer > Nouveau déploiement > Application Web. Exécuter en tant que : **moi**. Accès : **utilisateurs de aurlom.com**. Copie l'adresse `/exec` : c'est le lien de l'application.
 8. **Diffusion.** Envoie ce lien aux personnes inscrites. Elles se connectent avec leur compte Google de l'école.
 

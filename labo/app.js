@@ -212,7 +212,7 @@
     if (!S.onglet || !ongl.some(function (o) { return o[0] === S.onglet; })) S.onglet = ongl[0][0];
     var cpt = compteurs();
     var h = '<header class="entete"><p class="sur">aurlom BTS+ · Suivi labo</p>' +
-      '<div class="qui"><b>' + esc(moi().nom) + '</b> · ' + esc(C().roles[moi().role]) + (moi().filiere ? ' ' + esc(filLib(moi().filiere)) : '') +
+      '<div class="qui"><b>' + esc(moi().nom) + '</b> · ' + esc(C().roles[moi().role]) + (moi().filiere ? ' ' + esc(LaboCore.filieresDe(moi()).join(' et ')) : '') +
       (GOOGLE ? '' : ' · <button class="btn lien" data-act="deconnexion">Se déconnecter</button>') + '</div></header>';
     if (DEMO) h += '<div class="demo"><span><b>Démonstration.</b> Données fictives, stockées dans ce navigateur.</span><button class="btn petit" data-act="reinit">Réinitialiser la démo</button></div>';
     h += '<nav class="onglets" role="tablist">' + ongl.map(function (o) {
@@ -389,7 +389,8 @@
   function optionsTP(choisi) {
     var o = '<option value="">Aucun / autre TP</option>';
     Object.keys(LaboReferentiel).forEach(function (f) {
-      if (moi().role === 'enseignant' && moi().filiere && moi().filiere !== f) return;
+      var mes = LaboCore.filieresDe(moi());
+      if (moi().role === 'enseignant' && mes.length && mes.indexOf(f) === -1) return;
       LaboReferentiel[f].domaines.forEach(function (d) {
         o += '<optgroup label="' + esc(f + ' · ' + d.nom) + '">' + options(d.tps.map(function (t) { return { v: t.id, l: t.intitule + ' (' + t.codes + ')' }; }), choisi) + '</optgroup>';
       });
@@ -584,7 +585,8 @@
   function vueProgramme() {
     var e = S.etat, auj = aujourdhui();
     var src = S.filtres.progTout && S.programmeComplet ? S.programmeComplet : (e.programme || []);
-    var ff = S.filtres.progFiliere || (moi().role === 'enseignant' ? moi().filiere : '');
+    var mesF = LaboCore.filieresDe(moi());
+    var ff = S.filtres.progFiliere || (moi().role === 'enseignant' && mesF.length === 1 ? mesF[0] : '');
     var l = src.filter(function (p) { return !ff || p.filiere === ff; }).sort(function (a, b) { return (a.debut || '').localeCompare(b.debut || ''); });
     var cat = S.filtres.progVue === 'catalogue';
     var h = titre('Scénarios pédagogiques 2026-2028', cat ? 'TP incontournables' : 'Ce qui arrive en TP',
@@ -705,7 +707,7 @@
       (p.contexte ? '<div class="encart">' + esc(p.contexte) + '</div>' : '') +
       '<input type="hidden" name="sequence_id" value="' + esc(p.sequence_id || '') + '"><div class="grille">' +
       '<label class="champ large"><span>Article à commander</span><input name="designation" required value="' + esc(p.designation || '') + '"></label>' +
-      '<label class="champ"><span>Filière qui porte la dépense</span><select name="filiere" required>' + options([{ v: 'BIOMED', l: 'BIOMED' }, { v: 'BIOALC', l: 'BIOALC' }], p.filiere || moi().filiere, 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Filière qui porte la dépense</span><select name="filiere" required>' + options([{ v: 'BIOMED', l: 'BIOMED' }, { v: 'BIOALC', l: 'BIOALC' }], p.filiere || (LaboCore.filieresDe(moi()).length === 1 ? LaboCore.filieresDe(moi())[0] : ''), 'Choisir…') + '</select></label>' +
       '<label class="champ"><span>Catégorie</span><select name="categorie" data-change="categorieCommande">' + options(C().categoriesArticle, p.categorie, 'Choisir…') + '</select></label>' +
       '<label class="champ"><span>Référence fournisseur</span><input name="reference" value="' + esc(p.reference || '') + '"></label>' +
       '<label class="champ"><span>Quantité</span><input type="number" name="quantite" min="1" step="any" required value="' + esc(p.quantite || 1) + '" data-total></label>' +
@@ -856,15 +858,16 @@
   function vueHeures() {
     var rel = S.releve, equipe = peut('voirEquipe'), fact = peut('facturation');
     var h = titre('Relevé mensuel', fact ? 'Heures et facturation' : (equipe ? 'Activité des techniciennes' : 'Mes heures'),
-      fact ? 'Seules les présences validées entrent dans le relevé. Imprime-le pour le rapprocher de la facture de la prestataire.'
+      fact ? 'Seules les présences validées entrent dans le relevé, moins une heure de pause déjeuner par journée qui couvre 12 h – 14 h. Imprime-le pour le rapprocher de la facture de la prestataire.'
         : (equipe ? 'Heures passées au labo, missions et TP préparés. Les montants facturés ne sont visibles que par le directeur.'
-          : 'Tes présences du mois. Les heures validées sont celles à facturer.'));
+          : 'Tes présences du mois. Les heures facturables sont les heures validées, moins une heure de pause déjeuner par journée qui couvre 12 h – 14 h.'));
     h += '<form data-form="releve" class="actions" style="align-items:flex-end">' +
       (equipe ? '<label class="champ" style="min-width:220px"><span>Personne</span><select name="user_id" required>' + options(equipeLabo().map(function (u) { return { v: u.id, l: u.nom + ' · ' + C().roles[u.role] }; }), rel ? rel.personne.id : (equipeLabo()[0] || {}).id) + '</select></label>' : '') +
       '<label class="champ"><span>Mois</span><input type="month" name="mois" value="' + esc(rel ? rel.mois : moisCourant()) + '" required></label>' +
       '<button class="btn plein" type="submit">Afficher</button></form>';
     if (!rel) return h + '<p class="vide">Chargement du relevé…</p>';
-    h += '<div class="chiffres"><div class="chiffre accent"><b>' + num(rel.heures_validees) + '</b><span>heures validées · ' + esc(rel.personne.nom) + '</span></div>' +
+    h += '<div class="chiffres"><div class="chiffre accent"><b>' + num(rel.heures_validees) + '</b><span>heures facturables · ' + esc(rel.personne.nom) + '</span></div>' +
+      '<div class="chiffre"><b>' + duree(rel.minutes_pause) + '</b><span>de pause déjeuner déduite (' + duree(rel.minutes_brutes) + ' de présence validée)</span></div>' +
       (rel.montant_ht !== undefined ? '<div class="chiffre"><b>' + euros(rel.montant_ht) + '</b><span>HT au taux de ' + euros(rel.taux_horaire) + '/h</span></div>' : '') +
       '<div class="chiffre"><b>' + rel.non_validees + '</b><span>présence(s) non validée(s)</span></div>' +
       '<div class="chiffre"><b>' + rel.preparations.length + '</b><span>TP préparé(s) ce mois</span></div></div>';
@@ -877,14 +880,24 @@
           '<td class="petit">' + esc(SOURCES[s.source] || s.source) + (s.corrections ? '<br><span class="sourd">' + esc(s.corrections) + '</span>' : '') + '</td>' +
           '<td>' + badge(st[0], st[1]) + (s.motif_validation ? '<br><span class="petit sourd">' + esc(s.motif_validation) + '</span>' : '') + '</td>' +
           (peut('validerPresence') ? '<td>' + boutonsValidation(s) + '</td>' : '') + '</tr>';
-      }).join('') + '</tbody><tfoot><tr><td colspan="3">Total validé</td><td class="num">' + duree(rel.minutes_validees) + '</td><td colspan="' + (peut('validerPresence') ? 5 : 4) + '"></td></tr></tfoot></table></div>'
+      }).join('') + '</tbody><tfoot><tr><td colspan="3">Présence validée</td><td class="num">' + duree(rel.minutes_brutes) + '</td><td colspan="' + (peut('validerPresence') ? 5 : 4) + '"></td></tr>' +
+      '<tr><td colspan="3">Pause déjeuner déduite</td><td class="num">− ' + duree(rel.minutes_pause) + '</td><td colspan="' + (peut('validerPresence') ? 5 : 4) + '"></td></tr>' +
+      '<tr><td colspan="3">Total facturable</td><td class="num">' + duree(rel.minutes_validees) + '</td><td colspan="' + (peut('validerPresence') ? 5 : 4) + '"></td></tr></tfoot></table></div>'
       : '<p class="vide">Aucune présence ce mois-ci.</p>';
+    if (rel.jours.length) h += '<h2>Par journée</h2>' + tableJours(rel);
     if (rel.preparations.length) {
       h += '<h2>TP préparés</h2><div class="tableau-wrap"><table><thead><tr><th>Date</th><th>Créneau</th><th>Classe</th><th>TP</th><th>Statut</th></tr></thead><tbody>' +
         rel.preparations.map(function (d) { var st = ST_DEM[d.statut] || [d.statut, '']; return '<tr><td>' + esc(jourLisible(d.date_tp)) + '</td><td>' + esc(d.creneau) + '</td><td>' + esc(d.classe) + '</td><td>' + esc(d.titre) + '</td><td>' + badge(st[0], st[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>';
     }
     if (rel.sessions.length) h += '<div class="actions"><button class="btn" data-act="csv">Exporter en CSV</button><button class="btn" data-act="imprimer">Imprimer le relevé</button></div>';
     return h;
+  }
+
+  function tableJours(rel) {
+    return '<div class="tableau-wrap"><table><thead><tr><th>Journée</th><th class="num">Présence validée</th><th class="num">Pause déjeuner</th><th class="num">Facturable</th></tr></thead><tbody>' +
+      rel.jours.map(function (j) {
+        return '<tr><td>' + esc(jourLisible(j.date)) + '</td><td class="num">' + duree(j.minutes_brutes) + '</td><td class="num">' + (j.pause_min ? '− ' + duree(j.pause_min) : '—') + '</td><td class="num">' + duree(j.minutes_facturables) + '</td></tr>';
+      }).join('') + '</tbody><tfoot><tr><td>Total</td><td class="num">' + duree(rel.minutes_brutes) + '</td><td class="num">− ' + duree(rel.minutes_pause) + '</td><td class="num">' + duree(rel.minutes_validees) + '</td></tr></tfoot></table></div>';
   }
 
   function boutonsValidation(s) {
@@ -923,6 +936,11 @@
       l.push([rel.personne.nom, s.date, fmt(s.arrivee, 'HH:mm'), fmt(s.depart, 'HH:mm'), String(Math.round((Number(s.duree_min) || 0) / 60 * 100) / 100).replace('.', ','),
         s.labo, s.missions, SOURCES[s.source] || s.source, s.corrections, (ST_SES[s.statut] || [s.statut])[0], s.valide_par, s.id]);
     });
+    function h(min) { return String(Math.round(min / 60 * 100) / 100).replace('.', ','); }
+    rel.jours.forEach(function (j) {
+      if (j.pause_min) l.push([rel.personne.nom, j.date, '', '', '-' + h(j.pause_min), '', 'Pause déjeuner déduite', '', '', '', '', '']);
+    });
+    l.push([rel.personne.nom, rel.mois, '', '', h(rel.minutes_validees), '', 'Total facturable (présences validées moins pauses déjeuner)', '', '', '', '', '']);
     var txt = '﻿' + l.map(function (r) { return r.map(csvCellule).join(';'); }).join('\r\n');
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv;charset=utf-8' }));
@@ -940,8 +958,10 @@
       '<p><b>' + esc(C().roles[rel.personne.role] || '') + ' :</b> ' + esc(rel.personne.nom) + ' · <b>Période :</b> ' + esc(moisLib) + '</p>' +
       '<table><thead><tr><th>Date</th><th>Arrivée</th><th>Départ</th><th class="num">Durée</th><th>Labo</th><th>Missions</th><th>Réf.</th></tr></thead><tbody>' +
       val.map(function (s) { return '<tr><td>' + esc(jourLisible(s.date)) + '</td><td>' + fmt(s.arrivee, 'HH:mm') + '</td><td>' + fmt(s.depart, 'HH:mm') + '</td><td class="num">' + duree(s.duree_min) + '</td><td>' + esc(s.labo) + '</td><td>' + esc(String(s.missions).split(' | ').join(', ')) + '</td><td class="mono">' + esc(s.id) + '</td></tr>'; }).join('') +
-      '</tbody><tfoot><tr><td colspan="3">Total</td><td class="num">' + duree(rel.minutes_validees) + '</td><td colspan="3">' + num(rel.heures_validees) + ' h' +
-      (fact ? ' × ' + euros(rel.taux_horaire) + '/h = ' + euros(rel.montant_ht) + ' HT' : '') + '</td></tr></tfoot></table>' +
+      '</tbody></table>' +
+      '<h2 style="font-size:12pt;margin:6mm 0 2mm">Récapitulatif par journée</h2>' + tableJours(rel) +
+      '<p style="margin-top:4mm"><b>Total facturable : ' + duree(rel.minutes_validees) + ' (' + num(rel.heures_validees) + ' h)</b>, après déduction d\'une heure de pause déjeuner par journée couvrant 12 h – 14 h' +
+      (fact ? ' · ' + num(rel.heures_validees) + ' h × ' + euros(rel.taux_horaire) + '/h = <b>' + euros(rel.montant_ht) + ' HT</b>' : '') + '.</p>' +
       (rel.non_validees ? '<p>' + rel.non_validees + ' présence(s) non validée(s) à la date d\'édition, non incluses.</p>' : '') +
       '<div class="signatures"><div>Pour Aurlom BTS+, service fait<br>Nom, date, signature</div><div>La prestataire<br>Nom, date, signature</div></div>' +
       '<div class="pied"><span>Édité le ' + fmt(rel.edite_le, 'dd/MM/yyyy à HH:mm') + ' depuis le suivi labo · horodatages serveur</span><span class="mono">' + esc(rel.mois) + '</span></div>';

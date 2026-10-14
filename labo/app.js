@@ -2,20 +2,18 @@
 (function () {
   'use strict';
 
-  // Mode normal : page servie par Google Apps Script (comptes de l'école uniquement),
-  // les appels passent par google.script.run. API_URL ne sert qu'à l'ancien mode
-  // par PIN, fermé par défaut côté serveur. Ni l'un ni l'autre : démonstration.
-  var API_URL = '';
-
+  // Page servie par Google Apps Script (comptes de l'école uniquement) : les appels
+  // passent par google.script.run et l'identité est celle du compte Google.
+  // Partout ailleurs, la page est une démonstration avec des profils fictifs.
   var GOOGLE = typeof google !== 'undefined' && google.script && google.script.run ? true : false;
-  var DEMO = !GOOGLE && !API_URL;
-  var CLE_SESSION = 'labo-session-v2';
+  var DEMO = !GOOGLE;
+  var CLE_PROFIL_DEMO = 'labo-demo-profil';
   var CLE_FILE = 'labo-file-attente';
   var demoCore = null;
   if (DEMO) { demoCore = LaboCore.create(LaboNav.store(), LaboNav.env); LaboNav.amorcer(demoCore); }
 
   var S = {
-    session: GOOGLE ? { jeton: 'google' } : lire(CLE_SESSION), etat: null, erreurAcces: '', onglet: null, releve: null, releveEnCours: false,
+    session: GOOGLE ? { google: true } : lireProfilDemo(), etat: null, erreurAcces: '', onglet: null, releve: null, releveEnCours: false,
     filtres: { demandes: 'avenir', incidents: 'ouverts', inventaire: '', invFiliere: '', invAlerte: false, commandes: 'actives', progFiliere: '', progTout: false },
     programmeComplet: null, preDemande: null, preCommande: null, occupe: false
   };
@@ -24,6 +22,7 @@
   // ---------------------------------------------------------------------------
   // Utilitaires
   // ---------------------------------------------------------------------------
+  function lireProfilDemo() { try { var e = sessionStorage.getItem(CLE_PROFIL_DEMO); return e ? { email: e } : null; } catch (x) { return null; } }
   function lire(cle) { try { return JSON.parse(localStorage.getItem(cle)); } catch (e) { return null; } }
   function ecrire(cle, v) { try { if (v === null) localStorage.removeItem(cle); else localStorage.setItem(cle, JSON.stringify(v)); } catch (e) { /* stockage bloqué */ } }
   function esc(s) {
@@ -117,20 +116,16 @@
   // Serveur
   // ---------------------------------------------------------------------------
   function envoyer(req) {
-    if (DEMO) return Promise.resolve(demoCore.handle(JSON.parse(JSON.stringify(req))));
-    if (GOOGLE) {
-      return new Promise(function (ok, ko) {
-        google.script.run.withSuccessHandler(ok).withFailureHandler(ko).appel({ action: req.action, data: req.data });
-      });
-    }
-    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(req), credentials: 'omit', referrerPolicy: 'no-referrer' })
-      .then(function (r) { return r.json(); });
+    if (DEMO) return Promise.resolve(demoCore.handle(JSON.parse(JSON.stringify(req)), { email: S.session ? S.session.email : '' }));
+    return new Promise(function (ok, ko) {
+      google.script.run.withSuccessHandler(ok).withFailureHandler(ko).appel({ action: req.action, data: req.data });
+    });
   }
 
   function api(action, data) {
-    var req = { action: action, jeton: S.session ? S.session.jeton : null, data: data || {} };
+    var req = { action: action, data: data || {} };
     return envoyer(req).then(function (r) {
-      if (!r.ok && /Session expirée|Compte désactivé|n'est pas autorisé|Accès réservé|non identifié/.test(r.error)) {
+      if (!r.ok && /n'est pas autorisé|Accès réservé|non identifié/.test(r.error)) {
         if (GOOGLE) { S.erreurAcces = r.error; S.etat = null; } else finSession();
       }
       return r;
@@ -147,15 +142,19 @@
     });
   }
 
-  function finSession() { if (GOOGLE) return; ecrire(CLE_SESSION, null); S.session = null; S.etat = null; S.releve = null; rendre(); }
+  // Démonstration seulement : revenir au choix du profil fictif.
+  function finSession() {
+    if (GOOGLE) return;
+    try { sessionStorage.removeItem(CLE_PROFIL_DEMO); } catch (x) { /* rien */ }
+    S.session = null; S.etat = null; S.releve = null; rendre();
+  }
 
   function viderFile() {
     var file = lire(CLE_FILE) || [];
-    if (!file.length || DEMO || !S.session) return Promise.resolve();
+    if (!file.length || !S.session) return Promise.resolve();
     var reste = [];
     return file.reduce(function (p, req) {
       return p.then(function () {
-        req.jeton = S.session.jeton;
         return envoyer(req).then(function (r) { if (!r.ok) toast('Badge hors connexion refusé : ' + r.error, true); })
           .catch(function () { reste.push(req); });
       });
@@ -224,7 +223,7 @@
     var cpt = compteurs();
     var h = '<header class="entete"><div class="marque">' + logo() + '<p class="sur">BTS+ · Suivi labo</p></div>' +
       '<div class="qui"><b>' + esc(moi().nom) + '</b> · ' + esc(C().roles[moi().role]) + (moi().filiere ? ' ' + esc(LaboCore.filieresDe(moi()).join(' et ')) : '') +
-      (GOOGLE ? '' : ' · <button class="btn lien" data-act="deconnexion">Se déconnecter</button>') + '</div></header>';
+      (DEMO ? ' · <button class="btn lien" data-act="changerProfil">Changer de profil</button>' : '') + '</div></header>';
     if (DEMO) h += '<div class="demo"><span><b>Démonstration.</b> Données fictives, stockées dans ce navigateur.</span><button class="btn petit" data-act="reinit">Réinitialiser la démo</button></div>';
     h += '<nav class="onglets" role="tablist">' + ongl.map(function (o) {
       return '<button role="tab" data-onglet="' + o[0] + '" aria-selected="' + (S.onglet === o[0]) + '">' + esc(o[1]) +
@@ -257,18 +256,15 @@
   // ---------------------------------------------------------------------------
   // Connexion
   // ---------------------------------------------------------------------------
+  // Démonstration : choix d'un profil fictif. Dans l'application réelle, cet écran
+  // n'existe pas : Google identifie la personne par son compte de l'école.
   function rendreConnexion() {
-    var demo = '';
-    if (DEMO) {
-      demo = '<div class="encart ambre"><b>Démonstration.</b> Choisis un compte fictif :<div class="actions">' +
-        LaboNav.comptes.map(function (c) { return '<button type="button" class="btn petit" data-act="demoCompte" data-email="' + esc(c[2]) + '" data-pin="' + esc(c[6]) + '">' + esc(c[1]) + '</button>'; }).join('') + '</div></div>';
-    }
-    app.innerHTML = '<div class="connexion">' + logo(32) + titre('aurlom BTS+ · Suivi labo', 'Connexion', 'Ton adresse e-mail et ton code PIN personnel (6 chiffres).') + demo +
-      '<form data-form="connexion" class="grille" style="grid-template-columns:1fr" autocomplete="on">' +
-      '<label class="champ"><span>E-mail</span><input name="email" type="email" autocomplete="username" required></label>' +
-      '<label class="champ"><span>Code PIN</span><input name="pin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" autocomplete="current-password" required></label>' +
-      '<button class="btn plein" type="submit">Se connecter</button></form>' +
-      '<p class="petit sourd">PIN oublié : demande au directeur de t\'en attribuer un nouveau. Après 5 essais erronés, le compte est bloqué 15 minutes.</p></div>';
+    app.innerHTML = '<div class="connexion">' + logo(32) + titre('aurlom BTS+ · Suivi labo', 'Démonstration', 'Choisis un profil fictif pour voir l\'application telle que chaque poste la voit.') +
+      '<div class="actions" style="flex-direction:column;align-items:stretch">' +
+      LaboNav.comptes.map(function (c) {
+        return '<button type="button" class="btn" data-act="demoCompte" data-email="' + esc(c[2]) + '">' + esc(c[1]) + ' <span class="sourd" style="font-weight:400">· ' + esc(LaboCore.CONFIG.roles[c[3]]) + '</span></button>';
+      }).join('') + '</div>' +
+      '<div class="encart">Dans l\'application réelle, il n\'y a ni mot de passe ni code : chacun ouvre le lien avec son compte Google @aurlom.com. Une personne qui n\'est pas de l\'école, ou pas inscrite, ne voit rien.</div></div>';
   }
 
   // ---------------------------------------------------------------------------
@@ -1029,14 +1025,11 @@
     return o;
   }
 
-  function connecter(email, pin) {
-    api('connexion', { email: email, pin: pin }).then(function (r) {
-      if (!r.ok) return toast(r.error, true);
-      S.session = { jeton: r.data.jeton };
-      ecrire(CLE_SESSION, S.session);
-      S.onglet = null; S.releve = null; S.preDemande = null; S.preCommande = null;
-      charger();
-    });
+  function choisirProfil(email) {
+    try { sessionStorage.setItem(CLE_PROFIL_DEMO, email); } catch (x) { /* démo en mémoire */ }
+    S.session = { email: email };
+    S.onglet = null; S.releve = null; S.preDemande = null; S.preCommande = null;
+    charger();
   }
 
   app.addEventListener('submit', function (ev) {
@@ -1046,7 +1039,6 @@
     var v = valeurs(form);
     if (ev.submitter && ev.submitter.name) v[ev.submitter.name] = ev.submitter.value;
     switch (type) {
-      case 'connexion': connecter(v.email, v.pin); break;
       case 'arrivee': agir('arrivee', v, 'Arrivée enregistrée.'); break;
       case 'depart':
         (v.heure_depart ? boite('Départ à ' + v.heure_depart + ' saisi à la main : il sera signalé à la validation.') : Promise.resolve(true))
@@ -1081,8 +1073,8 @@
     var id = t.getAttribute('data-id'), v = t.getAttribute('data-v');
     var art = id ? (S.etat && (S.etat.articles || []).filter(function (a) { return a.id === id; })[0]) : null;
     switch (t.getAttribute('data-act')) {
-      case 'demoCompte': connecter(t.getAttribute('data-email'), t.getAttribute('data-pin')); break;
-      case 'deconnexion': api('deconnexion').then(finSession); break;
+      case 'demoCompte': choisirProfil(t.getAttribute('data-email')); break;
+      case 'changerProfil': finSession(); break;
       case 'reinit':
         boite('Effacer les données de démonstration et repartir des exemples ?').then(function (ok) {
           if (ok) { LaboNav.reinitialiser(); demoCore = LaboCore.create(LaboNav.store(), LaboNav.env); LaboNav.amorcer(demoCore); finSession(); }

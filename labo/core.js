@@ -24,9 +24,6 @@ var LaboCore = (function () {
     // Facturation : une heure de pause déjeuner est retirée de chaque journée qui
     // couvre la plage 12 h – 14 h, moins le temps déjà badgé en sortie dans cette plage.
     pauseDejeuner: { minutes: 60, debut: '12:00', fin: '14:00' },
-    dureeSessionJours: 7,
-    essaisMax: 5,
-    blocageMinutes: 15,
     labos: ['Labo Fleming', 'Labo Robert Koch', 'Labo Gerty Cori', 'Labo Marie Curie'],
     creneaux: ['C1 · 9h00 – 10h00', 'C2 · 10h15 – 11h45', 'C3 · 12h00 – 13h30', 'C4 · 14h30 – 16h00', 'C5 · 16h15 – 17h45'],
     filieres: {
@@ -97,7 +94,7 @@ var LaboCore = (function () {
   };
 
   var TABLES = {
-    Utilisateurs: ['id', 'nom', 'email', 'role', 'filiere', 'disciplines', 'pin', 'pin_hash', 'taux_horaire', 'actif'],
+    Utilisateurs: ['id', 'nom', 'email', 'role', 'filiere', 'disciplines', 'taux_horaire', 'actif'],
     Sessions: ['id', 'user_id', 'user_nom', 'date', 'arrivee', 'depart', 'duree_min', 'labo',
       'missions', 'demandes_ids', 'commentaire', 'source', 'corrections', 'statut',
       'valide_par', 'valide_le', 'motif_validation'],
@@ -179,38 +176,6 @@ var LaboCore = (function () {
     }
     function trouverUser(id) { return actifs().filter(function (u) { return String(u.id) === String(id); })[0] || null; }
 
-    // -------------------------------------------------------------------------
-    // Authentification : e-mail + PIN, jeton de session, blocage après échecs.
-    // -------------------------------------------------------------------------
-    function connexion(data) {
-      var email = texte(data.email, 120).toLowerCase();
-      var pin = texte(data.pin, 20);
-      var cle = 'echecs:' + email;
-      var echecs = Number(env.cache.get(cle) || 0);
-      if (echecs >= CONFIG.essaisMax) throw erreur('Trop d\'essais. Réessaie dans ' + CONFIG.blocageMinutes + ' minutes.');
-      var u = actifs().filter(function (x) { return String(x.email).toLowerCase() === email; })[0];
-      var ok = u && u.pin_hash && pin.length >= 4 && env.hashPin(u.id, pin) === String(u.pin_hash);
-      if (!ok) {
-        env.cache.put(cle, String(echecs + 1), CONFIG.blocageMinutes * 60);
-        journal(u || { id: '', nom: email }, 'connexion_refusee', '', '');
-        throw erreur('E-mail ou code PIN incorrect.');
-      }
-      env.cache.remove(cle);
-      var jeton = env.randomToken();
-      env.sessions.put(jeton, { uid: u.id, exp: now().getTime() + CONFIG.dureeSessionJours * 86400000 });
-      journal(u, 'connexion', '', '');
-      return { jeton: jeton, moi: profil(u) };
-    }
-
-    function authentifier(jeton) {
-      if (!jeton) throw erreur('Session expirée. Reconnecte-toi.');
-      var s = env.sessions.get(jeton);
-      if (!s || s.exp < now().getTime()) { if (s) env.sessions.remove(jeton); throw erreur('Session expirée. Reconnecte-toi.'); }
-      var u = trouverUser(s.uid);
-      if (!u) { env.sessions.remove(jeton); throw erreur('Compte désactivé.'); }
-      return u;
-    }
-
     function profil(u) {
       var droits = {};
       Object.keys(DROITS).forEach(function (d) { droits[d] = peut(u, d); });
@@ -268,7 +233,6 @@ var LaboCore = (function () {
     // -------------------------------------------------------------------------
     var A = {};
 
-    A.deconnexion = function (user, data, jeton) { if (jeton) env.sessions.remove(jeton); journal(user, 'deconnexion', '', ''); return true; };
 
     A.etat = function (user) {
       var auj = jour(now());
@@ -743,11 +707,10 @@ var LaboCore = (function () {
     };
 
     // -------------------------------------------------------------------------
-    var PUBLIQUES = { connexion: connexion };
-
-    // Identité vérifiée par Google (déploiement réservé au domaine de l'école) :
-    // le compte Google connecté est cherché dans la feuille Utilisateurs.
-    function parCompteGoogle(email) {
+    // L'identité vient toujours de l'hôte : compte Google vérifié par Apps Script
+    // (déploiement réservé au domaine de l'école), ou profil fictif en démonstration.
+    // Il n'existe aucune autre façon de s'identifier.
+    function parCompte(email) {
       email = texte(email, 120).toLowerCase();
       if (!email) throw erreur('Compte Google non identifié. Connecte-toi avec ton compte de l\'école.');
       var u = actifs().filter(function (x) { return String(x.email).toLowerCase() === email; })[0];
@@ -759,18 +722,11 @@ var LaboCore = (function () {
       return u;
     }
 
-    // ctx.email : présent quand l'appel vient de la page servie par Apps Script.
     function handle(req, ctx) {
       try {
         var action = req && req.action;
-        if (ctx && ctx.email !== undefined) {
-          if (!A[action]) throw erreur('Action inconnue.');
-          return { ok: true, data: A[action](parCompteGoogle(ctx.email), req.data || {}, null) };
-        }
-        if (PUBLIQUES[action]) return { ok: true, data: PUBLIQUES[action](req.data || {}) };
         if (!A[action]) throw erreur('Action inconnue.');
-        var user = authentifier(req.jeton);
-        return { ok: true, data: A[action](user, req.data || {}, req.jeton) };
+        return { ok: true, data: A[action](parCompte(ctx && ctx.email), req.data || {}) };
       } catch (e) {
         if (!e.metier && env.log) env.log(e);
         return { ok: false, error: e.metier ? e.message : 'Erreur serveur. Réessaie ou préviens le directeur.' };

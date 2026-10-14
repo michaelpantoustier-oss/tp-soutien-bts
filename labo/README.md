@@ -2,7 +2,7 @@
 
 Application web des laboratoires de TP du campus pour le BTS Biologie médicale (BIOMED, RNCP40027) et le BTS Bioanalyses en laboratoire de contrôle (BIOALC, RNCP38884). Elle couvre la présence et la facturation des prestataires du labo, les demandes de préparation de TP, le programme des TP tiré des scénarios pédagogiques, l'inventaire, les commandes, le rangement et les incidents.
 
-En production, l'application est servie par Google Apps Script et réservée aux comptes Google de l'école. La page publiée sur GitHub n'est qu'une **démonstration** : données fictives stockées dans le navigateur, un bouton par compte fictif.
+En production, l'application est servie par Google Apps Script et réservée aux comptes Google de l'école. La page publiée sur GitHub n'est qu'une **démonstration** : données fictives stockées dans le navigateur, choix d'un profil fictif, aucune connexion à un serveur.
 
 Ce dépôt est public. Il ne contient **que du code** : aucune donnée de l'école (scénarios, inventaire, fournisseurs, comptes) n'y est versée. Les données vivent dans un classeur Google Sheets privé, lu par un script Google Apps Script qui contrôle chaque accès.
 
@@ -51,7 +51,7 @@ L'application est servie par Google Apps Script, déployée avec l'accès **« U
 - **Traçabilité** : chaque action, et chaque accès refusé, est écrit dans la feuille Journal.
 - **Pas de secret dans le dépôt** : l'identifiant du classeur Pilotage est une propriété du script, pas une ligne de code.
 
-L'ancien accès par code PIN depuis une page hébergée hors Google reste dans le code mais est **fermé** : il ne s'ouvre que si la propriété `MODE_PIN` vaut `oui`.
+Il n'existe aucun autre moyen d'entrer : ni mot de passe propre à l'application, ni code PIN, ni adresse d'API publique. Le script ne répond qu'aux comptes Google du domaine.
 
 À ta charge, dans la console d'administration Google Workspace : imposer la validation en deux étapes aux comptes de l'école. Pour les prestataires sans compte @aurlom.com, il faut leur en créer un.
 
@@ -81,7 +81,7 @@ L'outil sert à attester le service fait. Il ne doit pas devenir un contrôle d'
      --inventaire INVENTAIRE.xlsx --commandes COMMANDES_LABO.xlsx --sortie import
    ```
    Pour chaque CSV, ouvre la feuille du même nom puis Fichier > Importer > « Remplacer la feuille actuelle ». Ne mets pas ces CSV dans le dépôt.
-6. **Comptes.** Importe `Utilisateurs.csv` (préparé hors du dépôt) dans la feuille `Utilisateurs`, ou saisis une ligne par personne : `id` court et unique, `nom`, `email` (adresse @aurlom.com), `role` (`technicienne`, `aide_laborantine`, `enseignant`, `prof_referent`, `coordinateur`, `directeur`), `filiere` (`BIOMED`, `BIOALC` ou `BIOMED,BIOALC` pour les enseignants), `disciplines`, `taux_horaire` pour les prestataires, `actif` = `oui`. Les colonnes `pin` et `pin_hash` restent vides.
+6. **Comptes.** Importe `Utilisateurs.csv` (préparé hors du dépôt) dans la feuille `Utilisateurs`, ou saisis une ligne par personne : `id` court et unique, `nom`, `email` (adresse @aurlom.com), `role` (`technicienne`, `aide_laborantine`, `enseignant`, `prof_referent`, `coordinateur`, `directeur`), `filiere` (`BIOMED`, `BIOALC` ou `BIOMED,BIOALC` pour les enseignants), `disciplines`, `taux_horaire` pour les prestataires, `actif` = `oui`.
 7. **Déploiement.** Déployer > Nouveau déploiement > Application Web. Exécuter en tant que : **moi**. Accès : **utilisateurs de aurlom.com**. Copie l'adresse `/exec` : c'est le lien de l'application.
 8. **Diffusion.** Envoie ce lien aux personnes inscrites. Elles se connectent avec leur compte Google de l'école.
 
@@ -91,7 +91,7 @@ La page GitHub (`labo/index.html`) ne sert que de démonstration avec des donné
 
 ## Réglages
 
-Dans l'objet `CONFIG` de `core.js` : labos, créneaux, classes, disciplines et blocs par filière, missions, points de rangement, catégories, seuil des trois devis, délai de préparation (15 jours), alerte de péremption (30 jours), durée de session, nombre d'essais. Propriétés du script : `PILOTAGE_ID`, `DOMAINE`, `MODE_PIN`. Dans `Code.gs` : `ENVOYER_MAILS`. Catalogue des TP : `referentiel.js`.
+Dans l'objet `CONFIG` de `core.js` : labos, créneaux, classes, disciplines et blocs par filière, missions, points de rangement, catégories, seuil des trois devis, délai de préparation (15 jours), alerte de péremption (30 jours), pause déjeuner. Propriétés du script : `PILOTAGE_ID`, `DOMAINE`. Dans `Code.gs` : `ENVOYER_MAILS`. Catalogue des TP : `referentiel.js`.
 
 ## Limites connues
 

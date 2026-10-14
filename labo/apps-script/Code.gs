@@ -45,7 +45,7 @@ function doGet() {
 function appel(req) {
   var email = emailVerifie_();
   if (!email) return { ok: false, error: 'Accès réservé aux comptes Google de l\'école.' };
-  if (limiteDepassee_({ jeton: email, action: req && req.action })) return { ok: false, error: 'Trop de requêtes. Patiente une minute.' };
+  if (limiteDepassee_(email)) return { ok: false, error: 'Trop de requêtes. Patiente une minute.' };
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(20000)) return { ok: false, error: 'Serveur occupé, réessaie.' };
   try {
@@ -56,44 +56,15 @@ function appel(req) {
   }
 }
 
-// Ancien point d'entrée par PIN (page hébergée hors Google). Fermé par défaut :
-// il ne s'ouvre que si la propriété MODE_PIN vaut « oui ».
-function doPost(e) {
-  if (proprietes_().getProperty('MODE_PIN') !== 'oui') return json_({ ok: false, error: 'Service fermé.' });
-  var req;
-  try {
-    if (!e || !e.postData || e.postData.contents.length > 100000) throw new Error('taille');
-    req = JSON.parse(e.postData.contents);
-  } catch (err) {
-    return json_({ ok: false, error: 'Requête refusée.' });
-  }
-  if (limiteDepassee_(req)) return json_({ ok: false, error: 'Trop de requêtes. Patiente une minute.' });
-  var lock = LockService.getScriptLock();
-  if (!lock.tryLock(20000)) return json_({ ok: false, error: 'Serveur occupé, réessaie.' });
-  try {
-    return json_(LaboCore.create(sheetStore_(), env_()).handle(req));
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-function json_(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-}
-
-// Limite globale et par session : protège contre l'aspiration et le forçage.
-function limiteDepassee_(req) {
+// Limite globale et par compte : protège contre l'aspiration en masse.
+function limiteDepassee_(email) {
   var cache = CacheService.getScriptCache();
   var minute = Math.floor(Date.now() / 60000);
-  var cles = ['rl:all:' + minute];
-  if (req && req.jeton) cles.push('rl:' + hache_(String(req.jeton)).slice(0, 20) + ':' + minute);
-  if (req && req.action === 'connexion') cles.push('rl:cx:' + minute);
-  var plafonds = [600, 120, 30];
-  for (var i = 0; i < cles.length; i++) {
-    var n = Number(cache.get(cles[i]) || 0) + 1;
-    cache.put(cles[i], String(n), 120);
-    var plafond = cles[i].indexOf('rl:cx:') === 0 ? plafonds[2] : (i === 0 ? plafonds[0] : plafonds[1]);
-    if (n > plafond) return true;
+  var regles = [['rl:all:' + minute, 600], ['rl:' + hache_(email).slice(0, 20) + ':' + minute, 120]];
+  for (var i = 0; i < regles.length; i++) {
+    var n = Number(cache.get(regles[i][0]) || 0) + 1;
+    cache.put(regles[i][0], String(n), 120);
+    if (n > regles[i][1]) return true;
   }
   return false;
 }
@@ -101,23 +72,13 @@ function limiteDepassee_(req) {
 /* -------------------------------------------------------------------------- */
 /* Environnement fourni au cœur                                                */
 /* -------------------------------------------------------------------------- */
-function poivre_() {
-  var p = PropertiesService.getScriptProperties();
-  var v = p.getProperty('POIVRE');
-  if (!v) { v = Utilities.getUuid() + Utilities.getUuid(); p.setProperty('POIVRE', v); }
-  return v;
-}
-
 function hache_(s) {
   var octets = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8);
   return octets.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
 }
 
-function hashPin_(id, pin) { return hache_(poivre_() + '|' + id + '|' + pin); }
-
 function env_() {
   var tz = LaboCore.CONFIG.fuseau;
-  var props = PropertiesService.getScriptProperties();
   var cache = CacheService.getScriptCache();
   return {
     now: function () { return new Date(); },
@@ -128,18 +89,10 @@ function env_() {
       return new Date(dateStr + 'T' + ('0' + p[0]).slice(-2) + ':' + p[1] + ':00' + off);
     },
     random: function (n) { return Utilities.getUuid().replace(/-/g, '').slice(0, n).toUpperCase(); },
-    randomToken: function () { return (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, ''); },
-    hashPin: hashPin_,
     cache: {
       get: function (k) { return cache.get(k); },
       put: function (k, v, s) { cache.put(k, v, s); },
       remove: function (k) { cache.remove(k); }
-    },
-    // Les jetons ne sont stockés que hachés.
-    sessions: {
-      put: function (jeton, obj) { nettoyerSessions_(); props.setProperty('jeton:' + hache_(jeton), JSON.stringify(obj)); },
-      get: function (jeton) { var v = props.getProperty('jeton:' + hache_(jeton)); return v ? JSON.parse(v) : null; },
-      remove: function (jeton) { props.deleteProperty('jeton:' + hache_(jeton)); }
     },
     notify: ENVOYER_MAILS ? function (to, sujet, corps) {
       try { MailApp.sendEmail(to, sujet, corps + '\n\n— Suivi labo Aurlom BTS+ (ne pas répondre à ce message)'); } catch (err) { console.warn(err); }
@@ -149,18 +102,8 @@ function env_() {
   };
 }
 
-function nettoyerSessions_() {
-  var p = PropertiesService.getScriptProperties();
-  var tout = p.getProperties();
-  var t = Date.now();
-  Object.keys(tout).forEach(function (k) {
-    if (k.indexOf('jeton:') !== 0) return;
-    try { if (JSON.parse(tout[k]).exp < t) p.deleteProperty(k); } catch (e) { p.deleteProperty(k); }
-  });
-}
-
 /* -------------------------------------------------------------------------- */
-/* Classeur « Pilotage dépenses » : une ligne par commande approuvée,          */
+/* Classeur « Pilotage dépenses » : une ligne par demande de commande,         */
 /* dans l'onglet de la filière (BIOMED ou BIOALC), mêmes colonnes.             */
 /* -------------------------------------------------------------------------- */
 function pilotage_() {
@@ -306,58 +249,16 @@ function sheetStore_() {
 /* -------------------------------------------------------------------------- */
 /* Administration depuis le classeur                                           */
 /* -------------------------------------------------------------------------- */
-function onOpen() {
-  SpreadsheetApp.getUi().createMenu('Suivi labo')
-    .addItem('Sécuriser les codes PIN saisis', 'securiserPins')
-    .addItem('Déconnecter tout le monde', 'deconnecterTout')
-    .addToUi();
-}
-
-// Un PIN tapé dans la colonne « pin » est remplacé par son empreinte dès la saisie.
-function onEdit(e) {
-  try {
-    var sh = e.range.getSheet();
-    if (sh.getName() !== 'Utilisateurs') return;
-    var entetes = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
-    if (e.range.getColumn() === entetes.indexOf('pin') + 1) securiserPins();
-  } catch (err) { /* le menu reste disponible */ }
-}
-
-function securiserPins() {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Utilisateurs');
-  var entetes = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
-  var cId = entetes.indexOf('id'), cPin = entetes.indexOf('pin'), cHash = entetes.indexOf('pin_hash');
-  var n = sh.getLastRow() - 1;
-  if (n < 1) return;
-  var vals = sh.getRange(2, 1, n, entetes.length).getDisplayValues();
-  for (var i = 0; i < vals.length; i++) {
-    var pin = String(vals[i][cPin]).trim();
-    if (!pin) continue;
-    if (!/^\d{6,}$/.test(pin)) {
-      sh.getRange(i + 2, cPin + 1).setValue('').setNote('PIN refusé : 6 chiffres minimum.');
-      continue;
-    }
-    sh.getRange(i + 2, cHash + 1).setNumberFormat('@').setValue(hashPin_(vals[i][cId], pin));
-    sh.getRange(i + 2, cPin + 1).setValue('').setNote('PIN enregistré le ' + Utilities.formatDate(new Date(), LaboCore.CONFIG.fuseau, 'dd/MM/yyyy HH:mm'));
-  }
-}
-
-function deconnecterTout() {
-  var p = PropertiesService.getScriptProperties();
-  Object.keys(p.getProperties()).forEach(function (k) { if (k.indexOf('jeton:') === 0) p.deleteProperty(k); });
-}
-
 // À lancer une fois depuis l'éditeur : crée les feuilles et le compte directeur.
 function installer() {
   var store = sheetStore_();
   Object.keys(LaboCore.TABLES).forEach(function (t) { store.all(t); });
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   ss.setSpreadsheetTimeZone(LaboCore.CONFIG.fuseau);
-  ss.getSheetByName('Utilisateurs').getRange('A:J').setNumberFormat('@');
+  ss.getSheetByName('Utilisateurs').getRange('A:H').setNumberFormat('@');
   if (!store.all('Utilisateurs').length) {
-    store.insert('Utilisateurs', { id: 'DIR', nom: 'Directeur du campus', email: Session.getActiveUser().getEmail(), role: 'directeur', filiere: '', disciplines: '', pin: '', pin_hash: '', taux_horaire: '', actif: 'oui' });
+    store.insert('Utilisateurs', { id: 'DIR', nom: 'Directeur du campus', email: Session.getActiveUser().getEmail(), role: 'directeur', filiere: '', disciplines: '', taux_horaire: '', actif: 'oui' });
   }
-  poivre_();
   var feuille1 = ss.getSheetByName('Feuille 1') || ss.getSheetByName('Sheet1');
   if (feuille1 && feuille1.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(feuille1);
 }

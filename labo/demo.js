@@ -4,7 +4,7 @@
  */
 var LaboNav = (function () {
   var TZ = 'Europe/Paris';
-  var CLE = 'labo-demo-v2';
+  var CLE = 'labo-demo-v3';
 
   function parties(d) {
     var f = new Intl.DateTimeFormat('fr-FR', {
@@ -39,12 +39,6 @@ var LaboNav = (function () {
     return s;
   }
 
-  // Empreinte simple : suffisante pour une démo locale, jamais utilisée en production.
-  function empreinte(s) {
-    var h = 2166136261;
-    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return (h >>> 0).toString(16);
-  }
 
   var memoire = null;
   function charger() { try { return JSON.parse(localStorage.getItem(CLE)) || null; } catch (e) { return null; } }
@@ -53,7 +47,6 @@ var LaboNav = (function () {
     if (!memoire) memoire = charger() || {};
     Object.keys(LaboCore.TABLES).forEach(function (t) { if (!memoire[t]) memoire[t] = []; });
     if (!memoire._cache) memoire._cache = {};
-    if (!memoire._sessions) memoire._sessions = {};
     return memoire;
   }
 
@@ -62,17 +55,10 @@ var LaboNav = (function () {
     format: format,
     parseLocal: parseLocal,
     random: aleatoire,
-    randomToken: function () { return aleatoire(40); },
-    hashPin: function (id, pin) { return empreinte('demo|' + id + '|' + pin); },
     cache: {
       get: function (k) { var v = base()._cache[k]; return v && v.exp > Date.now() ? v.v : null; },
       put: function (k, v, s) { base()._cache[k] = { v: v, exp: Date.now() + s * 1000 }; sauver(); },
       remove: function (k) { delete base()._cache[k]; sauver(); }
-    },
-    sessions: {
-      put: function (j, o) { base()._sessions[empreinte(j)] = o; sauver(); },
-      get: function (j) { return base()._sessions[empreinte(j)] || null; },
-      remove: function (j) { delete base()._sessions[empreinte(j)]; sauver(); }
     },
     notify: null,
     pilotage: null
@@ -97,26 +83,26 @@ var LaboNav = (function () {
   function decaler(j) { return format(new Date(Date.now() + j * 86400000), 'yyyy-MM-dd'); }
 
   var COMPTES = [
-    ['T1', 'Technicienne A', 'technicienne.a@demo.local', 'technicienne', '', '', '111111', '30'],
-    ['T2', 'Technicienne B', 'technicienne.b@demo.local', 'technicienne', '', '', '222222', '30'],
-    ['L1', 'Aide-laborantine C', 'aide.c@demo.local', 'aide_laborantine', '', '', '333333', '20'],
-    ['E1', 'Enseignant BIOMED microbiologie', 'prof.biomed@demo.local', 'enseignant', 'BIOMED', 'Microbiologie', '444444', ''],
-    ['E2', 'Enseignante BIOALC biochimie', 'prof.bioalc@demo.local', 'enseignant', 'BIOALC', 'Biochimie', '555555', ''],
-    ['R1', 'Prof référent', 'referent@demo.local', 'prof_referent', '', '', '666666', ''],
-    ['C1', 'Coordinateur pédagogique', 'coordination@demo.local', 'coordinateur', '', '', '777777', ''],
-    ['D1', 'Directeur du campus', 'direction@demo.local', 'directeur', '', '', '888888', '']
+    ['T1', 'Technicienne A', 'technicienne.a@demo.local', 'technicienne', '', '', '30'],
+    ['T2', 'Technicienne B', 'technicienne.b@demo.local', 'technicienne', '', '', '30'],
+    ['L1', 'Aide-laborantine C', 'aide.c@demo.local', 'aide_laborantine', '', '', '20'],
+    ['E1', 'Enseignant BIOMED microbiologie', 'prof.biomed@demo.local', 'enseignant', 'BIOMED', 'Microbiologie', ''],
+    ['E2', 'Enseignante BIOALC biochimie', 'prof.bioalc@demo.local', 'enseignant', 'BIOALC', 'Biochimie', ''],
+    ['R1', 'Prof référent', 'referent@demo.local', 'prof_referent', '', '', ''],
+    ['C1', 'Coordination pédagogique', 'coordination@demo.local', 'coordinateur', '', '', ''],
+    ['D1', 'Directeur du campus', 'direction@demo.local', 'directeur', '', '', '']
   ];
 
   function amorcer(core) {
     var s = store();
     if (s.all('Utilisateurs').length) return;
     COMPTES.forEach(function (c) {
-      s.insert('Utilisateurs', { id: c[0], nom: c[1], email: c[2], role: c[3], filiere: c[4], disciplines: c[5], pin: '', pin_hash: env.hashPin(c[0], c[6]), taux_horaire: c[7], actif: 'oui' });
+      s.insert('Utilisateurs', { id: c[0], nom: c[1], email: c[2], role: c[3], filiere: c[4], disciplines: c[5], taux_horaire: c[6], actif: 'oui' });
     });
-    var jetons = {};
-    COMPTES.forEach(function (c) { jetons[c[0]] = core.handle({ action: 'connexion', data: { email: c[2], pin: c[6] } }).data.jeton; });
+    var emails = {};
+    COMPTES.forEach(function (c) { emails[c[0]] = c[2]; });
     function q(id, action, data) {
-      var r = core.handle({ action: action, jeton: jetons[id], data: data });
+      var r = core.handle({ action: action, data: data }, { email: emails[id] });
       if (!r.ok && typeof console !== 'undefined') console.warn('démo', action, r.error);
       return r.data;
     }

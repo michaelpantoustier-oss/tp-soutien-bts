@@ -54,7 +54,7 @@ var LaboCore = (function () {
       aide_laborantine: 'Aide-laborantine',
       enseignant: 'Enseignant·e',
       prof_referent: 'Prof référent',
-      coordinateur: 'Coordinateur pédagogique',
+      coordinateur: 'Coordination pédagogique et administrative',
       directeur: 'Directeur du campus'
     },
     missions: [

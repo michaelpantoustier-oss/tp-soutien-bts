@@ -14,7 +14,7 @@ Ce dépôt est public. Il ne contient **que du code** : aucune donnée de l'éco
 | Aide-laborantine | Mêmes droits que la technicienne. |
 | Enseignant·e BIOMED ou BIOALC | Dépose ses demandes de TP et échange avec la préparatrice, consulte le programme de sa filière et le stock, déclare ce qu'il consomme, propose des commandes, signale un problème. Ne voit que ses propres demandes. |
 | Prof référent | Tableau de bord, **approbation des commandes**, validation des présences, activité des techniciennes (heures, missions, TP préparés) **sans aucune donnée financière**, attribution des TP. Ne peut pas approuver sa propre commande : elle part au directeur. |
-| Coordinateur pédagogique | Tableau de bord, activité des techniciennes sans montant, pilotage des demandes de TP, programme, inventaire, incidents. N'approuve pas les commandes et ne valide pas les présences. |
+| Coordination pédagogique et administrative | Tableau de bord, activité des techniciennes sans montant, pilotage des demandes de TP, programme, inventaire, incidents. N'approuve pas les commandes et ne valide pas les présences. |
 | Directeur du campus | Tout, plus **la facturation** : taux horaires, montants HT, relevés de prestations à joindre aux factures. Seul rôle à recevoir ces données du serveur. |
 
 Le filtrage se fait côté serveur (`core.js`) : une donnée que le rôle n'a pas le droit de voir ne quitte jamais le classeur, même en inspectant le navigateur.
@@ -77,7 +77,7 @@ L'outil sert à attester le service fait. Il ne doit pas devenir un contrôle d'
      --inventaire INVENTAIRE.xlsx --commandes COMMANDES_LABO.xlsx --sortie import
    ```
    Pour chaque CSV, ouvre la feuille du même nom puis Fichier > Importer > « Remplacer la feuille actuelle ». Ne mets pas ces CSV dans le dépôt.
-6. **Comptes.** Feuille `Utilisateurs`, une ligne par personne : `id` court et unique, `nom`, `email` (adresse @aurlom.com), `role` (`technicienne`, `aide_laborantine`, `enseignant`, `prof_referent`, `coordinateur`, `directeur`), `filiere` (`BIOMED` ou `BIOALC` pour les enseignants), `disciplines`, `taux_horaire` pour les prestataires, `actif` = `oui`. Les colonnes `pin` et `pin_hash` restent vides.
+6. **Comptes.** Importe `Utilisateurs.csv` (préparé hors du dépôt) dans la feuille `Utilisateurs`, ou saisis une ligne par personne : `id` court et unique, `nom`, `email` (adresse @aurlom.com), `role` (`technicienne`, `aide_laborantine`, `enseignant`, `prof_referent`, `coordinateur`, `directeur`), `filiere` (`BIOMED` ou `BIOALC` pour les enseignants), `disciplines`, `taux_horaire` pour les prestataires, `actif` = `oui`. Les colonnes `pin` et `pin_hash` restent vides.
 7. **Déploiement.** Déployer > Nouveau déploiement > Application Web. Exécuter en tant que : **moi**. Accès : **utilisateurs de aurlom.com**. Copie l'adresse `/exec` : c'est le lien de l'application.
 8. **Diffusion.** Envoie ce lien aux personnes inscrites. Elles se connectent avec leur compte Google de l'école.
 

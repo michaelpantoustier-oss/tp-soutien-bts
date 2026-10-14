@@ -162,3 +162,36 @@ dialog.boite { border: var(--filet-encre); border-radius: var(--radius-md); padd
 dialog.boite::backdrop { background: rgba(17, 17, 17, 0.45); }
 dialog.boite > p:first-child { font-weight: 700; margin: 0 0 var(--space-3); }
 details.carte summary .tete { margin: 0; }
+
+/* ------------------------------------------------------------------ */
+/* Codes couleurs (palette de la charte interne : états, filières)     */
+/* ------------------------------------------------------------------ */
+.entete .marque { display: flex; align-items: center; gap: var(--space-3); }
+.logo { display: block; height: 28px; width: auto; }
+.connexion .logo { height: 32px; margin-bottom: var(--space-2); }
+.imprimable .logo { height: 32px; }
+
+/* Filet gauche de 3 px dans la couleur de l'état, comme l'Encart de la charte */
+.carte.etat-vert { border-left: 3px solid var(--vert); }
+.carte.etat-ambre { border-left: 3px solid var(--ambre); }
+.carte.etat-urgent { border-left: 3px solid var(--violet-profond); }
+.carte.etat-violet { border-left: 3px solid var(--violet); }
+.carte.etat-eteint { border-left: 3px solid var(--filet-fort); }
+.carte.etat-eteint h3, .carte.etat-eteint p { color: var(--encre-sourde); }
+tr.etat-urgent td:first-child { border-left: 3px solid var(--violet-profond); padding-left: var(--space-2); }
+tr.etat-ambre td:first-child { border-left: 3px solid var(--ambre); padding-left: var(--space-2); }
+
+/* Étiquettes de filière */
+.filiere { display: inline-block; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; padding: 4px 6px; border-radius: var(--radius-xs); vertical-align: middle; white-space: nowrap; }
+.filiere.f-biomed { background: var(--violet-nuit); color: var(--papier); }
+.filiere.f-bioalc { background: var(--encre); color: var(--papier); }
+.filiere.f-commun { background: var(--pierre); color: var(--encre-sourde); }
+
+/* Pied de page et légende */
+.pied { margin-top: var(--space-7); border-top: var(--filet-fin); padding-top: var(--space-3); }
+.pied-ligne { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); font-size: 11px; color: var(--encre-faible); margin-top: var(--space-3); }
+.pied-num { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--violet-profond); }
+.legende summary { cursor: pointer; }
+.legende-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-2) var(--space-5); margin-top: var(--space-3); font-size: 14px; color: var(--encre-sourde); }
+.legende-grille p { margin: 0; }
+@media print { .pied { display: none; } }

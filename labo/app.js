@@ -57,6 +57,17 @@
   function moi() { return S.etat.moi; }
   function peut(d) { return !!(S.etat && S.etat.moi.droits[d]); }
   function filLib(f) { return f && C().filieres[f] ? C().filieres[f].court : (f || 'Commun'); }
+  // Logo officiel (design system) : fichier à côté de la page, ou image intégrée dans Page.html.
+  var LOGO = typeof LOGO_DATA !== 'undefined' ? LOGO_DATA : 'logo-aurlom.png';
+  function logo(h) { return '<img class="logo" src="' + LOGO + '" alt="aurlom" height="' + (h || 28) + '">'; }
+  // Étiquette de filière : BIOMED violet nuit, BIOALC encre, Commun pierre.
+  function tagFiliere(f) {
+    var l = LaboCore.filieresDe({ filiere: f });
+    if (!l.length) return '<span class="filiere f-commun">Commun</span>';
+    return l.map(function (x) { return '<span class="filiere f-' + x.toLowerCase() + '">' + x + '</span>'; }).join(' ');
+  }
+  // Code couleur d'une carte : filet gauche de 3 px dans la couleur de son état.
+  function carte(etat, attrs) { return '<article class="carte' + (etat ? ' etat-' + etat : '') + '"' + (attrs || '') + '>'; }
   function badge(t, cls) { return '<span class="badge ' + (cls || '') + '">' + esc(t) + '</span>'; }
   function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 
@@ -211,7 +222,7 @@
     var ongl = onglets();
     if (!S.onglet || !ongl.some(function (o) { return o[0] === S.onglet; })) S.onglet = ongl[0][0];
     var cpt = compteurs();
-    var h = '<header class="entete"><p class="sur">aurlom BTS+ · Suivi labo</p>' +
+    var h = '<header class="entete"><div class="marque">' + logo() + '<p class="sur">BTS+ · Suivi labo</p></div>' +
       '<div class="qui"><b>' + esc(moi().nom) + '</b> · ' + esc(C().roles[moi().role]) + (moi().filiere ? ' ' + esc(LaboCore.filieresDe(moi()).join(' et ')) : '') +
       (GOOGLE ? '' : ' · <button class="btn lien" data-act="deconnexion">Se déconnecter</button>') + '</div></header>';
     if (DEMO) h += '<div class="demo"><span><b>Démonstration.</b> Données fictives, stockées dans ce navigateur.</span><button class="btn petit" data-act="reinit">Réinitialiser la démo</button></div>';
@@ -220,10 +231,23 @@
         (cpt[o[0]] ? '<span class="compte">' + cpt[o[0]] + '</span>' : '') + '</button>';
     }).join('') + '</nav>';
     var vues = { tableau: vueTableau, presence: vuePresence, demandes: vueDemandes, programme: vueProgramme, inventaire: vueInventaire, commandes: vueCommandes, rangement: vueRangement, incidents: vueIncidents, heures: vueHeures };
-    h += '<section role="tabpanel">' + vues[S.onglet]() + '</section>';
+    h += '<section role="tabpanel">' + vues[S.onglet]() + '</section>' + piedDePage();
     app.innerHTML = h;
     if (S.onglet === 'heures' && !S.releve && !S.releveEnCours) chargerReleve();
     majTotalCommande();
+  }
+
+  function piedDePage() {
+    return '<footer class="pied"><details class="legende"><summary class="label">Codes couleurs</summary><div class="legende-grille">' +
+      '<p>' + badge('Fait', 'vert') + ' Validé, prêt, livré, résolu, en stock.</p>' +
+      '<p>' + badge('À faire', 'ambre') + ' Attend une action : à valider, à approuver, stock bas, non attribué.</p>' +
+      '<p>' + badge('Urgent', 'urgent') + ' Bloquant, rupture, périmé, refusé, demandé hors délai.</p>' +
+      '<p>' + badge('En cours', 'violet') + ' Pris en charge, approuvé, commandé, séquence en cours.</p>' +
+      '<p>' + badge('Éteint', '') + ' Annulé, réalisé, passé.</p>' +
+      '<p>' + badge('J-2', 'encre') + ' Échéance imminente.</p>' +
+      '<p>' + tagFiliere('BIOMED') + ' ' + tagFiliere('BIOALC') + ' ' + tagFiliere('') + ' Filière concernée.</p>' +
+      '<p class="petit sourd">Sur chaque carte, le filet de gauche reprend la couleur de son état.</p></div></details>' +
+      '<div class="pied-ligne"><span>Suivi labo · Aurlom BTS+ · Campus Picpus</span><span class="pied-num">' + esc(LaboNav.format(new Date(), 'dd/MM/yyyy')) + '</span></div></footer>';
   }
 
   function titre(sur, t, lead) {
@@ -239,7 +263,7 @@
       demo = '<div class="encart ambre"><b>Démonstration.</b> Choisis un compte fictif :<div class="actions">' +
         LaboNav.comptes.map(function (c) { return '<button type="button" class="btn petit" data-act="demoCompte" data-email="' + esc(c[2]) + '" data-pin="' + esc(c[6]) + '">' + esc(c[1]) + '</button>'; }).join('') + '</div></div>';
     }
-    app.innerHTML = '<div class="connexion">' + titre('aurlom BTS+ · Suivi labo', 'Connexion', 'Ton adresse e-mail et ton code PIN personnel (6 chiffres).') + demo +
+    app.innerHTML = '<div class="connexion">' + logo(32) + titre('aurlom BTS+ · Suivi labo', 'Connexion', 'Ton adresse e-mail et ton code PIN personnel (6 chiffres).') + demo +
       '<form data-form="connexion" class="grille" style="grid-template-columns:1fr" autocomplete="on">' +
       '<label class="champ"><span>E-mail</span><input name="email" type="email" autocomplete="username" required></label>' +
       '<label class="champ"><span>Code PIN</span><input name="pin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" autocomplete="current-password" required></label>' +
@@ -268,11 +292,11 @@
     var horsDelai = avenir.filter(function (d) { return Number(d.delai_jours) < C().delaiPrepaJours; });
     var aApprouver = (e.commandes || []).filter(function (c) { return c.statut === 'soumise'; });
     var stock = alertesStock();
-    var h = titre(jourLisible(auj), 'Où en est le labo', 'Ce qui demande ton attention aujourd\'hui.');
+    var h = titre(jourLisible(auj), 'État du labo', 'Ce qui demande ton attention aujourd\'hui.');
     h += '<div class="chiffres">' +
       '<div class="chiffre"><b>' + (e.presentes || []).length + '</b><span>personne(s) au labo</span></div>' +
       (peut('validerPresence') ? '<div class="chiffre' + (aValider.length ? ' accent' : '') + '"><b>' + aValider.length + '</b><span>présence(s) à valider</span></div>' : '') +
-      '<div class="chiffre' + (aApprouver.length && peut('approuverCommande') ? ' accent' : '') + '"><b>' + aApprouver.length + '</b><span>commande(s) en attente d\'approbation</span></div>' +
+      '<div class="chiffre' + (aApprouver.length && peut('approuverCommande') && !(peut('validerPresence') && aValider.length) ? ' accent' : '') + '"><b>' + aApprouver.length + '</b><span>commande(s) en attente d\'approbation</span></div>' +
       '<div class="chiffre"><b>' + incOuverts.length + '</b><span>incident(s) non résolu(s), dont ' + bloquants.length + ' bloquant(s)</span></div>' +
       '<div class="chiffre"><b>' + sansPrepa.length + '</b><span>TP dans les 7 jours sans préparatrice</span></div>' +
       '<div class="chiffre"><b>' + stock.length + '</b><span>article(s) en alerte de stock ou de péremption</span></div></div>';
@@ -446,11 +470,13 @@
     var hors = Number(d.delai_jours) < C().delaiPrepaJours;
     var msgs = (e.messages || []).filter(function (m) { return m.demande_id === d.id; });
     var st = ST_DEM[d.statut] || [d.statut, ''];
-    var h = '<article class="carte" id="' + esc(d.id) + '"><div class="tete"><div><p class="label" style="color:var(--violet-profond)">' + esc(jourLisible(d.date_tp)) + ' · ' + esc(d.creneau) + '</p>' +
+    var etatD = { demandee: 'ambre', prise_en_charge: 'violet', prete: 'vert', realisee: 'eteint', annulee: 'eteint' }[d.statut] || '';
+    if (d.statut === 'demandee' && (hors || j <= 2) && d.date_tp >= auj) etatD = 'urgent';
+    var h = carte(etatD, ' id="' + esc(d.id) + '"') + '<div class="tete"><div><p class="label">' + tagFiliere(d.filiere) + ' <span style="color:var(--violet-profond)">' + esc(jourLisible(d.date_tp)) + ' · ' + esc(d.creneau) + '</span></p>' +
       '<h3 style="margin-top:4px">' + esc(d.titre) + '</h3></div><div>' + badge(st[0], st[1]) +
       (d.date_tp >= auj && d.statut !== 'annulee' ? ' ' + badge(j === 0 ? 'Aujourd\'hui' : 'J-' + j, j <= 2 ? 'encre' : '') : '') +
       (hors ? ' ' + badge('Demandée à J-' + d.delai_jours, 'urgent') : '') + '</div></div>' +
-      '<p class="meta">' + esc(d.classe) + ' · ' + esc(filLib(d.filiere)) + ' · ' + esc(d.labo) + ' · ' + esc(d.discipline) + (d.effectif ? ' · ' + esc(d.effectif) + ' élèves' : '') + '</p>' +
+      '<p class="meta">' + esc(d.classe) + ' · ' + esc(d.labo) + ' · ' + esc(d.discipline) + (d.effectif ? ' · ' + esc(d.effectif) + ' élèves' : '') + '</p>' +
       (d.competence ? '<p class="petit sourd">' + esc(d.competence) + '</p>' : '') +
       (tpRef(d.tp_ref) ? '<p class="petit"><b>TP de référence :</b> ' + esc(tpRef(d.tp_ref).intitule) + ' <span class="mono sourd">' + esc(tpRef(d.tp_ref).codes) + '</span></p>' : '') +
       '<div class="encart" style="white-space:pre-wrap"><span class="label" style="display:block">Besoin</span>' + esc(d.besoin) + '</div>' +
@@ -566,7 +592,7 @@
           var seqs = (couverture[t.id] || []).slice().sort(function (a, b) { return (a.debut || '').localeCompare(b.debut || ''); });
           var prochaine = seqs.filter(function (p) { return p.fin >= auj; })[0];
           var nbDem = demandes.filter(function (x) { return x.tp_ref === t.id; }).length;
-          h += '<details class="carte"><summary><div class="tete"><div><p class="label">' + esc(t.codes) + '</p><h3 style="margin:4px 0 0">' + esc(t.intitule) + '</h3></div><div>' +
+          h += '<details class="carte etat-' + (seqs.length ? (prochaine ? 'violet' : 'eteint') : 'ambre') + '"><summary><div class="tete"><div><p class="label">' + tagFiliere(f) + ' ' + esc(t.codes) + '</p><h3 style="margin:4px 0 0">' + esc(t.intitule) + '</h3></div><div>' +
             (seqs.length ? badge(prochaine ? 'Prochaine : ' + dateCourte(prochaine.debut) + ' – ' + dateCourte(prochaine.fin) : 'Passé pour ce cycle', prochaine ? 'violet' : '') : badge('Non repéré dans le SPG', 'ambre')) +
             (nbDem ? ' ' + badge(nbDem + ' demande(s)', 'vert') : '') + '</div></div></summary>' +
             '<p class="petit">' + esc(t.description) + '</p>' +
@@ -589,7 +615,7 @@
     var ff = S.filtres.progFiliere || (moi().role === 'enseignant' && mesF.length === 1 ? mesF[0] : '');
     var l = src.filter(function (p) { return !ff || p.filiere === ff; }).sort(function (a, b) { return (a.debut || '').localeCompare(b.debut || ''); });
     var cat = S.filtres.progVue === 'catalogue';
-    var h = titre('Scénarios pédagogiques 2026-2028', cat ? 'TP incontournables' : 'Ce qui arrive en TP',
+    var h = titre('Scénarios pédagogiques 2026-2028', cat ? 'TP incontournables' : 'Les TP à venir',
       cat ? 'Le catalogue des TP attendus par le référentiel, relié aux séquences des scénarios (SPG). Un TP « non repéré » signale un manque possible dans le SPG.'
         : 'Les séquences avec manipulation au labo, tirées des scénarios BIOMED et BIOALC, rapprochées de l\'inventaire. Anticipe : une préparation demande ' + C().delaiPrepaJours + ' jours.');
     h += '<div class="actions">' + [['sequences', 'Séquences à venir'], ['catalogue', 'TP incontournables']].map(function (x) {
@@ -610,7 +636,7 @@
         return '<li>' + esc(it) + ' ' + badge(st.txt, st.cls) +
           (st.manque && peut('proposerCommande') ? ' <button class="btn lien petit" data-act="commanderSeq" data-id="' + esc(p.id) + '" data-item="' + esc(it) + '">Proposer une commande</button>' : '') + '</li>';
       }).join('');
-      return '<article class="carte"><div class="tete"><div><p class="label" style="color:var(--violet-profond)">' + esc(filLib(p.filiere)) + ' ' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + '</p>' +
+      return carte(enCours ? 'violet' : (p.fin < auj ? 'eteint' : '')) + '<div class="tete"><div><p class="label">' + tagFiliere(p.filiere) + ' <span style="color:var(--violet-profond)">' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + '</span></p>' +
         '<h3 style="margin-top:4px">' + esc(p.titre) + '</h3></div><div>' + (enCours ? badge('En cours', 'violet') : badge('Du ' + dateCourte(p.debut) + ' au ' + dateCourte(p.fin))) + '</div></div>' +
         (p.tp ? '<p class="petit"><b>Tronc commun :</b> ' + esc(p.tp) + '</p>' : '') +
         (p.renforcement ? '<p class="petit sourd"><b>Renforcement :</b> ' + esc(p.renforcement) + '</p>' : '') +
@@ -639,8 +665,9 @@
         var act = '<button class="btn petit" data-act="consommer" data-id="' + esc(a.id) + '">Consommer</button>';
         if (peut('gererInventaire')) act += ' <button class="btn petit" data-act="entree" data-id="' + esc(a.id) + '">Entrée / correction</button> <button class="btn petit" data-act="editerArticle" data-id="' + esc(a.id) + '">Modifier</button>';
         if (peut('proposerCommande') && (etat || a.peremption && a.peremption <= lim)) act += ' <button class="btn petit plein" data-act="commanderArticle" data-id="' + esc(a.id) + '">Commander</button>';
-        return '<tr><td>' + esc(a.designation) + '<br><span class="petit sourd">' + esc(a.categorie) + (a.reference ? ' · réf. <span class="mono">' + esc(a.reference) + '</span>' : '') + (a.fournisseur ? ' · ' + esc(a.fournisseur) : '') + '</span></td>' +
-          '<td>' + esc(filLib(a.filiere)) + '</td><td class="num">' + num(q) + ' <span class="sourd">' + esc(a.unite) + '</span> ' + etat + '</td><td class="num">' + (isFinite(s) ? num(s) : '') + '</td>' +
+        var etatA = (q === 0 || (a.peremption && a.peremption < auj)) ? 'urgent' : ((isFinite(s) && q <= s) || (a.peremption && a.peremption <= lim) ? 'ambre' : '');
+        return '<tr class="' + (etatA ? 'etat-' + etatA : '') + '"><td>' + esc(a.designation) + '<br><span class="petit sourd">' + esc(a.categorie) + (a.reference ? ' · réf. <span class="mono">' + esc(a.reference) + '</span>' : '') + (a.fournisseur ? ' · ' + esc(a.fournisseur) : '') + '</span></td>' +
+          '<td>' + tagFiliere(a.filiere === 'Commun' ? '' : a.filiere) + '</td><td class="num">' + num(q) + ' <span class="sourd">' + esc(a.unite) + '</span> ' + etat + '</td><td class="num">' + (isFinite(s) ? num(s) : '') + '</td>' +
           '<td>' + per + '</td><td>' + esc(a.emplacement) + '</td><td><div class="actions" style="margin:0">' + act + '</div></td></tr>';
       }).join('') + '</tbody></table></div>';
   }
@@ -749,7 +776,8 @@
     var st = ST_CMD[c.statut] || [c.statut, ''];
     var devis = []; try { devis = JSON.parse(c.devis || '[]'); } catch (e) { devis = []; }
     var mien = String(c.user_id) === String(moi().id);
-    var h = '<article class="carte"><div class="tete"><div><p class="label">' + esc(filLib(c.filiere)) + ' · ' + fmt(c.cree_le, 'dd/MM/yyyy') + ' · ' + esc(c.user_nom) + '</p>' +
+    var etatC = { soumise: 'ambre', approuvee: 'violet', commandee: 'violet', livree: 'vert', refusee: 'urgent', annulee: 'eteint' }[c.statut] || '';
+    var h = carte(etatC) + '<div class="tete"><div><p class="label">' + tagFiliere(c.filiere) + ' · ' + fmt(c.cree_le, 'dd/MM/yyyy') + ' · ' + esc(c.user_nom) + '</p>' +
       '<h3 style="margin-top:4px">' + esc(num(c.quantite)) + ' × ' + esc(c.designation) + '</h3></div><div>' + badge(st[0], st[1]) + (Number(c.total_ttc) >= C().seuilTroisDevisTTC ? ' ' + badge('3 devis', 'encre') : '') + '</div></div>' +
       '<p class="meta"><span class="mono">' + euros(c.total_ttc) + '</span> TTC estimés (' + euros(c.prix_unitaire_ttc) + ' l\'unité)' + (c.fournisseur ? ' · ' + esc(c.fournisseur) : '') + (c.reference ? ' · réf. <span class="mono">' + esc(c.reference) + '</span>' : '') +
       (c.lien && /^https?:\/\//.test(c.lien) ? ' · <a href="' + esc(c.lien) + '" target="_blank" rel="noopener noreferrer">lien</a>' : '') + '</p>' +
@@ -833,7 +861,8 @@
       .sort(function (a, b) { return (ordre[a.gravite] - ordre[b.gravite]) || (a.horodatage < b.horodatage ? 1 : -1); });
     return h + (l.length ? l.map(function (i) {
       var st = ST_INC[i.statut] || [i.statut, ''];
-      var x = '<article class="carte"><div class="tete"><div><p class="label">' + esc(i.categorie) + (i.labo ? ' · ' + esc(i.labo) : '') + '</p>' +
+      var etatI = i.statut === 'resolu' ? 'vert' : (i.gravite === 'Bloquant' ? 'urgent' : (i.gravite === 'Gênant' ? 'ambre' : (i.statut === 'en_cours' ? 'violet' : '')));
+      var x = carte(etatI) + '<div class="tete"><div><p class="label">' + esc(i.categorie) + (i.labo ? ' · ' + esc(i.labo) : '') + '</p>' +
         '<p style="margin:4px 0 0;white-space:pre-wrap">' + esc(i.description) + '</p></div><div>' + badge(i.gravite, GRAV[i.gravite]) + ' ' + badge(st[0], st[1]) + '</div></div>' +
         '<p class="meta">' + esc(i.user_nom) + ' · <span class="mono">' + fmt(i.horodatage, 'dd/MM/yyyy HH:mm') + '</span>' + (i.traite_par ? ' · suivi par ' + esc(i.traite_par) : '') + '</p>' +
         (i.resolution ? '<div class="encart vert"><b>Résolution' + (i.resolu_le ? ' du ' + fmt(i.resolu_le, 'dd/MM/yyyy') : '') + ' :</b> ' + esc(i.resolution) + '</div>' : '');
@@ -952,8 +981,8 @@
     var rel = S.releve, fact = rel.montant_ht !== undefined;
     var val = rel.sessions.filter(function (s) { return s.statut === 'validee'; });
     var moisLib = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(+rel.mois.slice(0, 4), +rel.mois.slice(5, 7) - 1, 1)));
-    document.getElementById('imprimable').innerHTML =
-      '<p class="sur">aurlom BTS+ · Laboratoires de TP · BTS BIOMED (RNCP40027) et BIOALC (RNCP38884)</p>' +
+    document.getElementById('imprimable').innerHTML = logo(32) +
+      '<p class="sur" style="margin-top:4mm">aurlom BTS+ · Laboratoires de TP · BTS BIOMED (RNCP40027) et BIOALC (RNCP38884)</p>' +
       '<h1>' + (fact ? 'Relevé de prestations' : 'Relevé d\'activité') + '<span class="point">.</span></h1>' +
       '<p><b>' + esc(C().roles[rel.personne.role] || '') + ' :</b> ' + esc(rel.personne.nom) + ' · <b>Période :</b> ' + esc(moisLib) + '</p>' +
       '<table><thead><tr><th>Date</th><th>Arrivée</th><th>Départ</th><th class="num">Durée</th><th>Labo</th><th>Missions</th><th>Réf.</th></tr></thead><tbody>' +

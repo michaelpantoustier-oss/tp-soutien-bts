@@ -6,6 +6,7 @@ recopier Page.html dans le projet Apps Script.
 
     python3 outils/construire_page.py
 """
+import base64
 import os
 import re
 
@@ -30,6 +31,8 @@ def main():
             '<main class="page" id="app"><p class="vide">Chargement…</p></main>',
             '<section class="imprimable" id="imprimable" aria-hidden="true"></section>',
             '<div class="toast cache" id="toast" role="status" aria-live="polite"></div>']
+    with open(os.path.join(LABO, "logo-aurlom.png"), "rb") as fh:
+        page += ['<script>var LOGO_DATA = "data:image/png;base64,' + base64.b64encode(fh.read()).decode() + '";</script>']
     for js in ("core.js", "demo.js", "referentiel.js", "app.js"):
         page += ['<script>', lire(js), '</script>']
     page += ['</body>', '</html>', '']

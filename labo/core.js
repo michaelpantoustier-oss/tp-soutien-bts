@@ -103,7 +103,7 @@ var LaboCore = (function () {
     Incidents: ['id', 'horodatage', 'date', 'user_id', 'user_nom', 'role', 'labo', 'categorie',
       'gravite', 'description', 'statut', 'traite_par', 'resolution', 'resolu_le'],
     Demandes: ['id', 'cree_le', 'prof_id', 'prof_nom', 'filiere', 'date_tp', 'creneau', 'labo', 'classe',
-      'discipline', 'competence', 'sequence_id', 'titre', 'besoin', 'effectif', 'delai_jours',
+      'discipline', 'competence', 'sequence_id', 'tp_ref', 'titre', 'besoin', 'effectif', 'delai_jours',
       'prepa_id', 'prepa_nom', 'statut', 'maj_le'],
     Messages: ['id', 'horodatage', 'demande_id', 'user_id', 'user_nom', 'role', 'texte'],
     Articles: ['id', 'filiere', 'categorie', 'designation', 'reference', 'fournisseur', 'quantite', 'unite',
@@ -258,7 +258,7 @@ var LaboCore = (function () {
     // -------------------------------------------------------------------------
     var A = {};
 
-    A.deconnexion = function (user, data, jeton) { env.sessions.remove(jeton); journal(user, 'deconnexion', '', ''); return true; };
+    A.deconnexion = function (user, data, jeton) { if (jeton) env.sessions.remove(jeton); journal(user, 'deconnexion', '', ''); return true; };
 
     A.etat = function (user) {
       var auj = jour(now());
@@ -493,7 +493,7 @@ var LaboCore = (function () {
       var d = {
         id: nouvelId('D'), cree_le: iso(h), prof_id: user.id, prof_nom: user.nom, filiere: filiereDeClasse(classe) || user.filiere || '',
         date_tp: data.date_tp, creneau: texte(data.creneau, 40), labo: texte(data.labo, 80), classe: classe,
-        discipline: texte(data.discipline, 80), competence: texte(data.competence, 200), sequence_id: texte(data.sequence_id, 40),
+        discipline: texte(data.discipline, 80), competence: texte(data.competence, 200), sequence_id: texte(data.sequence_id, 40), tp_ref: texte(data.tp_ref, 20),
         titre: titre, besoin: besoin, effectif: texte(data.effectif, 10), delai_jours: joursEntre(jour(h), data.date_tp),
         prepa_id: '', prepa_nom: '', statut: 'demandee', maj_le: iso(h)
       };
@@ -642,6 +642,12 @@ var LaboCore = (function () {
       };
       store.insert('Commandes', c);
       journal(user, 'commande', c.id, { total: total });
+      if (env.pilotage) {
+        try {
+          c.pilotage_id = env.pilotage.ajouter(c, 'Soumis', '') || '';
+          if (c.pilotage_id) store.update('Commandes', c.id, { pilotage_id: c.pilotage_id });
+        } catch (e) { journal(user, 'pilotage_erreur', c.id, e.message); }
+      }
       notifier(['prof_referent'], '[Labo] Commande à approuver – ' + designation + ' (' + total + ' € TTC)',
         user.nom + ' propose : ' + quantite + ' × ' + designation + (c.fournisseur ? ' chez ' + c.fournisseur : '') + '.\n\nJustification : ' + justification, filiere);
       return c;
@@ -672,15 +678,18 @@ var LaboCore = (function () {
         patch.motif_refus = texte(data.motif, 500);
         if (!patch.motif_refus) throw erreur('Indique le motif du refus.');
       }
-      if (cible === 'approuvee') {
-        patch.approuve_par = user.nom; patch.approuve_le = iso(now());
-        if (env.pilotage) {
-          try { patch.pilotage_id = env.pilotage.ajouter(Object.assign({}, c, patch), env.format(now(), 'dd/MM/yyyy')) || ''; }
-          catch (e) { patch.pilotage_id = ''; journal(user, 'pilotage_erreur', c.id, e.message); }
-        }
-      }
-      if ((cible === 'commandee' || cible === 'livree') && c.pilotage_id && env.pilotage) {
-        try { env.pilotage.statut(c.filiere, c.pilotage_id, cible === 'commandee' ? 'Commandé' : 'Livré'); } catch (e) { journal(user, 'pilotage_erreur', c.id, e.message); }
+      if (cible === 'approuvee') { patch.approuve_par = user.nom; patch.approuve_le = iso(now()); }
+      // Report dans le classeur Pilotage dépenses (statuts de ce classeur).
+      if (env.pilotage) {
+        var STATUT_PILOTAGE = { approuvee: 'Validé', refusee: 'Refusé', commandee: 'Commandé', livree: 'Livré', annulee: 'Refusé' };
+        var date = env.format(now(), 'dd/MM/yyyy');
+        var signe = cible === 'approuvee' ? user.nom + ' – ' + date
+          : cible === 'refusee' ? 'Refusé par ' + user.nom + ' – ' + date + ' : ' + patch.motif_refus
+          : cible === 'annulee' ? 'Annulée par le demandeur – ' + date : null;
+        try {
+          if (c.pilotage_id) env.pilotage.maj(c.filiere, c.pilotage_id, STATUT_PILOTAGE[cible], signe);
+          else if (cible !== 'annulee' && cible !== 'refusee') patch.pilotage_id = env.pilotage.ajouter(Object.assign({}, c, patch), STATUT_PILOTAGE[cible], signe || '') || '';
+        } catch (e) { journal(user, 'pilotage_erreur', c.id, e.message); }
       }
       store.update('Commandes', c.id, patch);
       journal(user, 'maj_commande', c.id, patch);
@@ -702,9 +711,28 @@ var LaboCore = (function () {
     // -------------------------------------------------------------------------
     var PUBLIQUES = { connexion: connexion };
 
-    function handle(req) {
+    // Identité vérifiée par Google (déploiement réservé au domaine de l'école) :
+    // le compte Google connecté est cherché dans la feuille Utilisateurs.
+    function parCompteGoogle(email) {
+      email = texte(email, 120).toLowerCase();
+      if (!email) throw erreur('Compte Google non identifié. Connecte-toi avec ton compte de l\'école.');
+      var u = actifs().filter(function (x) { return String(x.email).toLowerCase() === email; })[0];
+      if (!u) {
+        var cle = 'refus:' + email;
+        if (!env.cache.get(cle)) { journal({ id: '', nom: email }, 'acces_refuse', '', ''); env.cache.put(cle, '1', 600); }
+        throw erreur('Le compte ' + email + ' n\'est pas autorisé. Demande l\'accès au directeur du campus.');
+      }
+      return u;
+    }
+
+    // ctx.email : présent quand l'appel vient de la page servie par Apps Script.
+    function handle(req, ctx) {
       try {
         var action = req && req.action;
+        if (ctx && ctx.email !== undefined) {
+          if (!A[action]) throw erreur('Action inconnue.');
+          return { ok: true, data: A[action](parCompteGoogle(ctx.email), req.data || {}, null) };
+        }
         if (PUBLIQUES[action]) return { ok: true, data: PUBLIQUES[action](req.data || {}) };
         if (!A[action]) throw erreur('Action inconnue.');
         var user = authentifier(req.jeton);

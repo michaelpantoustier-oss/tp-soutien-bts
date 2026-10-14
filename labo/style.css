@@ -156,3 +156,9 @@ fieldset.devis legend { padding: 0 var(--space-2); }
   .imprimable .signatures div { border-top: 1px solid #111; padding-top: 2mm; min-height: 22mm; }
   .imprimable .pied { margin-top: 10mm; font-size: 8pt; color: #8c8c8c; display: flex; justify-content: space-between; }
 }
+
+/* Boîte de dialogue intégrée */
+dialog.boite { border: var(--filet-encre); border-radius: var(--radius-md); padding: var(--space-5); max-width: min(480px, calc(100% - 32px)); width: 100%; background: var(--papier); color: var(--encre); }
+dialog.boite::backdrop { background: rgba(17, 17, 17, 0.45); }
+dialog.boite > p:first-child { font-weight: 700; margin: 0 0 var(--space-3); }
+details.carte summary .tete { margin: 0; }

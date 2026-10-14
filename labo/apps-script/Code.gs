@@ -7,15 +7,59 @@
  * Procédure complète : labo/README.md.
  */
 
-// Identifiant du classeur « Pilotage dépenses » (la partie entre /d/ et /edit
-// de son adresse). Vide = les commandes approuvées n'y sont pas recopiées.
-var PILOTAGE_ID = '';
+// L'identifiant du classeur « Pilotage dépenses » n'est pas écrit ici (ce code
+// est public) : il se renseigne dans Paramètres du projet > Propriétés du
+// script, clé PILOTAGE_ID (la partie entre /d/ et /edit de son adresse).
+// Sans cette propriété, les commandes ne sont pas reportées.
+var PILOTAGE_ID = PropertiesService.getScriptProperties().getProperty('PILOTAGE_ID') || '';
 var ENVOYER_MAILS = true;
 
 /* -------------------------------------------------------------------------- */
-/* Point d'entrée web                                                          */
+/* Points d'entrée                                                             */
+/*                                                                            */
+/* Déploiement : Application Web, « Exécuter en tant que : moi », « Accès :    */
+/* tous les utilisateurs de aurlom.com ». Google impose la connexion avec un   */
+/* compte de l'école avant tout affichage ; le script vérifie ensuite le       */
+/* domaine puis la présence du compte dans la feuille Utilisateurs.            */
 /* -------------------------------------------------------------------------- */
+function proprietes_() { return PropertiesService.getScriptProperties(); }
+function domaine_() { return (proprietes_().getProperty('DOMAINE') || 'aurlom.com').toLowerCase(); }
+
+function emailVerifie_() {
+  var email = String(Session.getActiveUser().getEmail() || '').toLowerCase();
+  if (!email || email.slice(-(domaine_().length + 1)) !== '@' + domaine_()) return '';
+  return email;
+}
+
+function doGet() {
+  var email = emailVerifie_();
+  var sortie = email
+    ? HtmlService.createHtmlOutputFromFile('Page')
+    : HtmlService.createHtmlOutput('<p style="font-family:sans-serif;padding:24px">Accès réservé aux comptes Google de l\'école.</p>');
+  return sortie.setTitle('Suivi labo TP')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DENY);
+}
+
+// Appelé par la page via google.script.run : l'identité vient de Google, pas du navigateur.
+function appel(req) {
+  var email = emailVerifie_();
+  if (!email) return { ok: false, error: 'Accès réservé aux comptes Google de l\'école.' };
+  if (limiteDepassee_({ jeton: email, action: req && req.action })) return { ok: false, error: 'Trop de requêtes. Patiente une minute.' };
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return { ok: false, error: 'Serveur occupé, réessaie.' };
+  try {
+    // Aller-retour JSON : google.script.run ne transporte que des données simples.
+    return JSON.parse(JSON.stringify(LaboCore.create(sheetStore_(), env_()).handle(req || {}, { email: email })));
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Ancien point d'entrée par PIN (page hébergée hors Google). Fermé par défaut :
+// il ne s'ouvre que si la propriété MODE_PIN vaut « oui ».
 function doPost(e) {
+  if (proprietes_().getProperty('MODE_PIN') !== 'oui') return json_({ ok: false, error: 'Service fermé.' });
   var req;
   try {
     if (!e || !e.postData || e.postData.contents.length > 100000) throw new Error('taille');
@@ -31,11 +75,6 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
-}
-
-// Aucune donnée en GET : un robot qui appelle l'adresse ne reçoit rien.
-function doGet() {
-  return ContentService.createTextOutput('').setMimeType(ContentService.MimeType.TEXT);
 }
 
 function json_(obj) {
@@ -151,8 +190,14 @@ function pilotage_() {
   function sur(v) { // empêche l'interprétation d'une saisie comme formule
     return typeof v === 'string' && /^[=+\-@]/.test(v) ? "'" + v : v;
   }
+  function ligneDe(sh, id) {
+    var ids = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), 1).getValues();
+    for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) return i + 2;
+    return 0;
+  }
   return {
-    ajouter: function (c, dateValidation) {
+    // Une ligne par demande de commande, dès sa soumission.
+    ajouter: function (c, statut, validePar) {
       var sh = onglet(c.filiere);
       var ligne = premiereLigneVide(sh);
       var id = prochainId(sh, c.filiere, new Date());
@@ -161,16 +206,17 @@ function pilotage_() {
       var justif = c.justification + (devis.length ? ' · Devis : ' + devis.map(function (d) { return d.fournisseur + ' ' + d.montant + ' €'; }).join(' / ') : '') + ' · Suivi labo ' + c.id;
       var valeurs = [id, Utilities.formatDate(new Date(c.cree_le), LaboCore.CONFIG.fuseau, 'dd/MM/yyyy'), c.user_nom,
         c.designation + (c.reference ? ' (réf. ' + c.reference + ')' : ''), justif, Number(c.quantite), Number(c.prix_unitaire_ttc),
-        Number(c.total_ttc), c.fournisseur, c.lien, 'Validé', c.approuve_par + ' – ' + dateValidation];
-      var cellules = sh.getRange(ligne, 1, 1, valeurs.length);
-      var formules = cellules.getFormulas()[0];
+        Number(c.total_ttc), c.fournisseur, c.lien, statut, validePar || ''];
+      var formules = sh.getRange(ligne, 1, 1, valeurs.length).getFormulas()[0];
       valeurs.forEach(function (v, i) { if (!formules[i]) sh.getRange(ligne, i + 1).setValue(sur(v)); });
       return id;
     },
-    statut: function (filiere, id, statut) {
+    maj: function (filiere, id, statut, validePar) {
       var sh = onglet(filiere);
-      var ids = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), 1).getValues();
-      for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) { sh.getRange(i + 2, 11).setValue(statut); return; }
+      var ligne = ligneDe(sh, id);
+      if (!ligne) throw new Error('Ligne ' + id + ' introuvable dans le classeur de pilotage.');
+      sh.getRange(ligne, 11).setValue(statut);
+      if (validePar) sh.getRange(ligne, 12).setValue(sur(validePar));
     }
   };
 }
@@ -191,6 +237,12 @@ function sheetStore_() {
       sh = ss.insertSheet(table);
       sh.getRange(1, 1, 1, cols.length).setValues([cols]).setFontWeight('bold').setBackground('#111111').setFontColor('#ffffff');
       sh.setFrozenRows(1);
+    }
+    var entetes = sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), 1)).getValues()[0].map(String);
+    var manquantes = cols.filter(function (c) { return entetes.indexOf(c) === -1; });
+    if (manquantes.length) {
+      var depart = entetes.filter(String).length + 1;
+      sh.getRange(1, depart, 1, manquantes.length).setValues([manquantes]).setFontWeight('bold').setBackground('#111111').setFontColor('#ffffff');
     }
     return sh;
   }

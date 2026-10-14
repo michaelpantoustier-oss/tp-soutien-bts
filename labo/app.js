@@ -2,17 +2,20 @@
 (function () {
   'use strict';
 
-  // Adresse « /exec » du déploiement Apps Script (voir README). Vide = démonstration.
+  // Mode normal : page servie par Google Apps Script (comptes de l'école uniquement),
+  // les appels passent par google.script.run. API_URL ne sert qu'à l'ancien mode
+  // par PIN, fermé par défaut côté serveur. Ni l'un ni l'autre : démonstration.
   var API_URL = '';
 
-  var DEMO = !API_URL;
+  var GOOGLE = typeof google !== 'undefined' && google.script && google.script.run ? true : false;
+  var DEMO = !GOOGLE && !API_URL;
   var CLE_SESSION = 'labo-session-v2';
   var CLE_FILE = 'labo-file-attente';
   var demoCore = null;
   if (DEMO) { demoCore = LaboCore.create(LaboNav.store(), LaboNav.env); LaboNav.amorcer(demoCore); }
 
   var S = {
-    session: lire(CLE_SESSION), etat: null, onglet: null, releve: null, releveEnCours: false,
+    session: GOOGLE ? { jeton: 'google' } : lire(CLE_SESSION), etat: null, erreurAcces: '', onglet: null, releve: null, releveEnCours: false,
     filtres: { demandes: 'avenir', incidents: 'ouverts', inventaire: '', invFiliere: '', invAlerte: false, commandes: 'actives', progFiliere: '', progTout: false },
     programmeComplet: null, preDemande: null, preCommande: null, occupe: false
   };
@@ -57,6 +60,39 @@
   function badge(t, cls) { return '<span class="badge ' + (cls || '') + '">' + esc(t) + '</span>'; }
   function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 
+  // Boîte de dialogue intégrée à la page (les fenêtres natives peuvent être bloquées
+  // dans la page servie par Google). Renvoie une promesse : true / texte / null.
+  function boite(message, o) {
+    o = o || {};
+    return new Promise(function (fin) {
+      var d = document.createElement('dialog');
+      d.className = 'boite';
+      d.setAttribute('aria-label', message);
+      var champ = '';
+      if (o.saisie) champ = '<label class="champ"><span>' + esc(o.saisie) + '</span><input id="boite-v" ' + (o.nombre ? 'type="number" step="any" inputmode="decimal"' : '') + ' value="' + esc(o.defaut === undefined ? '' : o.defaut) + '"></label>';
+      if (o.choix) champ = '<div class="cases" style="grid-template-columns:1fr">' + o.choix.map(function (c, i) { return '<label class="case"><input type="radio" name="boite-c" value="' + esc(c) + '"' + (i === 0 ? ' checked' : '') + '><span>' + esc(c) + '</span></label>'; }).join('') + '</div>';
+      d.innerHTML = '<p>' + esc(message) + '</p>' + champ + '<p class="petit" id="boite-err" style="color:var(--violet-profond)"></p>' +
+        '<div class="actions"><button type="button" class="btn" data-r="non">Annuler</button><button type="button" class="btn plein" data-r="oui">' + esc(o.ok || 'Confirmer') + '</button></div>';
+      document.body.appendChild(d);
+      function fermer(oui) {
+        var v = null;
+        if (oui) {
+          if (o.saisie) {
+            v = d.querySelector('#boite-v').value.trim();
+            if (o.requis && !v) { d.querySelector('#boite-err').textContent = 'Ce champ est obligatoire.'; return; }
+          } else if (o.choix) v = d.querySelector('input[name="boite-c"]:checked').value;
+          else v = true;
+        }
+        d.close(); d.remove(); fin(v);
+      }
+      d.addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (b) fermer(b.getAttribute('data-r') === 'oui'); });
+      d.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'radio') { e.preventDefault(); fermer(true); } });
+      d.addEventListener('cancel', function (e) { e.preventDefault(); fermer(false); });
+      d.showModal();
+      var f = d.querySelector('input'); if (f) f.focus();
+    });
+  }
+
   var toastTimer;
   function toast(msg, err) {
     var t = document.getElementById('toast');
@@ -71,6 +107,11 @@
   // ---------------------------------------------------------------------------
   function envoyer(req) {
     if (DEMO) return Promise.resolve(demoCore.handle(JSON.parse(JSON.stringify(req))));
+    if (GOOGLE) {
+      return new Promise(function (ok, ko) {
+        google.script.run.withSuccessHandler(ok).withFailureHandler(ko).appel({ action: req.action, data: req.data });
+      });
+    }
     return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(req), credentials: 'omit', referrerPolicy: 'no-referrer' })
       .then(function (r) { return r.json(); });
   }
@@ -78,7 +119,9 @@
   function api(action, data) {
     var req = { action: action, jeton: S.session ? S.session.jeton : null, data: data || {} };
     return envoyer(req).then(function (r) {
-      if (!r.ok && /Session expirée|Compte désactivé/.test(r.error)) { finSession(); }
+      if (!r.ok && /Session expirée|Compte désactivé|n'est pas autorisé|Accès réservé|non identifié/.test(r.error)) {
+        if (GOOGLE) { S.erreurAcces = r.error; S.etat = null; } else finSession();
+      }
       return r;
     }).catch(function () {
       if (action === 'arrivee' || action === 'depart') {
@@ -93,7 +136,7 @@
     });
   }
 
-  function finSession() { ecrire(CLE_SESSION, null); S.session = null; S.etat = null; S.releve = null; rendre(); }
+  function finSession() { if (GOOGLE) return; ecrire(CLE_SESSION, null); S.session = null; S.etat = null; S.releve = null; rendre(); }
 
   function viderFile() {
     var file = lire(CLE_FILE) || [];
@@ -162,6 +205,7 @@
   }
 
   function rendre() {
+    if (S.erreurAcces) { app.innerHTML = '<div class="connexion">' + titre('aurlom BTS+ · Suivi labo', 'Accès refusé', '') + '<div class="encart urgent">' + esc(S.erreurAcces) + '</div></div>'; return; }
     if (!S.session) return rendreConnexion();
     if (!S.etat) { app.innerHTML = '<p class="vide">Chargement…</p>'; return; }
     var ongl = onglets();
@@ -169,7 +213,7 @@
     var cpt = compteurs();
     var h = '<header class="entete"><p class="sur">aurlom BTS+ · Suivi labo</p>' +
       '<div class="qui"><b>' + esc(moi().nom) + '</b> · ' + esc(C().roles[moi().role]) + (moi().filiere ? ' ' + esc(filLib(moi().filiere)) : '') +
-      ' · <button class="btn lien" data-act="deconnexion">Se déconnecter</button></div></header>';
+      (GOOGLE ? '' : ' · <button class="btn lien" data-act="deconnexion">Se déconnecter</button>') + '</div></header>';
     if (DEMO) h += '<div class="demo"><span><b>Démonstration.</b> Données fictives, stockées dans ce navigateur.</span><button class="btn petit" data-act="reinit">Réinitialiser la démo</button></div>';
     h += '<nav class="onglets" role="tablist">' + ongl.map(function (o) {
       return '<button role="tab" data-onglet="' + o[0] + '" aria-selected="' + (S.onglet === o[0]) + '">' + esc(o[1]) +
@@ -342,13 +386,25 @@
     }).join('');
   }
 
+  function optionsTP(choisi) {
+    var o = '<option value="">Aucun / autre TP</option>';
+    Object.keys(LaboReferentiel).forEach(function (f) {
+      if (moi().role === 'enseignant' && moi().filiere && moi().filiere !== f) return;
+      LaboReferentiel[f].domaines.forEach(function (d) {
+        o += '<optgroup label="' + esc(f + ' · ' + d.nom) + '">' + options(d.tps.map(function (t) { return { v: t.id, l: t.intitule + ' (' + t.codes + ')' }; }), choisi) + '</optgroup>';
+      });
+    });
+    return o;
+  }
+
   function formDemande() {
     var p = S.preDemande || {}, auj = aujourdhui();
     var classeDefaut = p.classe || '';
     return '<details class="carte" id="form-demande"' + (S.preDemande || !(S.etat.demandes || []).length ? ' open' : '') + '><summary><h3 style="margin:0">Nouvelle demande de préparation</h3>' +
       '<p class="meta">Au moins ' + C().delaiPrepaJours + ' jours avant le TP. En dessous, le prof référent est alerté.</p></summary>' +
-      (p.sequence_id ? '<div class="encart">Préremplie depuis la séquence <b>' + esc(p.titre) + '</b> du programme. Ajuste le besoin matériel.</div>' : '') +
+      (p.origine ? '<div class="encart">Préremplie depuis <b>' + esc(p.origine) + '</b>. Ajuste le besoin matériel, les quantités et la date.</div>' : '') +
       '<form data-form="demande" style="margin-top:16px"><input type="hidden" name="sequence_id" value="' + esc(p.sequence_id || '') + '"><div class="grille">' +
+      '<label class="champ large"><span>TP incontournable de référence</span><select name="tp_ref">' + optionsTP(p.tp_ref) + '</select></label>' +
       '<label class="champ"><span>Date du TP</span><input type="date" name="date_tp" min="' + auj + '" required></label>' +
       '<label class="champ"><span>Créneau</span><select name="creneau" required>' + options(C().creneaux, '', 'Choisir…') + '</select></label>' +
       '<label class="champ"><span>Labo</span><select name="labo" required>' + options(C().labos, '', 'Choisir…') + '</select></label>' +
@@ -395,7 +451,10 @@
       (hors ? ' ' + badge('Demandée à J-' + d.delai_jours, 'urgent') : '') + '</div></div>' +
       '<p class="meta">' + esc(d.classe) + ' · ' + esc(filLib(d.filiere)) + ' · ' + esc(d.labo) + ' · ' + esc(d.discipline) + (d.effectif ? ' · ' + esc(d.effectif) + ' élèves' : '') + '</p>' +
       (d.competence ? '<p class="petit sourd">' + esc(d.competence) + '</p>' : '') +
+      (tpRef(d.tp_ref) ? '<p class="petit"><b>TP de référence :</b> ' + esc(tpRef(d.tp_ref).intitule) + ' <span class="mono sourd">' + esc(tpRef(d.tp_ref).codes) + '</span></p>' : '') +
       '<div class="encart" style="white-space:pre-wrap"><span class="label" style="display:block">Besoin</span>' + esc(d.besoin) + '</div>' +
+      (peut('preparerTP') && ['annulee', 'realisee'].indexOf(d.statut) === -1 ? '<details><summary class="petit" style="cursor:pointer;color:var(--violet-profond);font-weight:700">Vérifier le stock pour ce TP</summary>' +
+        listeMateriel(String(d.besoin).split(/\n|;|,(?![^(]*\))/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 2; }).slice(0, 25), { act: 'commanderDemandeItem', id: d.id }) + '</details>' : '') +
       '<p class="petit">Enseignant·e : <b>' + esc(d.prof_nom) + '</b> · Préparation : ' + (d.prepa_nom ? '<b>' + esc(d.prepa_nom) + '</b>' : badge('Non attribuée', 'ambre')) + ' · <span class="mono sourd">' + esc(d.id) + '</span></p>';
     var a = [];
     var actif = ['annulee', 'realisee'].indexOf(d.statut) === -1;
@@ -448,16 +507,96 @@
     return { cls: 'vert', txt: 'En stock (' + num(total) + ')', manque: false };
   }
 
+  // --- Catalogue des TP incontournables (referentiel.js) ---
+  function catalogue(filiere) {
+    var l = [];
+    Object.keys(LaboReferentiel).forEach(function (f) {
+      if (filiere && f !== filiere) return;
+      LaboReferentiel[f].domaines.forEach(function (d) { d.tps.forEach(function (t) { l.push(Object.assign({ filiere: f, domaine: d.nom }, t)); }); });
+    });
+    return l;
+  }
+  function tpRef(id) { return catalogue().filter(function (t) { return t.id === id; })[0] || null; }
+  function tpsDeSequence(p) {
+    var txt = (p.titre + ' ' + p.tp + ' ' + p.renforcement).toLowerCase();
+    return catalogue(p.filiere).filter(function (t) { try { return new RegExp(t.motsCles, 'i').test(txt); } catch (e) { return false; } });
+  }
+  function listeMateriel(items, ctx) {
+    return '<ul class="materiel">' + items.map(function (it) {
+      var st = etatMateriel(it);
+      return '<li>' + esc(it) + ' ' + badge(st.txt, st.cls) +
+        (st.manque && peut('proposerCommande') ? ' <button class="btn lien petit" data-act="' + ctx.act + '" data-id="' + esc(ctx.id) + '" data-item="' + esc(it) + '">Proposer une commande</button>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  function preDemandeDepuis(t, seq) {
+    var fl = C().filieres[t ? t.filiere : seq.filiere];
+    var items = [];
+    (seq ? String(seq.materiel || '').split(' | ') : []).concat(t ? t.materiel : []).forEach(function (x) { if (x && items.indexOf(x) === -1) items.push(x); });
+    var bloc = '';
+    var num = seq && seq.bloc ? (String(seq.bloc).match(/BC0?(\d)/) || [])[1] : '';
+    if (fl && num) bloc = fl.blocs.filter(function (b) { return (b.match(/^BC0?(\d)/) || [])[1] === num; })[0] || '';
+    return {
+      tp_ref: t ? t.id : '', sequence_id: seq ? seq.id : '',
+      titre: seq ? seq.titre : t.intitule, besoin: items.join('\n'),
+      classe: fl ? fl.classes[seq && seq.annee === '2A' ? 1 : 0] : '',
+      competence: bloc ? fl.rncp + ' ' + bloc : '', origine: t ? t.intitule + ' (' + t.codes + ')' : seq.titre
+    };
+  }
+
+  function vueCatalogue(ff) {
+    var auj = aujourdhui(), prog = S.programmeComplet || [];
+    var demandes = S.etat.demandes || [];
+    var h = DEMO ? '<div class="encart ambre">Démonstration : le scénario fictif ne compte que 6 séquences, d\'où une couverture faible. Avec les scénarios importés, la couverture réelle s\'affiche ici.</div>' : '';
+    var filieres = Object.keys(LaboReferentiel).filter(function (f) { return !ff || f === ff; });
+    filieres.forEach(function (f) {
+      var tps = catalogue(f);
+      var couverture = {};
+      prog.filter(function (p) { return p.filiere === f; }).forEach(function (p) {
+        tpsDeSequence(p).forEach(function (t) { (couverture[t.id] = couverture[t.id] || []).push(p); });
+      });
+      var absents = tps.filter(function (t) { return !couverture[t.id]; });
+      h += '<h2>' + esc(C().filieres[f].libelle) + '</h2><p class="petit sourd">' + esc(LaboReferentiel[f].intro) + '</p>';
+      h += '<div class="chiffres"><div class="chiffre"><b>' + (tps.length - absents.length) + ' / ' + tps.length + '</b><span>TP incontournables repérés dans le scénario</span></div>' +
+        '<div class="chiffre' + (absents.length ? ' accent' : '') + '"><b>' + absents.length + '</b><span>non repérés : à vérifier ou à intégrer au SPG</span></div></div>';
+      LaboReferentiel[f].domaines.forEach(function (d) {
+        h += '<h3 style="margin-top:24px">' + esc(d.nom) + '</h3>';
+        d.tps.forEach(function (t0) {
+          var t = Object.assign({ filiere: f }, t0);
+          var seqs = (couverture[t.id] || []).slice().sort(function (a, b) { return (a.debut || '').localeCompare(b.debut || ''); });
+          var prochaine = seqs.filter(function (p) { return p.fin >= auj; })[0];
+          var nbDem = demandes.filter(function (x) { return x.tp_ref === t.id; }).length;
+          h += '<details class="carte"><summary><div class="tete"><div><p class="label">' + esc(t.codes) + '</p><h3 style="margin:4px 0 0">' + esc(t.intitule) + '</h3></div><div>' +
+            (seqs.length ? badge(prochaine ? 'Prochaine : ' + dateCourte(prochaine.debut) + ' – ' + dateCourte(prochaine.fin) : 'Passé pour ce cycle', prochaine ? 'violet' : '') : badge('Non repéré dans le SPG', 'ambre')) +
+            (nbDem ? ' ' + badge(nbDem + ' demande(s)', 'vert') : '') + '</div></div></summary>' +
+            '<p class="petit">' + esc(t.description) + '</p>' +
+            (seqs.length ? '<p class="label" style="margin:12px 0 4px">Séquences du scénario</p><ul class="petit">' + seqs.map(function (p) {
+              return '<li>' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + ' (' + dateCourte(p.debut) + ' – ' + dateCourte(p.fin) + ') : ' + esc(p.titre) + '</li>';
+            }).join('') + '</ul>' : '<div class="encart ambre">Aucune séquence du scénario ne correspond aux mots-clés de ce TP. Vérifie s\'il est traité sous un autre intitulé, sinon il manque au SPG.</div>') +
+            '<p class="label" style="margin:12px 0 4px">Matériel type</p>' + listeMateriel(t.materiel, { act: 'commanderTP', id: t.id }) +
+            (peut('creerDemandeTP') ? '<div class="actions"><button class="btn petit plein" data-act="preparerTP" data-id="' + esc(t.id) + '"' + (prochaine ? ' data-seq="' + esc(prochaine.id) + '"' : '') + '>Préparer ce TP</button></div>' : '') +
+            '</details>';
+        });
+      });
+    });
+    return h;
+  }
+
   function vueProgramme() {
     var e = S.etat, auj = aujourdhui();
     var src = S.filtres.progTout && S.programmeComplet ? S.programmeComplet : (e.programme || []);
     var ff = S.filtres.progFiliere || (moi().role === 'enseignant' ? moi().filiere : '');
     var l = src.filter(function (p) { return !ff || p.filiere === ff; }).sort(function (a, b) { return (a.debut || '').localeCompare(b.debut || ''); });
-    var h = titre('Scénarios pédagogiques 2026-2028', 'Ce qui arrive en TP',
-      'Les séquences avec manipulation au labo, tirées des scénarios BIOMED et BIOALC, rapprochées de l\'inventaire. Anticipe : une préparation demande ' + C().delaiPrepaJours + ' jours.');
+    var cat = S.filtres.progVue === 'catalogue';
+    var h = titre('Scénarios pédagogiques 2026-2028', cat ? 'TP incontournables' : 'Ce qui arrive en TP',
+      cat ? 'Le catalogue des TP attendus par le référentiel, relié aux séquences des scénarios (SPG). Un TP « non repéré » signale un manque possible dans le SPG.'
+        : 'Les séquences avec manipulation au labo, tirées des scénarios BIOMED et BIOALC, rapprochées de l\'inventaire. Anticipe : une préparation demande ' + C().delaiPrepaJours + ' jours.');
+    h += '<div class="actions">' + [['sequences', 'Séquences à venir'], ['catalogue', 'TP incontournables']].map(function (x) {
+      return '<button class="btn petit' + ((S.filtres.progVue || 'sequences') === x[0] ? ' plein' : '') + '" data-act="progVue" data-v="' + x[0] + '">' + x[1] + '</button>';
+    }).join('') + '</div>';
     h += '<div class="actions" style="align-items:flex-end;margin-bottom:16px"><label class="champ"><span>Filière</span><select data-change="progFiliere">' +
       options(Object.keys(C().filieres).map(function (k) { return { v: k, l: C().filieres[k].libelle }; }), ff, 'Toutes') + '</select></label>' +
-      '<button class="btn petit' + (S.filtres.progTout ? ' plein' : '') + '" data-act="progTout">' + (S.filtres.progTout ? 'Voir les 10 prochaines semaines' : 'Voir tout le cycle') + '</button></div>';
+      (cat ? '' : '<button class="btn petit' + (S.filtres.progTout ? ' plein' : '') + '" data-act="progTout">' + (S.filtres.progTout ? 'Voir les 10 prochaines semaines' : 'Voir tout le cycle') + '</button>') + '</div>';
+    if (cat) return h + (S.programmeComplet ? vueCatalogue(ff) : '<p class="vide">Chargement du scénario complet…</p>');
     if (!src.length) return h + '<div class="encart ambre">Aucune séquence chargée. Le directeur importe le programme dans la feuille Programme (voir README).</div>';
     var manques = {};
     var cartes = l.map(function (p) {
@@ -473,6 +612,7 @@
         '<h3 style="margin-top:4px">' + esc(p.titre) + '</h3></div><div>' + (enCours ? badge('En cours', 'violet') : badge('Du ' + dateCourte(p.debut) + ' au ' + dateCourte(p.fin))) + '</div></div>' +
         (p.tp ? '<p class="petit"><b>Tronc commun :</b> ' + esc(p.tp) + '</p>' : '') +
         (p.renforcement ? '<p class="petit sourd"><b>Renforcement :</b> ' + esc(p.renforcement) + '</p>' : '') +
+        (function () { var r = tpsDeSequence(p); return r.length ? '<p class="petit"><b>TP de référence :</b> ' + r.map(function (t) { return esc(t.intitule) + ' <span class="mono sourd">' + esc(t.codes) + '</span>'; }).join(' · ') + '</p>' : ''; })() +
         '<p class="label" style="margin:12px 0 4px">Matériel repéré dans la séquence</p><ul class="materiel">' + chips + '</ul>' +
         (peut('creerDemandeTP') ? '<div class="actions"><button class="btn petit" data-act="demanderSeq" data-id="' + esc(p.id) + '">Préparer la demande de TP</button></div>' : '') + '</article>';
     }).join('');
@@ -860,8 +1000,8 @@
       case 'connexion': connecter(v.email, v.pin); break;
       case 'arrivee': agir('arrivee', v, 'Arrivée enregistrée.'); break;
       case 'depart':
-        if (v.heure_depart && !confirm('Départ à ' + v.heure_depart + ' saisi à la main : il sera signalé à la validation. Confirmer ?')) return;
-        agir('depart', v, 'Départ enregistré.');
+        (v.heure_depart ? boite('Départ à ' + v.heure_depart + ' saisi à la main : il sera signalé à la validation.') : Promise.resolve(true))
+          .then(function (ok) { if (ok) agir('depart', v, 'Départ enregistré.'); });
         break;
       case 'saisieManuelle': agir('saisieManuelle', v, 'Présence envoyée en validation.'); break;
       case 'demande': agir('demande', v, 'Demande envoyée.').then(function (r) { if (r) S.preDemande = null; rendre(); }); break;
@@ -878,8 +1018,9 @@
         var controles = {};
         C().controlesRangement.forEach(function (c, i) { if (v['c' + i]) controles[c] = v['c' + i]; });
         var manq = C().controlesRangement.length - Object.keys(controles).length;
-        if (manq && !confirm(manq + ' point(s) sans réponse seront notés « N/A ». Continuer ?')) return;
-        agir('rangement', { labo: v.labo, demande_id: v.demande_id, controles: controles, remarques: v.remarques }, 'Contrôle enregistré.');
+        (manq ? boite(manq + ' point(s) sans réponse seront notés « N/A ».', { ok: 'Continuer' }) : Promise.resolve(true)).then(function (ok) {
+          if (ok) agir('rangement', { labo: v.labo, demande_id: v.demande_id, controles: controles, remarques: v.remarques }, 'Contrôle enregistré.');
+        });
         break;
     }
   });
@@ -894,22 +1035,23 @@
       case 'demoCompte': connecter(t.getAttribute('data-email'), t.getAttribute('data-pin')); break;
       case 'deconnexion': api('deconnexion').then(finSession); break;
       case 'reinit':
-        if (confirm('Effacer les données de démonstration et repartir des exemples ?')) {
-          LaboNav.reinitialiser(); demoCore = LaboCore.create(LaboNav.store(), LaboNav.env); LaboNav.amorcer(demoCore); finSession();
-        }
+        boite('Effacer les données de démonstration et repartir des exemples ?').then(function (ok) {
+          if (ok) { LaboNav.reinitialiser(); demoCore = LaboCore.create(LaboNav.store(), LaboNav.env); LaboNav.amorcer(demoCore); finSession(); }
+        });
         break;
       case 'recharger': charger(); break;
       case 'filtre': S.filtres[t.getAttribute('data-cle')] = v; rendre(); break;
       case 'prendre': agir('majDemande', { id: id, prendre: true }, 'Demande prise en charge.'); break;
       case 'statutDemande':
-        if (v === 'annulee' && !confirm('Annuler cette demande ?')) return;
-        agir('majDemande', { id: id, statut: v }, 'Statut mis à jour.');
+        (v === 'annulee' ? boite('Annuler cette demande de TP ?', { ok: 'Annuler la demande' }) : Promise.resolve(true))
+          .then(function (ok) { if (ok) agir('majDemande', { id: id, statut: v }, 'Statut mis à jour.'); });
         break;
       case 'toutOk': Array.prototype.forEach.call(app.querySelectorAll('.seg input[value="ok"]'), function (i) { i.checked = true; }); break;
       case 'valider': agir('validerSession', { id: id, decision: 'validee' }, 'Présence validée.').then(function () { if (S.releve) chargerReleve(); }); break;
       case 'contester':
-        var motif = prompt('Motif de la contestation (visible par la prestataire) :');
-        if (motif) agir('validerSession', { id: id, decision: 'contestee', motif: motif }, 'Présence contestée.').then(function () { if (S.releve) chargerReleve(); });
+        boite('Contester cette présence', { saisie: 'Motif (visible par la prestataire)', requis: true, ok: 'Contester' }).then(function (motif) {
+          if (motif) agir('validerSession', { id: id, decision: 'contestee', motif: motif }, 'Présence contestée.').then(function () { if (S.releve) chargerReleve(); });
+        });
         break;
       case 'csv': csv(); break;
       case 'imprimer': imprimer(); break;
@@ -922,9 +1064,30 @@
         break;
       case 'demanderSeq':
         var p = sequence(id);
-        var fl = C().filieres[p.filiere];
-        S.preDemande = { sequence_id: p.id, titre: p.titre, besoin: String(p.materiel || '').split(' | ').join('\n'), classe: fl ? fl.classes[p.annee === '2A' ? 1 : 0] : '' };
+        S.preDemande = preDemandeDepuis(tpsDeSequence(p)[0] || null, p);
         S.onglet = 'demandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'preparerTP':
+        var tref = tpRef(id), sq0 = t.getAttribute('data-seq') ? sequence(t.getAttribute('data-seq')) : null;
+        S.preDemande = preDemandeDepuis(tref, sq0);
+        S.onglet = 'demandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'commanderDemandeItem':
+        var dd = (S.etat.demandes || []).filter(function (x) { return x.id === id; })[0], itd = t.getAttribute('data-item');
+        S.preCommande = { designation: itd, filiere: dd.filiere, demande_tp_id: dd.id, categorie: categorieDe(itd), contexte: 'Pour le TP « ' + dd.titre + ' » du ' + jourLisible(dd.date_tp) + ' (' + dd.classe + ').',
+          justification: 'TP « ' + dd.titre + ' », ' + dd.classe + ', ' + jourLisible(dd.date_tp) + '.' };
+        S.onglet = 'commandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'commanderTP':
+        var tc = tpRef(id), itc = t.getAttribute('data-item');
+        S.preCommande = { designation: itc, filiere: tc.filiere, categorie: categorieDe(itc), contexte: 'Matériel type du TP incontournable « ' + tc.intitule + ' » (' + tc.codes + ').',
+          justification: filLib(tc.filiere) + ' · TP incontournable « ' + tc.intitule + ' » (' + tc.codes + ').' };
+        S.onglet = 'commandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'progVue':
+        S.filtres.progVue = v;
+        if (v === 'catalogue' && !S.programmeComplet) api('programme', {}).then(function (r) { if (r.ok) S.programmeComplet = r.data; else toast(r.error, true); rendre(); });
+        else rendre();
         break;
       case 'commanderSeq':
         var sq = sequence(id), item = t.getAttribute('data-item');
@@ -946,37 +1109,37 @@
         break;
       case 'choisirFournisseur': var fo = document.querySelector('#form-commande [name=fournisseur]'); if (fo) fo.value = v; break;
       case 'consommer':
-        var qc = prompt('Quantité utilisée de « ' + art.designation + ' » (en ' + art.unite + ') :', '1');
-        if (qc) agir('mouvement', { article_id: art.id, delta: -Math.abs(Number(String(qc).replace(',', '.'))), motif: 'Consommation TP' }, 'Consommation enregistrée.');
+        boite('Consommer « ' + art.designation + ' »', { saisie: 'Quantité utilisée (' + art.unite + ')', nombre: true, defaut: 1, requis: true, ok: 'Enregistrer' }).then(function (qc) {
+          if (qc) agir('mouvement', { article_id: art.id, delta: -Math.abs(Number(String(qc).replace(',', '.'))), motif: 'Consommation TP' }, 'Consommation enregistrée.');
+        });
         break;
       case 'entree':
-        var qe = prompt('Mouvement pour « ' + art.designation + ' » : nombre positif pour une entrée, négatif pour une sortie (casse, péremption, correction).', '');
-        if (!qe) return;
-        var dq = Number(String(qe).replace(',', '.'));
-        var mot = dq > 0 ? (confirm('Entrée liée à une réception de commande ? (Annuler = correction d\'inventaire)') ? 'Réception de commande' : 'Correction d\'inventaire') : (prompt('Motif : 1 = correction, 2 = casse / perte, 3 = péremption', '1') === '2' ? 'Casse / perte' : 'Correction d\'inventaire');
-        agir('mouvement', { article_id: art.id, delta: dq, motif: mot }, 'Stock mis à jour.');
+        boite('Mouvement de stock : « ' + art.designation + ' »', { saisie: 'Quantité (positive = entrée, négative = sortie)', nombre: true, requis: true, ok: 'Suivant' }).then(function (qe) {
+          if (!qe) return;
+          var dq = Number(String(qe).replace(',', '.'));
+          var motifs = dq > 0 ? ['Réception de commande', 'Correction d\'inventaire'] : ['Correction d\'inventaire', 'Casse / perte', 'Péremption (mise au rebut)'];
+          boite('Motif du mouvement', { choix: motifs, ok: 'Enregistrer' }).then(function (mot) {
+            if (mot) agir('mouvement', { article_id: art.id, delta: dq, motif: mot }, 'Stock mis à jour.');
+          });
+        });
         break;
       case 'editerArticle': S.edition = art; rendre(); var z = document.getElementById('zone-article'); if (z) z.scrollIntoView(); break;
       case 'annulerEdition': S.edition = null; rendre(); break;
       case 'retirerArticle':
-        if (confirm('Retirer cet article de l\'inventaire ? Son historique reste dans le classeur.')) {
-          var a2 = S.edition; agir('article', Object.assign({}, a2, { actif: 'non' }), 'Article retiré.').then(function () { S.edition = null; rendre(); });
-        }
+        boite('Retirer cet article de l\'inventaire ? Son historique reste dans le classeur.', { ok: 'Retirer' }).then(function (ok) {
+          if (ok) { var a2 = S.edition; agir('article', Object.assign({}, a2, { actif: 'non' }), 'Article retiré.').then(function () { S.edition = null; rendre(); }); }
+        });
         break;
       case 'invAlerte': S.filtres.invAlerte = !S.filtres.invAlerte; rendre(); break;
       case 'cmd':
-        var data = { id: id, statut: v };
-        if (v === 'refusee') { data.motif = prompt('Motif du refus (envoyé au demandeur) :'); if (!data.motif) return; }
-        if (v === 'annulee' && !confirm('Annuler cette demande d\'achat ?')) return;
-        if (v === 'approuvee') {
-          var cm = (S.etat.commandes || []).filter(function (x) { return x.id === id; })[0];
-          if (!confirm('Approuver l\'achat de ' + cm.designation + ' pour ' + euros(cm.total_ttc) + ' TTC ? Il sera recopié dans le classeur Pilotage dépenses.')) return;
-        }
-        if (v === 'livree') {
-          var cl = (S.etat.commandes || []).filter(function (x) { return x.id === id; })[0];
-          if (cl.article_id) { var qr = prompt('Quantité reçue (ajoutée au stock) :', cl.quantite); if (qr === null) return; data.quantite_recue = qr; }
-        }
-        agir('majCommande', data, 'Commande mise à jour.');
+        var cm = (S.etat.commandes || []).filter(function (x) { return x.id === id; })[0];
+        var etape;
+        if (v === 'refusee') etape = boite('Refuser « ' + cm.designation + ' »', { saisie: 'Motif (envoyé au demandeur)', requis: true, ok: 'Refuser' }).then(function (m) { return m ? { motif: m } : null; });
+        else if (v === 'annulee') etape = boite('Annuler cette demande d\'achat ?', { ok: 'Annuler la demande' }).then(function (ok) { return ok ? {} : null; });
+        else if (v === 'approuvee') etape = boite('Approuver l\'achat de ' + cm.designation + ' pour ' + euros(cm.total_ttc) + ' TTC ? La ligne passe à « Validé » dans le classeur Pilotage dépenses.', { ok: 'Approuver' }).then(function (ok) { return ok ? {} : null; });
+        else if (v === 'livree' && cm.article_id) etape = boite('Réception de « ' + cm.designation + ' »', { saisie: 'Quantité reçue (ajoutée au stock)', nombre: true, defaut: cm.quantite, requis: true, ok: 'Réceptionner' }).then(function (q) { return q ? { quantite_recue: q } : null; });
+        else etape = Promise.resolve({});
+        etape.then(function (extra) { if (extra) agir('majCommande', Object.assign({ id: id, statut: v }, extra), 'Commande mise à jour.'); });
         break;
     }
   });

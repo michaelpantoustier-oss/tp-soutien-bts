@@ -99,7 +99,7 @@ PRATIQUE = re.compile(r"\btp\b|paillasse|manipul|dosage|ensemencement|coloration
                       r"pipetage|centrifug|titrage|dénombrement|groupage|prélèvement", re.I)
 
 # Matières sans manipulation au laboratoire de TP.
-HORS_LABO = re.compile(r"anglais|culture g|cge|math|stats|relations professionnelles|comm-projet|projet", re.I)
+HORS_LABO = re.compile(r"anglais|culture g|cge|math|stats|relations professionnelles|comm-projet", re.I)
 
 
 def norm(s):

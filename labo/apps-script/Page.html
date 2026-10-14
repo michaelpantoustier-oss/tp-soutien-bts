@@ -1,0 +1,2522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<!-- Généré par outils/construire_page.py : ne pas modifier à la main. -->
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,700;1,900&family=Hanken+Grotesk:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Suivi labo — charte interne Aurlom BTS+ (Guide interne Aurlom, jetons du design system). */
+:root {
+  --papier: #ffffff; --pierre: #f5f4f1; --encre: #111111; --encre-sourde: #5c5a57; --encre-faible: #8c8c8c;
+  --filet: #e2dfda; --filet-fort: #cfccc7; --violet: #c57aff; --violet-profond: #902edb; --violet-pale: #f4ecff;
+  --violet-2: #cdb0ff; --violet-nuit: #391959; --vert: #1d7a50; --vert-pale: #e8f4ee; --ambre: #a85f00;
+  --ambre-pale: #fbf1e3; --rouge-pale: #fbeceb; --sur-encre: #e9e6e2; --sur-encre-sourd: #bdb9b4;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-xs: 3px; --radius-sm: 5px; --radius-md: 8px;
+  --filet-fin: 1px solid var(--filet); --filet-encre: 1px solid var(--encre);
+  --inclinaison: -8deg;
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--papier); color: var(--encre); font-family: var(--font-sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1040px; margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-7); }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* Titres */
+.sur { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet-profond); margin: 0; }
+h1 { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: clamp(32px, 7vw, 45px); line-height: 1; letter-spacing: -0.02em; margin: var(--space-5) 0 var(--space-5); display: inline-block; transform: rotate(var(--inclinaison)); transform-origin: left bottom; }
+h1 .point, h2 .point { color: var(--violet); }
+h2 { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 23px; line-height: 1.15; letter-spacing: -0.01em; margin: var(--space-6) 0 var(--space-4); }
+h3 { font-size: 16px; font-weight: 700; margin: 0 0 var(--space-2); }
+.lead { font-size: 17px; margin: 0 0 var(--space-5); color: var(--encre-sourde); max-width: 640px; }
+.label, th, .champ > span { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--encre-faible); }
+.sourd { color: var(--encre-sourde); }
+.petit { font-size: 14px; }
+.mono { font-family: var(--font-mono); font-size: 13px; }
+
+/* En-tête */
+.entete { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding-bottom: var(--space-3); border-bottom: var(--filet-encre); }
+.entete .qui { font-size: 14px; color: var(--encre-sourde); }
+.entete .qui b { color: var(--encre); }
+.demo { background: var(--ambre-pale); border-left: 3px solid var(--ambre); padding: var(--space-2) var(--space-3); font-size: 14px; margin: var(--space-3) 0 0; display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; justify-content: space-between; }
+
+/* Onglets */
+.onglets { display: flex; gap: var(--space-1); overflow-x: auto; margin: var(--space-4) 0 0; border-bottom: var(--filet-fin); scrollbar-width: none; }
+.onglets button { background: none; border: 0; border-bottom: 2px solid transparent; padding: var(--space-2) var(--space-3); font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--encre-sourde); cursor: pointer; white-space: nowrap; }
+.onglets button[aria-selected="true"] { color: var(--encre); border-bottom-color: var(--violet); }
+.onglets .compte { font-family: var(--font-mono); color: var(--violet-profond); margin-left: 4px; }
+
+/* Boutons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-sm); border: var(--filet-encre); background: var(--papier); color: var(--encre); font-weight: 700; cursor: pointer; text-decoration: none; }
+.btn:hover { background: var(--pierre); }
+.btn.plein { background: var(--encre); color: var(--papier); }
+.btn.plein:hover { background: #2a2a2a; }
+.btn.violet { background: var(--violet-profond); border-color: var(--violet-profond); color: var(--papier); }
+.btn.lien { border: 0; background: none; color: var(--violet-profond); padding: 0; min-height: 0; }
+.btn.petit { min-height: 34px; padding: 0 var(--space-3); font-size: 13px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:focus-visible, .onglets button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .seg label:focus-within { outline: 2px solid var(--violet-profond); outline-offset: 2px; }
+.actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
+
+/* Formulaires */
+.grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3) var(--space-4); }
+.champ { display: flex; flex-direction: column; gap: var(--space-1); }
+.champ.large { grid-column: 1 / -1; }
+input, select, textarea { width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border: var(--filet-fin); border-color: var(--filet-fort); border-radius: var(--radius-sm); background: var(--papier); font-size: 16px; }
+textarea { min-height: 88px; resize: vertical; }
+.cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-2); }
+.case { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-2) var(--space-3); border: var(--filet-fin); border-radius: var(--radius-sm); cursor: pointer; }
+.case input { width: 18px; height: 18px; min-height: 0; margin: 3px 0 0; accent-color: var(--violet-profond); flex: none; }
+.case:has(input:checked) { border-color: var(--violet-2); background: var(--violet-pale); }
+
+/* Segmenté OK / NC / N.A. */
+.controle { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: var(--filet-fin); }
+.seg { display: inline-flex; border: var(--filet-fin); border-color: var(--filet-fort); border-radius: var(--radius-sm); overflow: hidden; flex: none; }
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
+.seg span { display: block; padding: var(--space-2) var(--space-3); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; min-width: 52px; text-align: center; }
+.seg label + label span { border-left: var(--filet-fin); }
+.seg input:checked + span.ok { background: var(--vert-pale); color: var(--vert); }
+.seg input:checked + span.nc { background: var(--rouge-pale); color: var(--violet-profond); }
+.seg input:checked + span.na { background: var(--pierre); color: var(--encre-sourde); }
+
+/* Cartes, encarts, panneau */
+.carte { border: var(--filet-fin); border-radius: var(--radius-sm); padding: var(--space-4); margin-bottom: var(--space-3); background: var(--papier); }
+.carte .tete { display: flex; justify-content: space-between; gap: var(--space-3); align-items: flex-start; flex-wrap: wrap; }
+.carte .meta { font-size: 14px; color: var(--encre-sourde); margin: var(--space-1) 0 0; }
+.carte p { margin: var(--space-2) 0 0; }
+details.carte summary { cursor: pointer; list-style: none; }
+details.carte summary::-webkit-details-marker { display: none; }
+.encart { padding: var(--space-3) var(--space-4); border-left: 3px solid var(--encre); background: var(--pierre); margin: var(--space-3) 0; font-size: 14px; }
+.encart.ambre { background: var(--ambre-pale); border-color: var(--ambre); }
+.encart.vert { background: var(--vert-pale); border-color: var(--vert); }
+.encart.urgent { background: var(--rouge-pale); border-color: var(--violet-profond); }
+.panneau { background: var(--encre); color: var(--sur-encre); border-radius: var(--radius-md); padding: var(--space-5); margin: var(--space-4) 0; }
+.panneau .label { color: var(--sur-encre-sourd); }
+.panneau .heure { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: clamp(44px, 12vw, 64px); line-height: 1; letter-spacing: -0.02em; display: inline-block; transform: rotate(var(--inclinaison)); transform-origin: left bottom; margin: var(--space-4) 0 var(--space-4); color: var(--papier); }
+.panneau .heure .point { color: var(--violet); }
+.panneau select { background: var(--encre); color: var(--sur-encre); border-color: #3a3a3a; }
+.panneau .btn.badge { width: 100%; min-height: 64px; font-size: 18px; background: var(--violet); border-color: var(--violet); color: var(--encre); }
+.panneau .btn.badge:hover { background: var(--violet-2); }
+.panneau .sourd { color: var(--sur-encre-sourd); }
+
+/* Badges d'état (toujours un mot + une couleur) */
+.badge { display: inline-block; font-family: var(--font-display); font-size: 11px; line-height: 1; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 7px; border-radius: var(--radius-xs); white-space: nowrap; vertical-align: middle; background: var(--pierre); color: var(--encre-sourde); }
+.badge.vert { background: var(--vert-pale); color: var(--vert); }
+.badge.ambre { background: var(--ambre-pale); color: var(--ambre); }
+.badge.violet { background: var(--violet-pale); color: var(--violet-profond); }
+.badge.urgent { background: var(--rouge-pale); color: var(--violet-profond); }
+.badge.encre { background: var(--encre); color: var(--sur-encre); }
+
+/* Chiffres clés */
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-top: var(--filet-encre); margin: var(--space-4) 0; }
+.chiffre { padding: var(--space-4) var(--space-4) var(--space-4) 0; border-bottom: var(--filet-fin); }
+.chiffre b { display: inline-block; font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 38px; line-height: 1; letter-spacing: -0.02em; transform: rotate(var(--inclinaison)); transform-origin: left bottom; margin: var(--space-2) 0 var(--space-3); }
+.chiffre.accent b { color: var(--violet-profond); }
+.chiffre span { display: block; font-size: 14px; color: var(--encre-sourde); line-height: 1.4; }
+
+/* Tableaux */
+.tableau-wrap { overflow-x: auto; margin: var(--space-3) 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th { text-align: left; padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: var(--filet-encre); white-space: nowrap; }
+td { padding: var(--space-3) var(--space-3) var(--space-3) 0; border-bottom: var(--filet-fin); vertical-align: top; }
+td:first-child { font-weight: 600; }
+td.num, th.num, td.mono { white-space: nowrap; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+tfoot td { border-top: var(--filet-encre); border-bottom: 0; font-weight: 700; }
+
+/* Fil de messages */
+.fil { margin-top: var(--space-3); border-top: var(--filet-fin); padding-top: var(--space-3); }
+.msg { padding: var(--space-2) 0; font-size: 14px; }
+.msg .de { font-weight: 700; }
+.msg.systeme { color: var(--encre-faible); font-size: 13px; }
+.fil form { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+.fil input { flex: 1; }
+
+.vide { color: var(--encre-faible); font-size: 14px; padding: var(--space-3) 0; }
+.toast { position: fixed; left: 50%; bottom: var(--space-5); transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--encre); color: var(--sur-encre); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size: 14px; z-index: 10; }
+.toast.erreur { background: var(--violet-nuit); }
+.connexion { max-width: 420px; margin: var(--space-6) auto 0; }
+.cache { display: none !important; }
+.deux { display: grid; grid-template-columns: 1fr; gap: var(--space-5); }
+@media (min-width: 860px) { .deux { grid-template-columns: 1fr 1fr; } }
+
+/* Programme et commandes */
+ul.materiel { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); font-size: 14px; }
+ul.materiel li::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--violet); margin-right: var(--space-2); vertical-align: middle; }
+fieldset.devis { border: var(--filet-fin); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); margin: var(--space-4) 0 0; }
+fieldset.devis legend { padding: 0 var(--space-2); }
+.devis-ligne + .devis-ligne { margin-top: var(--space-3); padding-top: var(--space-3); border-top: var(--filet-fin); }
+
+/* Impression du relevé mensuel */
+.imprimable { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  .imprimable, .imprimable * { visibility: visible; }
+  .imprimable { display: block; position: absolute; inset: 0; padding: 18mm; font-size: 10pt; }
+  .imprimable h1 { font-size: 25pt; transform: none; margin: 4mm 0 6mm; }
+  .imprimable .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; margin-top: 14mm; }
+  .imprimable .signatures div { border-top: 1px solid #111; padding-top: 2mm; min-height: 22mm; }
+  .imprimable .pied { margin-top: 10mm; font-size: 8pt; color: #8c8c8c; display: flex; justify-content: space-between; }
+}
+
+/* Boîte de dialogue intégrée */
+dialog.boite { border: var(--filet-encre); border-radius: var(--radius-md); padding: var(--space-5); max-width: min(480px, calc(100% - 32px)); width: 100%; background: var(--papier); color: var(--encre); }
+dialog.boite::backdrop { background: rgba(17, 17, 17, 0.45); }
+dialog.boite > p:first-child { font-weight: 700; margin: 0 0 var(--space-3); }
+details.carte summary .tete { margin: 0; }
+
+</style>
+</head>
+<body>
+<main class="page" id="app"><p class="vide">Chargement…</p></main>
+<section class="imprimable" id="imprimable" aria-hidden="true"></section>
+<div class="toast cache" id="toast" role="status" aria-live="polite"></div>
+<script>
+/*
+ * Suivi labo Aurlom BTS+ — logique métier commune.
+ *
+ * Ce fichier tourne à deux endroits sans modification :
+ *  - dans le navigateur (mode démonstration, données en localStorage) ;
+ *  - dans Google Apps Script (fichier Core.gs, données dans Google Sheets).
+ * Il ne dépend que de `store` (tables) et `env` (heure, hachage, sessions,
+ * e-mails, classeur de pilotage des dépenses) fournis par l'hôte.
+ *
+ * Toutes les règles d'accès sont appliquées ici, côté serveur : l'interface
+ * ne reçoit jamais une donnée que le rôle connecté n'a pas le droit de voir.
+ */
+var LaboCore = (function () {
+
+  // ---------------------------------------------------------------------------
+  // Référentiels (aucune donnée interne ici : ce fichier est public).
+  // ---------------------------------------------------------------------------
+  var CONFIG = {
+    fuseau: 'Europe/Paris',
+    delaiPrepaJours: 15,
+    alerteSessionHeures: 11,
+    seuilTroisDevisTTC: 1000, // à ajuster : au-delà, trois devis concurrents obligatoires
+    alertePeremptionJours: 30,
+    dureeSessionJours: 7,
+    essaisMax: 5,
+    blocageMinutes: 15,
+    labos: ['Labo Fleming', 'Labo Robert Koch', 'Labo Gerty Cori', 'Labo Marie Curie'],
+    creneaux: ['C1 · 9h00 – 10h00', 'C2 · 10h15 – 11h45', 'C3 · 12h00 – 13h30', 'C4 · 14h30 – 16h00', 'C5 · 16h15 – 17h45'],
+    filieres: {
+      BIOMED: {
+        libelle: 'BTS Biologie médicale', court: 'BIOMED', rncp: 'RNCP40027', classes: ['BM1', 'BM2'],
+        disciplines: ['Microbiologie', 'Biochimie', 'HAI (hématologie, anatomopathologie, immunologie)'],
+        blocs: [
+          'BC1 – Démarche qualité et organisation opérationnelle du laboratoire',
+          'BC2 – Analyses médicales les plus courantes',
+          'BC3 – Amélioration des méthodes d\'analyse et pratiques à visée thérapeutique',
+          'BC4 – Communication et projet',
+          'BC5 – Prélèvements'
+        ]
+      },
+      BIOALC: {
+        libelle: 'BTS Bioanalyses en laboratoire de contrôle', court: 'BIOALC', rncp: 'RNCP38884', classes: ['BIOALC1', 'BIOALC2'],
+        disciplines: ['Microbiologie', 'Biochimie', 'Biologie cellulaire'],
+        blocs: [
+          'BC01 – Gestion opérationnelle et documentaire du laboratoire',
+          'BC02 – Réalisation des analyses dans le cadre d\'un contrôle qualité',
+          'BC03 – Expertise pour l\'optimisation de méthodes de bioanalyse',
+          'BC04 – Relation professionnelle au laboratoire'
+        ]
+      }
+    },
+    roles: {
+      technicienne: 'Technicienne de laboratoire',
+      aide_laborantine: 'Aide-laborantine',
+      enseignant: 'Enseignant·e',
+      prof_referent: 'Prof référent',
+      coordinateur: 'Coordinateur pédagogique',
+      directeur: 'Directeur du campus'
+    },
+    missions: [
+      'Préparation de TP', 'Assistance pendant le TP', 'Rangement et nettoyage',
+      'Inventaire / réception de commande', 'Préparation de milieux / réactifs',
+      'Autre (préciser en commentaire)'
+    ],
+    controlesRangement: [
+      'Pipettes verre', 'Becs Bunsen', 'Écouvillons', 'Tubes', 'Pinces / öses', 'Lames',
+      'Microscopes', 'DASRI', 'Verres à pied remplis', 'Portoirs remplis', 'Cuves',
+      'Béchers / fioles jaugées', 'Paillasses désinfectées'
+    ],
+    categoriesIncident: [
+      'Équipement en panne', 'Casse / matériel manquant', 'Stock bas ou rupture',
+      'Réactif périmé', 'Hygiène / sécurité', 'Rangement non conforme', 'Autre'
+    ],
+    gravites: ['Faible', 'Gênant', 'Bloquant'],
+    categoriesArticle: ['Réactif / coffret', 'Milieu de culture', 'Souche / échantillon pédagogique', 'Consommable', 'Verrerie', 'Petit matériel', 'Équipement', 'EPI / hygiène'],
+    motifsMouvement: ['Consommation TP', 'Réception de commande', 'Correction d\'inventaire', 'Casse / perte', 'Péremption (mise au rebut)']
+  };
+
+  // Droits par action.
+  var DROITS = {
+    badge: ['technicienne', 'aide_laborantine'],
+    voirEquipe: ['prof_referent', 'coordinateur', 'directeur'],
+    validerPresence: ['prof_referent', 'directeur'],
+    facturation: ['directeur'],
+    creerDemandeTP: ['enseignant', 'prof_referent', 'coordinateur', 'directeur'],
+    preparerTP: ['technicienne', 'aide_laborantine'],
+    piloterTP: ['prof_referent', 'coordinateur', 'directeur'],
+    rangement: ['technicienne', 'aide_laborantine', 'prof_referent', 'directeur'],
+    traiterIncident: ['technicienne', 'aide_laborantine', 'prof_referent', 'coordinateur', 'directeur'],
+    gererInventaire: ['technicienne', 'aide_laborantine', 'prof_referent', 'directeur'],
+    proposerCommande: ['technicienne', 'aide_laborantine', 'enseignant', 'prof_referent', 'directeur'],
+    approuverCommande: ['prof_referent', 'directeur'],
+    suivreCommande: ['technicienne', 'aide_laborantine', 'prof_referent', 'directeur']
+  };
+
+  var TABLES = {
+    Utilisateurs: ['id', 'nom', 'email', 'role', 'filiere', 'disciplines', 'pin', 'pin_hash', 'taux_horaire', 'actif'],
+    Sessions: ['id', 'user_id', 'user_nom', 'date', 'arrivee', 'depart', 'duree_min', 'labo',
+      'missions', 'demandes_ids', 'commentaire', 'source', 'corrections', 'statut',
+      'valide_par', 'valide_le', 'motif_validation'],
+    Rangements: ['id', 'horodatage', 'date', 'user_id', 'user_nom', 'labo', 'demande_id',
+      'controles', 'nb_non_conformes', 'remarques'],
+    Incidents: ['id', 'horodatage', 'date', 'user_id', 'user_nom', 'role', 'labo', 'categorie',
+      'gravite', 'description', 'statut', 'traite_par', 'resolution', 'resolu_le'],
+    Demandes: ['id', 'cree_le', 'prof_id', 'prof_nom', 'filiere', 'date_tp', 'creneau', 'labo', 'classe',
+      'discipline', 'competence', 'sequence_id', 'tp_ref', 'titre', 'besoin', 'effectif', 'delai_jours',
+      'prepa_id', 'prepa_nom', 'statut', 'maj_le'],
+    Messages: ['id', 'horodatage', 'demande_id', 'user_id', 'user_nom', 'role', 'texte'],
+    Articles: ['id', 'filiere', 'categorie', 'designation', 'reference', 'fournisseur', 'quantite', 'unite',
+      'seuil', 'peremption', 'emplacement', 'notes', 'maj_le', 'maj_par', 'actif'],
+    Mouvements: ['id', 'horodatage', 'article_id', 'designation', 'delta', 'quantite_apres', 'motif',
+      'demande_tp_id', 'user_id', 'user_nom'],
+    Commandes: ['id', 'cree_le', 'user_id', 'user_nom', 'filiere', 'designation', 'reference', 'quantite',
+      'prix_unitaire_ttc', 'total_ttc', 'fournisseur', 'lien', 'justification', 'demande_tp_id', 'sequence_id',
+      'article_id', 'devis', 'statut', 'approuve_par', 'approuve_le', 'motif_refus', 'pilotage_id', 'maj_le'],
+    Fournisseurs: ['nom', 'domaine', 'categories', 'contact', 'email', 'telephone', 'notes'],
+    Programme: ['id', 'filiere', 'annee', 'matiere', 'bloc', 'semaines', 'debut', 'fin', 'titre', 'tp', 'renforcement', 'materiel'],
+    Journal: ['horodatage', 'user_id', 'user_nom', 'action', 'cible', 'detail']
+  };
+
+  var STATUTS_DEMANDE = { demandee: 'demandée', prise_en_charge: 'prise en charge', prete: 'prête', realisee: 'réalisée', annulee: 'annulée' };
+  var STATUTS_COMMANDE = { soumise: 'soumise', approuvee: 'approuvée', refusee: 'refusée', commandee: 'commandée', livree: 'livrée', annulee: 'annulée' };
+
+  function erreur(msg) { var e = new Error(msg); e.metier = true; return e; }
+
+  // Le directeur a tous les droits, sauf ceux qui n'ont de sens que pour l'équipe du labo.
+  function peut(user, droit) {
+    if (user.role === 'directeur') return droit !== 'badge' && droit !== 'preparerTP';
+    return DROITS[droit].indexOf(user.role) !== -1;
+  }
+  function exiger(user, droit) { if (!peut(user, droit)) throw erreur('Action non autorisée pour ton rôle.'); }
+
+  function filiereDeClasse(classe) {
+    for (var k in CONFIG.filieres) if (CONFIG.filieres[k].classes.indexOf(classe) !== -1) return k;
+    return '';
+  }
+
+  function joursEntre(a, b) {
+    var x = Date.UTC(+a.slice(0, 4), +a.slice(5, 7) - 1, +a.slice(8, 10));
+    var y = Date.UTC(+b.slice(0, 4), +b.slice(5, 7) - 1, +b.slice(8, 10));
+    return Math.round((y - x) / 86400000);
+  }
+
+  function texte(v, max) {
+    var s = (v === undefined || v === null) ? '' : String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim();
+    return max ? s.slice(0, max) : s;
+  }
+  function liste(v) { return Array.isArray(v) ? v.map(function (x) { return texte(x, 200); }).filter(Boolean) : []; }
+  function nombre(v) { var n = Number(String(v === undefined || v === null ? '' : v).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : NaN; }
+  function arrondi(n) { return Math.round(n * 100) / 100; }
+  function ymd(v) { return /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : ''; }
+
+  function create(store, env) {
+
+    function now() { return env.now(); }
+    function iso(d) { return d.toISOString(); }
+    function jour(d) { return env.format(d, 'yyyy-MM-dd'); }
+    function nouvelId(p) { return p + '-' + now().getTime().toString(36).toUpperCase() + env.random(4); }
+
+    function journal(user, action, cible, detail) {
+      store.insert('Journal', {
+        horodatage: iso(now()), user_id: user ? user.id : '', user_nom: user ? user.nom : '',
+        action: action, cible: cible || '', detail: typeof detail === 'string' ? detail : JSON.stringify(detail || {}).slice(0, 2000)
+      });
+    }
+
+    function actifs() {
+      return store.all('Utilisateurs').filter(function (u) { return String(u.actif).toLowerCase() === 'oui' && CONFIG.roles[u.role]; });
+    }
+    function trouverUser(id) { return actifs().filter(function (u) { return String(u.id) === String(id); })[0] || null; }
+
+    // -------------------------------------------------------------------------
+    // Authentification : e-mail + PIN, jeton de session, blocage après échecs.
+    // -------------------------------------------------------------------------
+    function connexion(data) {
+      var email = texte(data.email, 120).toLowerCase();
+      var pin = texte(data.pin, 20);
+      var cle = 'echecs:' + email;
+      var echecs = Number(env.cache.get(cle) || 0);
+      if (echecs >= CONFIG.essaisMax) throw erreur('Trop d\'essais. Réessaie dans ' + CONFIG.blocageMinutes + ' minutes.');
+      var u = actifs().filter(function (x) { return String(x.email).toLowerCase() === email; })[0];
+      var ok = u && u.pin_hash && pin.length >= 4 && env.hashPin(u.id, pin) === String(u.pin_hash);
+      if (!ok) {
+        env.cache.put(cle, String(echecs + 1), CONFIG.blocageMinutes * 60);
+        journal(u || { id: '', nom: email }, 'connexion_refusee', '', '');
+        throw erreur('E-mail ou code PIN incorrect.');
+      }
+      env.cache.remove(cle);
+      var jeton = env.randomToken();
+      env.sessions.put(jeton, { uid: u.id, exp: now().getTime() + CONFIG.dureeSessionJours * 86400000 });
+      journal(u, 'connexion', '', '');
+      return { jeton: jeton, moi: profil(u) };
+    }
+
+    function authentifier(jeton) {
+      if (!jeton) throw erreur('Session expirée. Reconnecte-toi.');
+      var s = env.sessions.get(jeton);
+      if (!s || s.exp < now().getTime()) { if (s) env.sessions.remove(jeton); throw erreur('Session expirée. Reconnecte-toi.'); }
+      var u = trouverUser(s.uid);
+      if (!u) { env.sessions.remove(jeton); throw erreur('Compte désactivé.'); }
+      return u;
+    }
+
+    function profil(u) {
+      var droits = {};
+      Object.keys(DROITS).forEach(function (d) { droits[d] = peut(u, d); });
+      return { id: u.id, nom: u.nom, role: u.role, filiere: u.filiere || '', disciplines: u.disciplines || '', droits: droits };
+    }
+
+    function notifier(roles, sujet, corps, filiere) {
+      if (!env.notify) return;
+      actifs().forEach(function (u) {
+        if (roles.indexOf(u.role) === -1 || !u.email) return;
+        if (filiere && u.filiere && u.filiere !== filiere && u.role !== 'directeur') return;
+        env.notify(u.email, sujet, corps);
+      });
+    }
+
+    function sessionOuverte(userId) {
+      return store.all('Sessions').filter(function (s) { return String(s.user_id) === String(userId) && s.statut === 'en_cours'; })[0] || null;
+    }
+
+    function heureBadge(data) {
+      if (data && data.hors_ligne && data.client_time) {
+        var d = new Date(data.client_time);
+        if (!isNaN(d.getTime()) && d <= now() && now() - d < 3 * 86400000) return { date: d, source: 'hors_ligne' };
+      }
+      return { date: now(), source: 'badge' };
+    }
+
+    function heureLocale(dateStr, hhmm) {
+      if (!ymd(dateStr) || !/^\d{1,2}:\d{2}$/.test(hhmm || '')) throw erreur('Date ou heure invalide.');
+      return env.parseLocal(dateStr, hhmm);
+    }
+
+    function dureeMin(a, b) { return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 60000); }
+
+    function article(id) { return store.get('Articles', id); }
+
+    function mouvementStock(user, art, delta, motif, demandeId) {
+      var q = nombre(art.quantite) || 0;
+      var apres = arrondi(q + delta);
+      if (apres < 0) throw erreur('Stock insuffisant : il reste ' + q + ' ' + (art.unite || '') + ' de « ' + art.designation + ' ».');
+      store.update('Articles', art.id, { quantite: apres, maj_le: iso(now()), maj_par: user.nom });
+      var m = {
+        id: nouvelId('MV'), horodatage: iso(now()), article_id: art.id, designation: art.designation,
+        delta: delta, quantite_apres: apres, motif: motif, demande_tp_id: demandeId || '', user_id: user.id, user_nom: user.nom
+      };
+      store.insert('Mouvements', m);
+      var seuil = nombre(art.seuil);
+      if (delta < 0 && isFinite(seuil) && apres <= seuil && q > seuil) {
+        notifier(['technicienne', 'aide_laborantine', 'prof_referent'], '[Labo] Stock bas – ' + art.designation,
+          'Il reste ' + apres + ' ' + (art.unite || '') + ' (seuil : ' + seuil + '). Pense à proposer une commande dans le suivi labo.', art.filiere);
+      }
+      return m;
+    }
+
+    // -------------------------------------------------------------------------
+    var A = {};
+
+    A.deconnexion = function (user, data, jeton) { if (jeton) env.sessions.remove(jeton); journal(user, 'deconnexion', '', ''); return true; };
+
+    A.etat = function (user) {
+      var auj = jour(now());
+      var r = { moi: profil(user), config: CONFIG, aujourdhui: auj };
+      var sessions = store.all('Sessions');
+      var demandes = store.all('Demandes');
+      var estProf = user.role === 'enseignant';
+
+      r.presentes = sessions.filter(function (s) { return s.statut === 'en_cours'; })
+        .map(function (s) { return { user_nom: s.user_nom, arrivee: s.arrivee, labo: s.labo, source: s.source }; });
+
+      if (peut(user, 'badge')) {
+        r.sessionOuverte = sessionOuverte(user.id);
+        r.sessions = sessions.filter(function (s) { return String(s.user_id) === String(user.id); });
+      }
+      if (peut(user, 'voirEquipe')) r.sessions = sessions;
+
+      r.demandes = estProf ? demandes.filter(function (d) { return String(d.prof_id) === String(user.id); }) : demandes;
+      var ids = r.demandes.map(function (d) { return String(d.id); });
+      r.messages = store.all('Messages').filter(function (m) { return ids.indexOf(String(m.demande_id)) !== -1; });
+
+      var incidents = store.all('Incidents');
+      r.incidents = estProf ? incidents.filter(function (i) { return String(i.user_id) === String(user.id) || i.statut !== 'resolu'; }) : incidents;
+      if (!estProf) r.rangements = store.all('Rangements').slice(-150);
+
+      r.articles = store.all('Articles').filter(function (a) { return String(a.actif).toLowerCase() !== 'non'; });
+      r.mouvements = store.all('Mouvements').slice(-200);
+
+      var commandes = store.all('Commandes');
+      r.commandes = estProf ? commandes.filter(function (c) { return String(c.user_id) === String(user.id); }) : commandes;
+      r.fournisseurs = store.all('Fournisseurs');
+
+      var debut = env.format(new Date(now().getTime() - 14 * 86400000), 'yyyy-MM-dd');
+      var fin = env.format(new Date(now().getTime() + 70 * 86400000), 'yyyy-MM-dd');
+      r.programme = store.all('Programme').filter(function (p) {
+        return (!p.fin || p.fin >= debut) && (!p.debut || p.debut <= fin) && (!estProf || !user.filiere || p.filiere === user.filiere);
+      });
+
+      if (peut(user, 'piloterTP') || peut(user, 'voirEquipe') || peut(user, 'approuverCommande')) {
+        r.utilisateurs = actifs().map(function (u) {
+          var o = { id: u.id, nom: u.nom, role: u.role, filiere: u.filiere || '' };
+          if (peut(user, 'facturation')) o.taux_horaire = u.taux_horaire;
+          return o;
+        });
+      }
+      return r;
+    };
+
+    A.programme = function (user, data) {
+      var f = texte(data.filiere, 10);
+      return store.all('Programme').filter(function (p) { return !f || p.filiere === f; });
+    };
+
+    // --- Présence -------------------------------------------------------------
+    A.arrivee = function (user, data) {
+      exiger(user, 'badge');
+      var o = sessionOuverte(user.id);
+      if (o) throw erreur('Une présence est déjà ouverte depuis le ' + env.format(new Date(o.arrivee), 'dd/MM à HH:mm') + '. Déclare d\'abord ton départ.');
+      var h = heureBadge(data);
+      var s = {
+        id: nouvelId('S'), user_id: user.id, user_nom: user.nom, date: jour(h.date), arrivee: iso(h.date),
+        depart: '', duree_min: '', labo: texte(data.labo, 80), missions: '', demandes_ids: '', commentaire: '',
+        source: h.source, corrections: '', statut: 'en_cours', valide_par: '', valide_le: '', motif_validation: ''
+      };
+      store.insert('Sessions', s);
+      journal(user, 'arrivee', s.id, { source: h.source });
+      return s;
+    };
+
+    A.depart = function (user, data) {
+      exiger(user, 'badge');
+      var s = sessionOuverte(user.id);
+      if (!s) throw erreur('Aucune présence ouverte.');
+      var missions = liste(data.missions);
+      if (!missions.length) throw erreur('Coche au moins une mission réalisée.');
+      var corr = '', fin;
+      if (data.heure_depart) {
+        fin = heureLocale(s.date, data.heure_depart);
+        corr = 'Départ saisi à la main le ' + env.format(now(), 'dd/MM/yyyy HH:mm');
+      } else {
+        var h = heureBadge(data); fin = h.date;
+        if (h.source === 'hors_ligne') corr = 'Départ enregistré hors connexion';
+      }
+      if (fin.getTime() <= new Date(s.arrivee).getTime()) throw erreur('L\'heure de départ doit suivre l\'arrivée.');
+      if (fin > now()) throw erreur('L\'heure de départ ne peut pas être dans le futur.');
+      var duree = dureeMin(s.arrivee, iso(fin));
+      if (duree / 60 > CONFIG.alerteSessionHeures) corr = (corr ? corr + ' ; ' : '') + 'Durée supérieure à ' + CONFIG.alerteSessionHeures + ' h';
+      var patch = {
+        depart: iso(fin), duree_min: duree, missions: missions.join(' | '),
+        demandes_ids: liste(data.demandes_ids).join(' | '), commentaire: texte(data.commentaire, 1000),
+        corrections: corr, statut: 'a_valider'
+      };
+      store.update('Sessions', s.id, patch);
+      journal(user, 'depart', s.id, patch);
+      return Object.assign({}, s, patch);
+    };
+
+    A.saisieManuelle = function (user, data) {
+      exiger(user, 'badge');
+      var motif = texte(data.motif, 500);
+      if (!motif) throw erreur('Indique pourquoi la présence n\'a pas été badgée.');
+      var debut = heureLocale(data.date, data.debut), fin = heureLocale(data.date, data.fin);
+      if (fin <= debut) throw erreur('L\'heure de fin doit suivre l\'heure de début.');
+      if (fin > now()) throw erreur('Impossible de déclarer une présence future.');
+      var missions = liste(data.missions);
+      if (!missions.length) throw erreur('Coche au moins une mission réalisée.');
+      var s = {
+        id: nouvelId('S'), user_id: user.id, user_nom: user.nom, date: data.date, arrivee: iso(debut), depart: iso(fin),
+        duree_min: dureeMin(iso(debut), iso(fin)), labo: texte(data.labo, 80), missions: missions.join(' | '),
+        demandes_ids: liste(data.demandes_ids).join(' | '), commentaire: texte(data.commentaire, 1000),
+        source: 'saisie_manuelle', corrections: 'Saisie a posteriori le ' + env.format(now(), 'dd/MM/yyyy HH:mm') + ' : ' + motif,
+        statut: 'a_valider', valide_par: '', valide_le: '', motif_validation: ''
+      };
+      store.insert('Sessions', s);
+      journal(user, 'saisie_manuelle', s.id, s);
+      return s;
+    };
+
+    A.validerSession = function (user, data) {
+      exiger(user, 'validerPresence');
+      var s = store.get('Sessions', data.id);
+      if (!s) throw erreur('Présence introuvable.');
+      if (s.statut === 'en_cours') throw erreur('Présence encore ouverte.');
+      var decision = data.decision === 'contestee' ? 'contestee' : 'validee';
+      if (decision === 'contestee' && !texte(data.motif)) throw erreur('Un motif est nécessaire pour contester.');
+      var patch = { statut: decision, valide_par: user.nom, valide_le: iso(now()), motif_validation: texte(data.motif, 500) };
+      store.update('Sessions', s.id, patch);
+      journal(user, 'validation_session', s.id, patch);
+      return Object.assign({}, s, patch);
+    };
+
+    // Relevé mensuel. Les montants ne sortent que pour le directeur.
+    A.releve = function (user, data) {
+      var cible = data.user_id || user.id;
+      var soi = String(cible) === String(user.id);
+      if (!soi && !peut(user, 'voirEquipe')) throw erreur('Relevé réservé.');
+      var mois = texte(data.mois);
+      if (!/^\d{4}-\d{2}$/.test(mois)) throw erreur('Mois invalide.');
+      var tech = store.all('Utilisateurs').filter(function (u) { return String(u.id) === String(cible); })[0];
+      if (!tech) throw erreur('Personne introuvable.');
+      var sessions = store.all('Sessions').filter(function (s) {
+        return String(s.user_id) === String(cible) && String(s.date).slice(0, 7) === mois;
+      }).sort(function (a, b) { return a.arrivee < b.arrivee ? -1 : 1; });
+      var minutes = sessions.filter(function (s) { return s.statut === 'validee'; })
+        .reduce(function (t, s) { return t + (Number(s.duree_min) || 0); }, 0);
+      var demandes = store.all('Demandes');
+      var prep = demandes.filter(function (d) { return String(d.prepa_id) === String(cible) && String(d.date_tp).slice(0, 7) === mois; })
+        .map(function (d) { return { id: d.id, date_tp: d.date_tp, creneau: d.creneau, classe: d.classe, titre: d.titre, statut: d.statut }; });
+      var r = {
+        personne: { id: tech.id, nom: tech.nom, role: tech.role }, mois: mois, sessions: sessions,
+        minutes_validees: minutes, heures_validees: arrondi(minutes / 60),
+        non_validees: sessions.filter(function (s) { return s.statut !== 'validee'; }).length,
+        preparations: prep, edite_le: iso(now())
+      };
+      if (peut(user, 'facturation')) {
+        var taux = nombre(tech.taux_horaire);
+        r.taux_horaire = isFinite(taux) ? taux : 0;
+        r.montant_ht = arrondi(minutes / 60 * r.taux_horaire);
+        journal(user, 'releve_facturation', tech.id, mois);
+      }
+      return r;
+    };
+
+    // --- Rangement -------------------------------------------------------------
+    A.rangement = function (user, data) {
+      exiger(user, 'rangement');
+      var labo = texte(data.labo, 80);
+      if (!labo) throw erreur('Choisis le labo contrôlé.');
+      var controles = {}, nc = [];
+      CONFIG.controlesRangement.forEach(function (c) {
+        var v = data.controles && data.controles[c];
+        v = (v === 'ok' || v === 'nc' || v === 'na') ? v : 'na';
+        controles[c] = v;
+        if (v === 'nc') nc.push(c);
+      });
+      var h = now();
+      var r = {
+        id: nouvelId('R'), horodatage: iso(h), date: jour(h), user_id: user.id, user_nom: user.nom, labo: labo,
+        demande_id: texte(data.demande_id, 40), controles: JSON.stringify(controles), nb_non_conformes: nc.length,
+        remarques: texte(data.remarques, 1000)
+      };
+      store.insert('Rangements', r);
+      journal(user, 'rangement', r.id, { labo: labo, nc: nc });
+      if (nc.length) {
+        A.incident(user, { labo: labo, categorie: 'Rangement non conforme', gravite: 'Faible',
+          description: 'Contrôle ' + r.id + ' : ' + nc.join(', ') + (r.remarques ? '. ' + r.remarques : '') });
+      }
+      return r;
+    };
+
+    // --- Incidents -------------------------------------------------------------
+    A.incident = function (user, data) {
+      var description = texte(data.description, 2000);
+      if (!description) throw erreur('Décris le problème.');
+      var h = now();
+      var i = {
+        id: nouvelId('I'), horodatage: iso(h), date: jour(h), user_id: user.id, user_nom: user.nom, role: user.role,
+        labo: texte(data.labo, 80),
+        categorie: CONFIG.categoriesIncident.indexOf(data.categorie) !== -1 ? data.categorie : 'Autre',
+        gravite: CONFIG.gravites.indexOf(data.gravite) !== -1 ? data.gravite : 'Gênant',
+        description: description, statut: 'ouvert', traite_par: '', resolution: '', resolu_le: ''
+      };
+      store.insert('Incidents', i);
+      journal(user, 'incident', i.id, { categorie: i.categorie, gravite: i.gravite });
+      if (i.gravite === 'Bloquant') {
+        notifier(['prof_referent', 'directeur', 'technicienne'], '[Labo] Incident bloquant – ' + i.categorie + (i.labo ? ' – ' + i.labo : ''),
+          user.nom + ' a signalé le ' + env.format(h, 'dd/MM/yyyy à HH:mm') + ' :\n\n' + description + '\n\nRéf. ' + i.id);
+      }
+      return i;
+    };
+
+    A.majIncident = function (user, data) {
+      exiger(user, 'traiterIncident');
+      var i = store.get('Incidents', data.id);
+      if (!i) throw erreur('Incident introuvable.');
+      var statut = ['ouvert', 'en_cours', 'resolu'].indexOf(data.statut) !== -1 ? data.statut : i.statut;
+      if (statut === 'resolu' && !texte(data.resolution)) throw erreur('Indique ce qui a été fait.');
+      var patch = { statut: statut, traite_par: user.nom, resolution: texte(data.resolution, 1000) || i.resolution };
+      if (statut === 'resolu') patch.resolu_le = iso(now());
+      store.update('Incidents', i.id, patch);
+      journal(user, 'maj_incident', i.id, patch);
+      return Object.assign({}, i, patch);
+    };
+
+    // --- Demandes de TP --------------------------------------------------------
+    A.demande = function (user, data) {
+      exiger(user, 'creerDemandeTP');
+      if (!ymd(data.date_tp)) throw erreur('Date du TP invalide.');
+      var titre = texte(data.titre, 300), besoin = texte(data.besoin, 3000);
+      if (!titre || !besoin) throw erreur('Le titre du TP et le besoin matériel sont obligatoires.');
+      var h = now(), classe = texte(data.classe, 40);
+      var d = {
+        id: nouvelId('D'), cree_le: iso(h), prof_id: user.id, prof_nom: user.nom, filiere: filiereDeClasse(classe) || user.filiere || '',
+        date_tp: data.date_tp, creneau: texte(data.creneau, 40), labo: texte(data.labo, 80), classe: classe,
+        discipline: texte(data.discipline, 80), competence: texte(data.competence, 200), sequence_id: texte(data.sequence_id, 40), tp_ref: texte(data.tp_ref, 20),
+        titre: titre, besoin: besoin, effectif: texte(data.effectif, 10), delai_jours: joursEntre(jour(h), data.date_tp),
+        prepa_id: '', prepa_nom: '', statut: 'demandee', maj_le: iso(h)
+      };
+      if (d.delai_jours < 0) throw erreur('La date du TP est passée.');
+      store.insert('Demandes', d);
+      journal(user, 'demande', d.id, { date_tp: d.date_tp, delai: d.delai_jours });
+      var corps = user.nom + ' demande « ' + titre + ' » pour le ' + d.date_tp + ' (' + d.creneau + ', ' + d.labo + ', ' + d.classe + ').\n\nBesoin :\n' + besoin;
+      notifier(['technicienne', 'aide_laborantine'], '[Labo] Nouvelle demande de TP – ' + d.classe + ' – ' + d.date_tp, corps);
+      if (d.delai_jours < CONFIG.delaiPrepaJours) {
+        notifier(['prof_referent'], '[Labo] Demande de TP hors délai (' + d.delai_jours + ' j) – ' + d.classe, corps, d.filiere);
+      }
+      return d;
+    };
+
+    A.majDemande = function (user, data) {
+      var d = store.get('Demandes', data.id);
+      if (!d) throw erreur('Demande introuvable.');
+      var statut = data.statut, patch = {};
+      if (statut && !STATUTS_DEMANDE[statut]) throw erreur('Statut inconnu.');
+
+      if (peut(user, 'piloterTP')) {
+        if (statut) patch.statut = statut;
+        if (data.prepa_id !== undefined) {
+          var p = data.prepa_id ? trouverUser(data.prepa_id) : null;
+          if (p && !peut(p, 'preparerTP')) throw erreur('Cette personne ne prépare pas de TP.');
+          patch.prepa_id = p ? p.id : ''; patch.prepa_nom = p ? p.nom : '';
+          if (p && d.statut === 'demandee' && !statut) patch.statut = 'prise_en_charge';
+        }
+      } else if (peut(user, 'preparerTP')) {
+        if (data.prendre) { patch.prepa_id = user.id; patch.prepa_nom = user.nom; if (d.statut === 'demandee') patch.statut = 'prise_en_charge'; }
+        if (statut) {
+          if (['prise_en_charge', 'prete'].indexOf(statut) === -1) throw erreur('Tu peux passer une demande en « prise en charge » ou « prête ».');
+          patch.statut = statut;
+          if (!d.prepa_id && !patch.prepa_id) { patch.prepa_id = user.id; patch.prepa_nom = user.nom; }
+        }
+      } else if (String(d.prof_id) === String(user.id)) {
+        if (!statut || ['realisee', 'annulee'].indexOf(statut) === -1) throw erreur('Tu peux marquer ta demande « réalisée » ou « annulée ».');
+        patch.statut = statut;
+      } else {
+        throw erreur('Action non autorisée pour ton rôle.');
+      }
+      if (!Object.keys(patch).length) throw erreur('Rien à modifier.');
+      patch.maj_le = iso(now());
+      store.update('Demandes', d.id, patch);
+      journal(user, 'maj_demande', d.id, patch);
+      if (patch.statut && patch.statut !== d.statut) {
+        store.insert('Messages', { id: nouvelId('M'), horodatage: patch.maj_le, demande_id: d.id, user_id: user.id, user_nom: user.nom, role: 'systeme',
+          texte: 'Statut : ' + STATUTS_DEMANDE[d.statut] + ' → ' + STATUTS_DEMANDE[patch.statut] + (patch.prepa_nom ? ' (préparation : ' + patch.prepa_nom + ')' : '') });
+      }
+      return Object.assign({}, d, patch);
+    };
+
+    A.message = function (user, data) {
+      var d = store.get('Demandes', data.demande_id);
+      if (!d) throw erreur('Demande introuvable.');
+      if (user.role === 'enseignant' && String(d.prof_id) !== String(user.id)) throw erreur('Cette demande n\'est pas la tienne.');
+      var t = texte(data.texte, 2000);
+      if (!t) throw erreur('Message vide.');
+      var m = { id: nouvelId('M'), horodatage: iso(now()), demande_id: d.id, user_id: user.id, user_nom: user.nom, role: user.role, texte: t };
+      store.insert('Messages', m);
+      journal(user, 'message', d.id, '');
+      if (env.notify) {
+        actifs().forEach(function (u) {
+          if (String(u.id) === String(user.id) || !u.email) return;
+          if (String(u.id) === String(d.prof_id) || String(u.id) === String(d.prepa_id)) {
+            env.notify(u.email, '[Labo] Message sur « ' + d.titre + ' » (' + d.date_tp + ')', user.nom + ' :\n\n' + t);
+          }
+        });
+      }
+      return m;
+    };
+
+    // --- Inventaire ------------------------------------------------------------
+    A.article = function (user, data) {
+      exiger(user, 'gererInventaire');
+      var designation = texte(data.designation, 200);
+      if (!designation) throw erreur('Désignation obligatoire.');
+      var champs = {
+        filiere: ['BIOMED', 'BIOALC', 'Commun'].indexOf(data.filiere) !== -1 ? data.filiere : 'Commun',
+        categorie: CONFIG.categoriesArticle.indexOf(data.categorie) !== -1 ? data.categorie : 'Consommable',
+        designation: designation, reference: texte(data.reference, 80), fournisseur: texte(data.fournisseur, 80),
+        unite: texte(data.unite, 30) || 'unité', seuil: isFinite(nombre(data.seuil)) ? nombre(data.seuil) : '',
+        peremption: ymd(data.peremption), emplacement: texte(data.emplacement, 80), notes: texte(data.notes, 500),
+        maj_le: iso(now()), maj_par: user.nom
+      };
+      if (data.id) {
+        var a = article(data.id);
+        if (!a) throw erreur('Article introuvable.');
+        if (data.actif === 'non') champs.actif = 'non';
+        store.update('Articles', a.id, champs);
+        journal(user, 'maj_article', a.id, champs);
+        return Object.assign({}, a, champs);
+      }
+      var q = nombre(data.quantite);
+      champs.id = nouvelId('A');
+      champs.quantite = isFinite(q) && q >= 0 ? q : 0;
+      champs.actif = 'oui';
+      store.insert('Articles', champs);
+      journal(user, 'article', champs.id, champs);
+      return champs;
+    };
+
+    A.mouvement = function (user, data) {
+      var a = article(data.article_id);
+      if (!a) throw erreur('Article introuvable.');
+      var delta = nombre(data.delta);
+      if (!isFinite(delta) || delta === 0) throw erreur('Quantité invalide.');
+      var motif = CONFIG.motifsMouvement.indexOf(data.motif) !== -1 ? data.motif : 'Consommation TP';
+      // Tout le monde déclare ce qu'il consomme ; les entrées et corrections sont réservées.
+      if ((delta > 0 || motif !== 'Consommation TP') && !peut(user, 'gererInventaire')) throw erreur('Seule une consommation peut être déclarée avec ton rôle.');
+      var m = mouvementStock(user, a, delta, motif, texte(data.demande_tp_id, 40));
+      journal(user, 'mouvement', a.id, { delta: delta, motif: motif });
+      return m;
+    };
+
+    // --- Commandes -------------------------------------------------------------
+    A.commande = function (user, data) {
+      exiger(user, 'proposerCommande');
+      var designation = texte(data.designation, 300);
+      var quantite = nombre(data.quantite), pu = nombre(data.prix_unitaire_ttc);
+      if (!designation) throw erreur('Indique ce qu\'il faut commander.');
+      if (!(quantite > 0)) throw erreur('Quantité invalide.');
+      if (!(pu >= 0)) throw erreur('Prix unitaire TTC estimé obligatoire (0 si inconnu).');
+      var justification = texte(data.justification, 1500);
+      if (!justification) throw erreur('La justification pédagogique est obligatoire (TP, séquence, bloc visé).');
+      var filiere = ['BIOMED', 'BIOALC'].indexOf(data.filiere) !== -1 ? data.filiere : (user.filiere || '');
+      if (!filiere) throw erreur('Choisis la filière qui porte la dépense.');
+      var total = arrondi(quantite * pu);
+      var devis = (Array.isArray(data.devis) ? data.devis : []).map(function (d) {
+        return { fournisseur: texte(d && d.fournisseur, 80), montant: nombre(d && d.montant), lien: texte(d && d.lien, 300) };
+      }).filter(function (d) { return d.fournisseur && d.montant > 0; });
+      if (total >= CONFIG.seuilTroisDevisTTC) {
+        var noms = {};
+        devis.forEach(function (d) { noms[d.fournisseur.toLowerCase()] = true; });
+        if (Object.keys(noms).length < 3) {
+          throw erreur('Montant estimé de ' + total + ' € TTC : au-delà de ' + CONFIG.seuilTroisDevisTTC + ' € TTC, joins trois devis de fournisseurs différents.');
+        }
+      }
+      var h = now();
+      var c = {
+        id: nouvelId('C'), cree_le: iso(h), user_id: user.id, user_nom: user.nom, filiere: filiere, designation: designation,
+        reference: texte(data.reference, 80), quantite: quantite, prix_unitaire_ttc: pu, total_ttc: total,
+        fournisseur: texte(data.fournisseur, 80), lien: texte(data.lien, 500), justification: justification,
+        demande_tp_id: texte(data.demande_tp_id, 40), sequence_id: texte(data.sequence_id, 40), article_id: texte(data.article_id, 40),
+        devis: JSON.stringify(devis), statut: 'soumise', approuve_par: '', approuve_le: '', motif_refus: '', pilotage_id: '', maj_le: iso(h)
+      };
+      store.insert('Commandes', c);
+      journal(user, 'commande', c.id, { total: total });
+      if (env.pilotage) {
+        try {
+          c.pilotage_id = env.pilotage.ajouter(c, 'Soumis', '') || '';
+          if (c.pilotage_id) store.update('Commandes', c.id, { pilotage_id: c.pilotage_id });
+        } catch (e) { journal(user, 'pilotage_erreur', c.id, e.message); }
+      }
+      notifier(['prof_referent'], '[Labo] Commande à approuver – ' + designation + ' (' + total + ' € TTC)',
+        user.nom + ' propose : ' + quantite + ' × ' + designation + (c.fournisseur ? ' chez ' + c.fournisseur : '') + '.\n\nJustification : ' + justification, filiere);
+      return c;
+    };
+
+    A.majCommande = function (user, data) {
+      var c = store.get('Commandes', data.id);
+      if (!c) throw erreur('Commande introuvable.');
+      var cible = data.statut, patch = {};
+      var transitions = {
+        approuvee: { de: ['soumise'], droit: 'approuverCommande' },
+        refusee: { de: ['soumise'], droit: 'approuverCommande' },
+        commandee: { de: ['approuvee'], droit: 'suivreCommande' },
+        livree: { de: ['commandee', 'approuvee'], droit: 'suivreCommande' },
+        annulee: { de: ['soumise'], droit: null }
+      };
+      var t = transitions[cible];
+      if (!t) throw erreur('Statut inconnu.');
+      if (t.de.indexOf(c.statut) === -1) throw erreur('Impossible de passer de « ' + STATUTS_COMMANDE[c.statut] + ' » à « ' + STATUTS_COMMANDE[cible] + ' ».');
+      if (t.droit) exiger(user, t.droit);
+      else if (String(c.user_id) !== String(user.id)) throw erreur('Seul l\'auteur peut annuler sa demande.');
+      if ((cible === 'approuvee' || cible === 'refusee') && String(c.user_id) === String(user.id) && user.role !== 'directeur') {
+        throw erreur('Tu ne peux pas approuver ta propre demande : elle part au directeur.');
+      }
+      patch.statut = cible;
+      patch.maj_le = iso(now());
+      if (cible === 'refusee') {
+        patch.motif_refus = texte(data.motif, 500);
+        if (!patch.motif_refus) throw erreur('Indique le motif du refus.');
+      }
+      if (cible === 'approuvee') { patch.approuve_par = user.nom; patch.approuve_le = iso(now()); }
+      // Report dans le classeur Pilotage dépenses (statuts de ce classeur).
+      if (env.pilotage) {
+        var STATUT_PILOTAGE = { approuvee: 'Validé', refusee: 'Refusé', commandee: 'Commandé', livree: 'Livré', annulee: 'Refusé' };
+        var date = env.format(now(), 'dd/MM/yyyy');
+        var signe = cible === 'approuvee' ? user.nom + ' – ' + date
+          : cible === 'refusee' ? 'Refusé par ' + user.nom + ' – ' + date + ' : ' + patch.motif_refus
+          : cible === 'annulee' ? 'Annulée par le demandeur – ' + date : null;
+        try {
+          if (c.pilotage_id) env.pilotage.maj(c.filiere, c.pilotage_id, STATUT_PILOTAGE[cible], signe);
+          else if (cible !== 'annulee' && cible !== 'refusee') patch.pilotage_id = env.pilotage.ajouter(Object.assign({}, c, patch), STATUT_PILOTAGE[cible], signe || '') || '';
+        } catch (e) { journal(user, 'pilotage_erreur', c.id, e.message); }
+      }
+      store.update('Commandes', c.id, patch);
+      journal(user, 'maj_commande', c.id, patch);
+      if (cible === 'livree' && c.article_id) {
+        var a = article(c.article_id);
+        var q = nombre(data.quantite_recue);
+        if (a) mouvementStock(user, a, q > 0 ? q : nombre(c.quantite), 'Réception de commande', '');
+      }
+      if (cible === 'approuvee' || cible === 'refusee') {
+        var auteur = trouverUser(c.user_id);
+        if (auteur && auteur.email && env.notify) {
+          env.notify(auteur.email, '[Labo] Commande ' + STATUTS_COMMANDE[cible] + ' – ' + c.designation,
+            user.nom + ' a ' + (cible === 'approuvee' ? 'approuvé' : 'refusé') + ' ta demande.' + (patch.motif_refus ? '\n\nMotif : ' + patch.motif_refus : ''));
+        }
+      }
+      return Object.assign({}, c, patch);
+    };
+
+    // -------------------------------------------------------------------------
+    var PUBLIQUES = { connexion: connexion };
+
+    // Identité vérifiée par Google (déploiement réservé au domaine de l'école) :
+    // le compte Google connecté est cherché dans la feuille Utilisateurs.
+    function parCompteGoogle(email) {
+      email = texte(email, 120).toLowerCase();
+      if (!email) throw erreur('Compte Google non identifié. Connecte-toi avec ton compte de l\'école.');
+      var u = actifs().filter(function (x) { return String(x.email).toLowerCase() === email; })[0];
+      if (!u) {
+        var cle = 'refus:' + email;
+        if (!env.cache.get(cle)) { journal({ id: '', nom: email }, 'acces_refuse', '', ''); env.cache.put(cle, '1', 600); }
+        throw erreur('Le compte ' + email + ' n\'est pas autorisé. Demande l\'accès au directeur du campus.');
+      }
+      return u;
+    }
+
+    // ctx.email : présent quand l'appel vient de la page servie par Apps Script.
+    function handle(req, ctx) {
+      try {
+        var action = req && req.action;
+        if (ctx && ctx.email !== undefined) {
+          if (!A[action]) throw erreur('Action inconnue.');
+          return { ok: true, data: A[action](parCompteGoogle(ctx.email), req.data || {}, null) };
+        }
+        if (PUBLIQUES[action]) return { ok: true, data: PUBLIQUES[action](req.data || {}) };
+        if (!A[action]) throw erreur('Action inconnue.');
+        var user = authentifier(req.jeton);
+        return { ok: true, data: A[action](user, req.data || {}, req.jeton) };
+      } catch (e) {
+        if (!e.metier && env.log) env.log(e);
+        return { ok: false, error: e.metier ? e.message : 'Erreur serveur. Réessaie ou préviens le directeur.' };
+      }
+    }
+
+    return { handle: handle };
+  }
+
+  return {
+    create: create, CONFIG: CONFIG, TABLES: TABLES, DROITS: DROITS,
+    STATUTS_DEMANDE: STATUTS_DEMANDE, STATUTS_COMMANDE: STATUTS_COMMANDE,
+    joursEntre: joursEntre, filiereDeClasse: filiereDeClasse, peut: peut
+  };
+})();
+
+if (typeof module !== 'undefined') module.exports = LaboCore;
+
+</script>
+<script>
+/*
+ * Hôte navigateur de LaboCore : formatage des dates et mode démonstration
+ * (stockage localStorage, données entièrement fictives).
+ */
+var LaboNav = (function () {
+  var TZ = 'Europe/Paris';
+  var CLE = 'labo-demo-v2';
+
+  function parties(d) {
+    var f = new Intl.DateTimeFormat('fr-FR', {
+      timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+    });
+    var p = {};
+    f.formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
+    return p;
+  }
+
+  function format(d, motif) {
+    var p = parties(d);
+    return motif.replace('yyyy', p.year).replace('MM', p.month).replace('dd', p.day)
+      .replace('HH', p.hour).replace('mm', p.minute).replace('ss', p.second);
+  }
+
+  function parseLocal(dateStr, hhmm) {
+    var y = +dateStr.slice(0, 4), m = +dateStr.slice(5, 7), j = +dateStr.slice(8, 10);
+    var h = hhmm.split(':');
+    var naif = Date.UTC(y, m - 1, j, +h[0], +h[1]);
+    var p = parties(new Date(naif));
+    var vu = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+    return new Date(naif - (vu - naif));
+  }
+
+  function aleatoire(n) {
+    var s = '';
+    var b = new Uint8Array(n);
+    (typeof crypto !== 'undefined' && crypto.getRandomValues ? crypto.getRandomValues(b) : b.forEach(function (x, i) { b[i] = Math.random() * 256; }));
+    for (var i = 0; i < n; i++) s += '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'[b[i] % 34];
+    return s;
+  }
+
+  // Empreinte simple : suffisante pour une démo locale, jamais utilisée en production.
+  function empreinte(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0).toString(16);
+  }
+
+  var memoire = null;
+  function charger() { try { return JSON.parse(localStorage.getItem(CLE)) || null; } catch (e) { return null; } }
+  function sauver() { try { localStorage.setItem(CLE, JSON.stringify(memoire)); } catch (e) { /* démo en mémoire seulement */ } }
+  function base() {
+    if (!memoire) memoire = charger() || {};
+    Object.keys(LaboCore.TABLES).forEach(function (t) { if (!memoire[t]) memoire[t] = []; });
+    if (!memoire._cache) memoire._cache = {};
+    if (!memoire._sessions) memoire._sessions = {};
+    return memoire;
+  }
+
+  var env = {
+    now: function () { return new Date(); },
+    format: format,
+    parseLocal: parseLocal,
+    random: aleatoire,
+    randomToken: function () { return aleatoire(40); },
+    hashPin: function (id, pin) { return empreinte('demo|' + id + '|' + pin); },
+    cache: {
+      get: function (k) { var v = base()._cache[k]; return v && v.exp > Date.now() ? v.v : null; },
+      put: function (k, v, s) { base()._cache[k] = { v: v, exp: Date.now() + s * 1000 }; sauver(); },
+      remove: function (k) { delete base()._cache[k]; sauver(); }
+    },
+    sessions: {
+      put: function (j, o) { base()._sessions[empreinte(j)] = o; sauver(); },
+      get: function (j) { return base()._sessions[empreinte(j)] || null; },
+      remove: function (j) { delete base()._sessions[empreinte(j)]; sauver(); }
+    },
+    notify: null,
+    pilotage: null
+  };
+
+  function store() {
+    base();
+    function copie(o) { return JSON.parse(JSON.stringify(o)); }
+    return {
+      all: function (t) { return copie(memoire[t]); },
+      get: function (t, id) { var r = memoire[t].filter(function (x) { return String(x.id) === String(id); })[0]; return r ? copie(r) : null; },
+      insert: function (t, o) { memoire[t].push(copie(o)); sauver(); },
+      update: function (t, id, patch) {
+        var r = memoire[t].filter(function (x) { return String(x.id) === String(id); })[0];
+        if (!r) throw new Error('Ligne introuvable');
+        Object.keys(patch).forEach(function (k) { r[k] = patch[k]; });
+        sauver();
+      }
+    };
+  }
+
+  function decaler(j) { return format(new Date(Date.now() + j * 86400000), 'yyyy-MM-dd'); }
+
+  var COMPTES = [
+    ['T1', 'Technicienne A', 'technicienne.a@demo.local', 'technicienne', '', '', '111111', '30'],
+    ['T2', 'Technicienne B', 'technicienne.b@demo.local', 'technicienne', '', '', '222222', '30'],
+    ['L1', 'Aide-laborantine C', 'aide.c@demo.local', 'aide_laborantine', '', '', '333333', '20'],
+    ['E1', 'Enseignant BIOMED microbiologie', 'prof.biomed@demo.local', 'enseignant', 'BIOMED', 'Microbiologie', '444444', ''],
+    ['E2', 'Enseignante BIOALC biochimie', 'prof.bioalc@demo.local', 'enseignant', 'BIOALC', 'Biochimie', '555555', ''],
+    ['R1', 'Prof référent', 'referent@demo.local', 'prof_referent', '', '', '666666', ''],
+    ['C1', 'Coordinateur pédagogique', 'coordination@demo.local', 'coordinateur', '', '', '777777', ''],
+    ['D1', 'Directeur du campus', 'direction@demo.local', 'directeur', '', '', '888888', '']
+  ];
+
+  function amorcer(core) {
+    var s = store();
+    if (s.all('Utilisateurs').length) return;
+    COMPTES.forEach(function (c) {
+      s.insert('Utilisateurs', { id: c[0], nom: c[1], email: c[2], role: c[3], filiere: c[4], disciplines: c[5], pin: '', pin_hash: env.hashPin(c[0], c[6]), taux_horaire: c[7], actif: 'oui' });
+    });
+    var jetons = {};
+    COMPTES.forEach(function (c) { jetons[c[0]] = core.handle({ action: 'connexion', data: { email: c[2], pin: c[6] } }).data.jeton; });
+    function q(id, action, data) {
+      var r = core.handle({ action: action, jeton: jetons[id], data: data });
+      if (!r.ok && typeof console !== 'undefined') console.warn('démo', action, r.error);
+      return r.data;
+    }
+
+    // Programme fictif inspiré des intitulés de référentiel (pas d'extrait du scénario réel).
+    [
+      ['P1', 'BIOMED', '1A', 'Biochimie', 'BC2', 'S3-5', decaler(-3), decaler(25), 'Spectrophotométrie et gamme d\'étalonnage', 'Gamme d\'étalonnage des protéines totales (biuret), dosage d\'inconnus', 'Recherche de la limite de linéarité', 'Spectrophotomètre | Cuves | Réactif de biuret | Micropipettes et cônes'],
+      ['P2', 'BIOMED', '1A', 'Microbiologie', 'BC2', 'S4-6', decaler(4), decaler(30), 'Examen microscopique et coloration de Gram', 'État frais et coloration de Gram sur souches non pathogènes', 'Lecture de lames et identification présomptive', 'Microscopes | Lames et lamelles | Kit coloration de Gram | Huile à immersion | Anses / öses'],
+      ['P3', 'BIOMED', '1A', 'HAI', 'BC2', 'S5-7', decaler(10), decaler(38), 'Frottis sanguin et formule leucocytaire', 'Réalisation et coloration MGG de frottis', 'Formule leucocytaire sur lames commentées', 'Lames et lamelles | Colorant MGG | Microscopes | Huile à immersion'],
+      ['P4', 'BIOALC', '1A', 'Biochimie', 'BC02', 'S5-11', decaler(1), decaler(45), 'Paramètres physico-chimiques d\'un produit', 'Mesures de pH, conductivité et extrait sec sur eau de process et lait', 'Exploitation des mesures et conformité', 'pH-mètre | Conductimètre | Balance analytique | Étuve | Verrerie jaugée'],
+      ['P5', 'BIOALC', '1A', 'Microbiologie', 'BC02', 'S6-9', decaler(8), decaler(40), 'Dénombrement de la flore d\'un produit alimentaire', 'Ensemencement en masse et dénombrement sur PCA', 'Calcul et expression des résultats', 'Gélose PCA | Boîtes de Petri | Eau peptonée | Bain-marie | Étuve'],
+      ['P6', 'BIOALC', '1A', 'Biologie cellulaire', 'BC02', 'S7-10', decaler(15), decaler(50), 'Numération cellulaire et viabilité', 'Numération sur cellule de Malassez et test au bleu trypan', 'Comparaison de méthodes de numération', 'Cellule de Malassez | Bleu trypan | Microscopes | Micropipettes et cônes']
+    ].forEach(function (p) {
+      s.insert('Programme', { id: p[0], filiere: p[1], annee: p[2], matiere: p[3], bloc: p[4], semaines: p[5], debut: p[6], fin: p[7], titre: p[8], tp: p[9], renforcement: p[10], materiel: p[11] });
+    });
+
+    [
+      ['Fournisseur verrerie (démo)', 'Laboratoire', 'Verrerie | Petit matériel | Consommable', '', '', '', 'Exemple fictif'],
+      ['Fournisseur microbiologie (démo)', 'Laboratoire', 'Milieu de culture | Petit matériel', '', '', '', 'Exemple fictif'],
+      ['Fournisseur réactifs (démo)', 'Laboratoire', 'Réactif / coffret', '', '', '', 'Exemple fictif'],
+      ['Fournisseur équipements (démo)', 'Laboratoire', 'Équipement', '', '', '', 'Exemple fictif']
+    ].forEach(function (f) { s.insert('Fournisseurs', { nom: f[0], domaine: f[1], categories: f[2], contact: f[3], email: f[4], telephone: f[5], notes: f[6] }); });
+
+    var art = {};
+    [
+      ['biuret', 'BIOMED', 'Réactif / coffret', 'Réactif de biuret', 'REF-DEMO-01', 'Fournisseur réactifs (démo)', 2, 'flacon', 2, decaler(400)],
+      ['gram', 'Commun', 'Réactif / coffret', 'Kit coloration de Gram', 'REF-DEMO-02', 'Fournisseur microbiologie (démo)', 1, 'kit', 1, decaler(200)],
+      ['mgg', 'BIOMED', 'Réactif / coffret', 'Colorant MGG', 'REF-DEMO-03', 'Fournisseur réactifs (démo)', 3, 'flacon', 1, decaler(20)],
+      ['cones', 'Commun', 'Consommable', 'Cônes 200 µL', 'REF-DEMO-04', 'Fournisseur verrerie (démo)', 6, 'sachet de 1000', 2, ''],
+      ['lames', 'Commun', 'Consommable', 'Lames et lamelles', 'REF-DEMO-05', 'Fournisseur verrerie (démo)', 8, 'boîte', 3, ''],
+      ['pca', 'BIOALC', 'Milieu de culture', 'Gélose PCA déshydratée', 'REF-DEMO-06', 'Fournisseur microbiologie (démo)', 0, 'pot 500 g', 1, decaler(300)],
+      ['petri', 'Commun', 'Consommable', 'Boîtes de Petri stériles', 'REF-DEMO-07', 'Fournisseur verrerie (démo)', 4, 'carton de 500', 2, ''],
+      ['huile', 'Commun', 'Consommable', 'Huile à immersion', 'REF-DEMO-08', 'Fournisseur équipements (démo)', 1, 'flacon', 1, '']
+    ].forEach(function (a) {
+      art[a[0]] = q('T1', 'article', { filiere: a[1], categorie: a[2], designation: a[3], reference: a[4], fournisseur: a[5], quantite: a[6], unite: a[7], seuil: a[8], peremption: a[9], emplacement: 'Réserve' }).id;
+    });
+
+    var d1 = q('E1', 'demande', { date_tp: decaler(2), creneau: LaboCore.CONFIG.creneaux[1], labo: 'Labo Gerty Cori', classe: 'BM1', discipline: 'Microbiologie', competence: 'RNCP40027 BC2 – Analyses médicales les plus courantes', sequence_id: 'P2', titre: 'Réaliser une coloration de Gram et l\'interpréter', effectif: '15', besoin: 'Souches non pathogènes en bouillon, kit Gram, lames, microscopes, huile à immersion' });
+    q('E2', 'demande', { date_tp: decaler(0), creneau: LaboCore.CONFIG.creneaux[3], labo: 'Labo Fleming', classe: 'BIOALC1', discipline: 'Biochimie', competence: 'RNCP38884 BC02 – Réalisation des analyses dans le cadre d\'un contrôle qualité', sequence_id: 'P4', titre: 'Mesurer le pH et la conductivité d\'une eau de process', effectif: '12', besoin: 'pH-mètres étalonnés, solutions tampons pH 4/7/10, conductimètres, échantillons d\'eau' });
+    q('E2', 'demande', { date_tp: decaler(20), creneau: LaboCore.CONFIG.creneaux[2], labo: 'Labo Marie Curie', classe: 'BIOALC1', discipline: 'Microbiologie', competence: '', sequence_id: 'P5', titre: 'Dénombrer la flore aérobie mésophile d\'un lait', effectif: '12', besoin: 'Gélose PCA, boîtes de Petri, eau peptonée tamponnée, bain-marie 45 °C' });
+    q('T1', 'majDemande', { id: d1.id, prendre: true });
+    q('T1', 'message', { demande_id: d1.id, texte: 'Il ne reste qu\'un kit de Gram : suffisant pour 15 élèves en binômes ?' });
+    q('E1', 'message', { demande_id: d1.id, texte: 'Oui, en binômes ça passe.' });
+
+    var missions = LaboCore.CONFIG.missions;
+    [[-9, '08:00', '12:30', 'T1'], [-8, '13:30', '18:00', 'T1'], [-7, '08:15', '12:00', 'T2'], [-3, '09:00', '17:30', 'T2'], [-2, '08:00', '11:45', 'T1'], [-2, '13:00', '16:00', 'L1']]
+      .forEach(function (x, i) {
+        var r = q(x[3], 'saisieManuelle', { date: decaler(x[0]), debut: x[1], fin: x[2], labo: LaboCore.CONFIG.labos[i % 4], missions: [missions[i % 2], missions[2]], motif: 'Reprise de l\'émargement papier (démo)' });
+        if (r && i < 3) q('R1', 'validerSession', { id: r.id, decision: 'validee' });
+      });
+
+    q('T2', 'rangement', { labo: 'Labo Gerty Cori', controles: { 'Pipettes verre': 'ok', 'Becs Bunsen': 'ok', 'DASRI': 'nc', 'Microscopes': 'ok' }, remarques: 'Collecteur DASRI plein, pas de collecteur de rechange.' });
+    q('T1', 'incident', { labo: 'Labo Robert Koch', categorie: 'Équipement en panne', gravite: 'Bloquant', description: 'Spectrophotomètre n° 2 : la lampe ne s\'allume plus.' });
+    q('T2', 'mouvement', { article_id: art.cones, delta: -1, motif: 'Consommation TP' });
+
+    q('T2', 'commande', { filiere: 'BIOALC', designation: 'Gélose PCA déshydratée 500 g', reference: 'REF-DEMO-06', quantite: 2, prix_unitaire_ttc: 85, fournisseur: 'Fournisseur microbiologie (démo)', justification: 'TP dénombrement flore aérobie mésophile BIOALC1 (séquence P5) : stock à 0.', article_id: art.pca, sequence_id: 'P5' });
+    var c2 = q('T1', 'commande', { filiere: 'BIOMED', designation: 'Colorant MGG 1 L', quantite: 2, prix_unitaire_ttc: 40, fournisseur: 'Fournisseur réactifs (démo)', justification: 'Frottis sanguins BM1 (séquence P3), lot actuel proche de la péremption.', article_id: art.mgg, sequence_id: 'P3' });
+    if (c2) q('R1', 'majCommande', { id: c2.id, statut: 'approuvee' });
+  }
+
+  function reinitialiser() {
+    memoire = null;
+    try { localStorage.removeItem(CLE); } catch (e) { /* rien */ }
+  }
+
+  return { env: env, store: store, amorcer: amorcer, reinitialiser: reinitialiser, format: format, comptes: COMPTES };
+})();
+
+</script>
+<script>
+/*
+ * Catalogue des TP incontournables par filière, établi par la direction du
+ * campus à partir des référentiels BTS Biologie médicale (RNCP40027) et BTS
+ * Bioanalyses en laboratoire de contrôle (RNCP38884).
+ *
+ * Chaque TP porte :
+ *  - codes : savoir-faire (SF), savoirs (T) ou compétences (C) du référentiel ;
+ *  - motsCles : expression régulière qui repère le TP dans le texte des
+ *    séquences des scénarios pédagogiques (titre, tronc commun, renforcement) ;
+ *  - materiel : matériel type à préparer, rapproché de l'inventaire.
+ * Le matériel type est indicatif : l'enseignant l'ajuste dans sa demande.
+ */
+var LaboReferentiel = {
+  BIOMED: {
+    intro: 'Microbiologie (REMIC / CA-SFM), hématologie, immunologie, biochimie, biologie moléculaire, ACP et prélèvements simulés.',
+    domaines: [
+      { nom: 'Microbiologie médicale (REMIC / CA-SFM)', tps: [
+        { id: 'BM-MIC-1', intitule: 'Ensemencement et isolement sous PSM de type 2', codes: 'SF2.3.1',
+          description: 'Isolement sur milieux sélectifs, d\'enrichissement et d\'orientation (milieux chromogènes) en conditions strictes d\'asepsie.',
+          motsCles: 'ensemencement|isolement|chromog|milieux? (usuels|sélectifs|d.enrichissement)|\\bpsm\\b',
+          materiel: ['Poste de sécurité microbiologique de type 2', 'Géloses sélectives et chromogènes', 'Bouillons d\'enrichissement', 'Anses / öses stériles', 'Boîtes de Petri', 'Souches de référence'] },
+        { id: 'BM-MIC-2', intitule: 'Examens macroscopiques et lecture de milieux différentiels', codes: 'SF2.3.3',
+          description: 'Étude des caractères culturaux des colonies, lecture de milieux différentiels.',
+          motsCles: 'macroscopique|caractères culturaux|colonies|différentiels?|lecture des (boîtes|milieux)',
+          materiel: ['Milieux différentiels (lactose, mannitol…)', 'Cultures de 24 h', 'Loupes / compte-colonies'] },
+        { id: 'BM-MIC-3', intitule: 'États frais et colorations différentielles', codes: 'SF2.3.2 · T2.3',
+          description: 'États frais, coloration de Gram et autres colorations pour l\'identification morphologique et tinctoriale de bactéries, levures et champignons filamenteux.',
+          motsCles: 'état[s]? frais|\\bgram\\b|colorations? (de gram|différentielles?)|levures?|micromycète|fongique|mycolog',
+          materiel: ['Kit coloration de Gram', 'Lames et lamelles', 'Microscopes', 'Huile à immersion', 'Bleu de lactophénol', 'Souches bactériennes et fongiques'] },
+        { id: 'BM-MIC-4', intitule: 'Antibiogramme par diffusion en gélose (CA-SFM)', codes: 'SF2.3.3 · T2.3',
+          description: 'Réalisation standardisée selon le CA-SFM, mesure des diamètres de zones d\'inhibition.',
+          motsCles: 'antibiogramme|ca-sfm|disques?|diamètres?|résistance',
+          materiel: ['Gélose Mueller-Hinton', 'Disques d\'antibiotiques', 'Distributeur de disques', 'Standard McFarland 0,5', 'Pied à coulisse ou réglet', 'Souches de contrôle'] },
+        { id: 'BM-MIC-5', intitule: 'Microbiologie quantitative et ECBU', codes: 'SF2.3.2 · T2.3',
+          description: 'Dénombrement de germes et d\'éléments figurés (seuils de positivité de l\'ECBU).',
+          motsCles: 'ecbu|urinaire|dénombrement|leucocyturie|seuils? de positivité|kova|numération des éléments',
+          materiel: ['Urines simulées', 'Cellules de numération (Kova, Malassez)', 'Bandelettes urinaires', 'Gélose CLED ou chromogène urinaire', 'Anses calibrées 1 et 10 µL'] }
+      ] },
+      { nom: 'Hématologie, cytologie et hémostase', tps: [
+        { id: 'BM-HEM-1', intitule: 'Frottis sanguin, coloration MGG et formule leucocytaire', codes: 'SF2.3.2 · T2.3 · T2.6',
+          description: 'Confection, coloration MGG, identification des cellules matures et immatures des lignées myéloïde et lymphoïde, recherche d\'anomalies et d\'atypies.',
+          motsCles: 'frottis|\\bmgg\\b|may|formule leucocytaire|lignées?|cytologie sanguine|atypies?',
+          materiel: ['Sang EDTA ou frottis pédagogiques', 'Lames dégraissées', 'Colorants May-Grünwald et Giemsa', 'Tampon pH 7,2', 'Microscopes', 'Huile à immersion', 'Atlas de cytologie'] },
+        { id: 'BM-HEM-2', intitule: 'Numération cellulaire manuelle', codes: 'SF2.3.2 · T2.3',
+          description: 'Comptage sur cellule hématimétrique.',
+          motsCles: 'numération (globulaire|des (hématies|leucocytes|globules)|cellulaire|et formule)|hématimètre|malassez|thoma|hématimétrique',
+          materiel: ['Cellules de Malassez ou Thoma', 'Liquide de dilution (Hayem, Lazarus)', 'Micropipettes et cônes', 'Microscopes', 'Compteur manuel'] },
+        { id: 'BM-HEM-3', intitule: 'Hémostase chronométrique (TP/INR, TCA, tests de correction)', codes: 'SF2.4.1 · T2.3 · T2.6',
+          description: 'Tests chronométriques manuels ou sur semi-automate, tests de correction pour anticoagulant circulant ou déficit en facteurs.',
+          motsCles: 'hémostase|\\btca\\b|\\btq\\b|\\binr\\b|taux de prothrombine|chronométrique|anticoagulant circulant|tests? de correction|coagulation',
+          materiel: ['Semi-automate d\'hémostase ou bain-marie 37 °C', 'Réactifs TQ (thromboplastine) et TCA', 'Plasmas de contrôle normal et pathologique', 'Plasma témoin pour correction', 'Cuvettes et billes', 'Chronomètres'] }
+      ] },
+      { nom: 'Immunologie et immuno-hématologie', tps: [
+        { id: 'BM-IMM-1', intitule: 'Agglutination manuelle (groupage ABO-Rh, latex)', codes: 'SF2.3.4 · T2.3',
+          description: 'Recherche et identification d\'antigènes ou d\'anticorps par agglutination directe ou réactifs particulaires.',
+          motsCles: 'agglutin|groupage|\\babo\\b|rhésus|beth|simonin|latex|phénotyp',
+          materiel: ['Sérums tests anti-A, anti-B, anti-AB, anti-D', 'Hématies tests A1 et B', 'Plaques d\'opaline ou cartes', 'Réactifs latex', 'Sangs de groupe connu'] },
+        { id: 'BM-IMM-2', intitule: 'ELISA quantitatif sur lecteur de microplaques', codes: 'SF2.3.5 · T2.3',
+          description: 'Dosage d\'antigènes ou d\'anticorps avec gamme d\'étalonnage, témoins de spécificité et d\'efficacité.',
+          motsCles: 'elisa|immuno-?enzym|immunodosage|microplaques?',
+          materiel: ['Kit ELISA', 'Microplaques 96 puits', 'Lecteur de microplaques', 'Micropipettes multicanaux', 'Laveur ou pissettes de tampon', 'Étuve 37 °C'] },
+        { id: 'BM-IMM-3', intitule: 'Tests rapides d\'immunochromatographie', codes: 'SF2.3.4',
+          description: 'Mise en œuvre et lecture de bandelettes ou cassettes.',
+          motsCles: 'trod|immunochromato|tests? rapides?|cassettes?',
+          materiel: ['Cassettes ou bandelettes de TROD', 'Contrôles positifs et négatifs', 'Minuteurs'] }
+      ] },
+      { nom: 'Biochimie clinique et séparations', tps: [
+        { id: 'BM-BIO-1', intitule: 'Dosages colorimétriques en point final', codes: 'SF2.3.6 · T2.3',
+          description: 'Dosages de substrats avec ou sans enzymes outils, gammes étalons, limites de linéarité et domaine de mesure.',
+          motsCles: 'point final|colorimétr|gamme d.étalonnage|beer|glucose|urée|créatinine|cholest|biuret|protéines totales',
+          materiel: ['Spectrophotomètre', 'Cuves', 'Coffrets de dosage (glucose, urée, créatinine…)', 'Étalons', 'Micropipettes et cônes', 'Tubes à hémolyse'] },
+        { id: 'BM-BIO-2', intitule: 'Cinétiques enzymatiques (vitesse initiale, deux points)', codes: 'SF2.3.7 · T2.3',
+          description: 'Dosage d\'enzymes sériques en continu ou en deux points sur spectrophotomètre thermostaté.',
+          motsCles: 'cinétique|activité enzymatique|vitesse initiale|alat|asat|transaminases|\\bldh\\b|\\bpal\\b|deux points',
+          materiel: ['Spectrophotomètre thermostaté', 'Coffrets ALAT, ASAT, PAL, LDH', 'Sérums de contrôle', 'Chronomètres', 'Cuves'] },
+        { id: 'BM-BIO-3', intitule: 'Électrophorèse manuelle des protéines ou hémoglobines', codes: 'T2.3',
+          description: 'Migration, révélation, corrélation électrophorégramme et densitogramme.',
+          motsCles: 'électrophorèse|densitogramme|électrophorégramme|hémoglobines?',
+          materiel: ['Cuve et générateur d\'électrophorèse', 'Gels d\'agarose ou bandes d\'acétate de cellulose', 'Tampon de migration', 'Colorant (noir amide, Ponceau)', 'Sérums normaux et pathologiques', 'Densitomètre ou scanner'] },
+        { id: 'BM-BIO-4', intitule: 'Contrôle interne de qualité (Levey-Jennings, Westgard)', codes: 'SF2.1.3 · SF2.5.3 · T2.4',
+          description: 'Contrôles haut et bas, cartes de Levey-Jennings, règles de Westgard, actions curatives.',
+          motsCles: '\\bciq\\b|levey|westgard|contrôle (interne )?de qualité|cartes? de contrôle',
+          materiel: ['Sérums de contrôle deux niveaux', 'Cartes de contrôle (tableur)', 'Coffrets de dosage en cours'] }
+      ] },
+      { nom: 'Biologie moléculaire', tps: [
+        { id: 'BM-MOL-1', intitule: 'PCR en point final', codes: 'SF2.3.8 · T2.3',
+          description: 'Pipetage en zone dédiée, préparation des mix, programmation du thermocycleur, témoins positifs et négatifs.',
+          motsCles: '\\bpcr\\b|thermocycleur|amplification génique',
+          materiel: ['Thermocycleur', 'Mix PCR et amorces', 'ADN témoin positif', 'Eau sans nucléase', 'Tubes PCR 0,2 mL', 'Cônes à filtre', 'Hotte ou zone dédiée'] },
+        { id: 'BM-MOL-2', intitule: 'Électrophorèse des amplicons sur gel d\'agarose', codes: 'SF2.3.8',
+          description: 'Contrôle et séparation des fragments amplifiés, visualisation UV ou lumière bleue.',
+          motsCles: 'agarose|amplicons?|fragments amplifiés|transillumin|produits? (de )?pcr|révélation sur gel',
+          materiel: ['Agarose', 'Tampon TAE ou TBE', 'Intercalant (SYBR Safe ou équivalent)', 'Marqueur de taille', 'Cuve et générateur', 'Transilluminateur'] }
+      ] },
+      { nom: 'Anatomie et cytologie pathologiques, gamètes', tps: [
+        { id: 'BM-ACP-1', intitule: 'Technique histologique (coupe au microtome, coloration)', codes: 'SF2.2.3 · T2.6',
+          description: 'Préparation et traitement pré-analytique de pièces, coupe au microtome, coloration de tissus.',
+          motsCles: 'histolog|microtome|coupes?|anatomo|cytopatholog|\\bacp\\b|tissus?',
+          materiel: ['Blocs en paraffine pédagogiques', 'Microtome et lames de rasoir', 'Bain d\'étalement', 'Colorants HES ou HE', 'Lames et lamelles', 'Milieu de montage'] },
+        { id: 'BM-ACP-2', intitule: 'Spermiologie : frottis, morphologie et numération', codes: 'SF3.4.2 · T3.4',
+          description: 'Frottis coloré de gamètes, morphologie selon David ou Krüger, numération.',
+          motsCles: 'spermi|sperme|spermatozo|gamètes?|david|krüger|kruger|\\bamp\\b|paillettes',
+          materiel: ['Paillettes de sperme bovin', 'Colorant de Papanicolaou ou Spermac', 'Cellules de numération', 'Bain-marie 37 °C', 'Microscopes'] }
+      ] },
+      { nom: 'Prélèvements en pratique simulée (BC5, U9)', tps: [
+        { id: 'BM-PRE-1', intitule: 'Ponctions sanguines simulées', codes: 'SF5.3.2 · SF5.3.4 · SF5.3.6 · T5.1',
+          description: 'Bras d\'entraînement (pli du coude, dos de la main, ponction capillaire), ordre des tubes selon les additifs, identitovigilance, étiquetage, AES.',
+          motsCles: 'ponction|veineuse|prélèvement sanguin|bras|mannequin|capillaire|ordre des tubes|identitovigilance|\\baes\\b',
+          materiel: ['Bras d\'entraînement', 'Aiguilles et corps de pompe', 'Tubes sous vide (citrate, héparine, EDTA, sec)', 'Garrots', 'Antiseptique et compresses', 'Collecteurs DASRI', 'Étiquettes'] },
+        { id: 'BM-PRE-2', intitule: 'Prélèvements par écouvillonnage simulé', codes: 'SF5.3.2 · T5.1',
+          description: 'Gestes nasopharyngés, oropharyngés, nasaux et salivaires selon les recommandations de la SFM.',
+          motsCles: 'écouvillon|nasopharyng|oropharyng|salivaire|nasal',
+          materiel: ['Écouvillons floqués', 'Milieux de transport', 'Têtes de simulation', 'EPI (masques, gants, lunettes)'] }
+      ] }
+    ]
+  },
+  BIOALC: {
+    intro: 'Bloc 2 (U4) : réalisation des analyses dans le cadre d\'un contrôle qualité (C2.3 à C2.6), en lien avec le bloc 3 (optimisation de méthodes).',
+    domaines: [
+      { nom: 'Microbiologie (C2.4, T2.2)', tps: [
+        { id: 'AC-MIC-1', intitule: 'Détection et isolement à partir de matrices', codes: 'C2.4 · T2.2',
+          description: 'Isolement à partir de matrices agroalimentaires, cosmétiques, pharmaceutiques ou environnementales ; orientation microscopique et galeries d\'identification.',
+          motsCles: 'isolement|détecter|détection|matrices?|galeries?|identifi|cosmétique',
+          materiel: ['Milieux d\'enrichissement et sélectifs', 'Galeries d\'identification', 'Kit coloration de Gram', 'Microscopes', 'Échantillons de matrices (lait, eau, cosmétique)'] },
+        { id: 'AC-MIC-2', intitule: 'Dénombrements (masse, surface, membrane, numération)', codes: 'C2.4 · T2.2',
+          description: 'Dilutions en série, ensemencement en masse et en surface, filtration sur membrane, comptage direct, suivi de biomasse par turbidimétrie.',
+          motsCles: 'dénombr|en masse|en surface|filtration sur membrane|turbidim|biomasse',
+          materiel: ['Diluant (eau peptonée tamponnée)', 'Géloses PCA et sélectives', 'Rampe de filtration et membranes', 'Cellules de numération', 'Spectrophotomètre', 'Bain-marie 45 °C'] },
+        { id: 'AC-MIC-3', intitule: 'Efficacité d\'antimicrobiens et barèmes thermiques', codes: 'C2.4',
+          description: 'Efficacité d\'un antiseptique ou désinfectant, barèmes de destruction thermique, stérilisation à froid.',
+          motsCles: 'antisept|désinfect|antimicrob|destruction thermique|barèmes?|stérilisation|pasteurisation|bactéricid',
+          materiel: ['Désinfectants à tester', 'Neutralisant', 'Souches de référence', 'Bain-marie thermostaté', 'Chronomètres'] },
+        { id: 'AC-MIC-4', intitule: 'Culture en bioréacteur de paillasse', codes: 'C2.4',
+          description: 'Suivi en ligne et hors ligne (pH, pO2, température), biomasse et production de métabolites.',
+          motsCles: 'bioréacteur|fermente|fermentaire|bioproduction|\\bpo2\\b',
+          materiel: ['Bioréacteur de paillasse', 'Sondes pH et pO2', 'Milieu de culture', 'Souche de production', 'Spectrophotomètre'] },
+        { id: 'AC-MIC-5', intitule: 'Contrôles environnementaux (surfaces, air)', codes: 'C2.4',
+          description: 'Prélèvements de surfaces (écouvillons, boîtes contact) et aérobiocontamination (biocollecteur d\'air).',
+          motsCles: 'surfaces?|environnement|boîtes? contact|biocollecteur|aérobio|\\bair\\b',
+          materiel: ['Boîtes contact', 'Écouvillons', 'Biocollecteur d\'air', 'Géloses TSA et Sabouraud'] }
+      ] },
+      { nom: 'Biochimie analytique et physico-chimie (C2.3, T2.2)', tps: [
+        { id: 'AC-BIO-1', intitule: 'Mesures physico-chimiques de base', codes: 'C2.3 · T2.2',
+          description: 'pH-métrie, conductimétrie, réfractométrie, polarimétrie, viscosimétrie, aw, matière sèche, cendres, Kjeldahl.',
+          motsCles: 'ph-?m|conductim|réfractom|polarim|viscosi|\\baw\\b|activité de l.eau|matière sèche|extrait sec|cendres|kjeldahl|physico-chimiques?',
+          materiel: ['pH-mètres et tampons', 'Conductimètre', 'Réfractomètre', 'Polarimètre', 'Viscosimètre', 'Balance analytique', 'Étuve et four à moufle', 'Minéralisateur Kjeldahl'] },
+        { id: 'AC-BIO-2', intitule: 'Chromatographie (CLHP, CPG, échange d\'ions)', codes: 'C2.3 · T2.2',
+          description: 'Préparation des échantillons, réglage de la chaîne, temps de rétention, intégration des pics.',
+          motsCles: 'chromatograph|clhp|hplc|\\bcpg\\b|rétention|échangeuses? d.ions',
+          materiel: ['Chaîne CLHP ou CPG', 'Colonnes', 'Solvants qualité HPLC', 'Étalons', 'Filtres seringue', 'Résines échangeuses d\'ions'] },
+        { id: 'AC-BIO-3', intitule: 'Électrophorèse des protéines (agarose, SDS-PAGE)', codes: 'C2.3 · T2.2',
+          description: 'Coulée, migration, révélation et profil densitométrique.',
+          motsCles: 'électrophorèse|sds|polyacrylamide|page\\b|densitom',
+          materiel: ['Cuve verticale et générateur', 'Gels ou réactifs de coulée', 'Marqueur de masse moléculaire', 'Bleu de Coomassie', 'Échantillons protéiques'] },
+        { id: 'AC-BIO-4', intitule: 'Dosages spectrophotométriques, cinétiques et ELISA', codes: 'C2.3 · T2.2',
+          description: 'Gammes d\'étalonnage externe, ajouts dosés, mesure d\'activité catalytique, ELISA sandwich ou compétitif en plaque 96 puits.',
+          motsCles: 'dosage|spectrophotom|gamme|ajouts dosés|cinétique|activité|elisa|biuret|enzymat',
+          materiel: ['Spectrophotomètre', 'Cuves', 'Réactifs de dosage', 'Kit ELISA', 'Lecteur de microplaques', 'Micropipettes et cônes'] }
+      ] },
+      { nom: 'Biologie moléculaire des acides nucléiques (C2.5, T2.2)', tps: [
+        { id: 'AC-MOL-1', intitule: 'Extraction et dosage des acides nucléiques', codes: 'C2.5 · T2.2',
+          description: 'Extraction d\'ADN ou d\'ARN sur colonnes, pureté et concentration (A260/A280).',
+          motsCles: 'extraction|purification|acides nucléiques|\\badn\\b|\\barn\\b|a260',
+          materiel: ['Kits d\'extraction sur colonnes', 'Microcentrifugeuse', 'Spectrophotomètre UV et microcuves', 'Éthanol', 'Tubes 1,5 mL'] },
+        { id: 'AC-MOL-2', intitule: 'PCR et qPCR', codes: 'C2.5 · T2.2',
+          description: 'Mélanges réactionnels en marche en avant, thermocycleur classique et en temps réel.',
+          motsCles: '\\bpcr\\b|qpcr|temps réel|amplification|thermocycleur|marche en avant',
+          materiel: ['Thermocycleur', 'Thermocycleur temps réel', 'Mix PCR et qPCR', 'Amorces et sondes', 'Plaques ou tubes PCR', 'Cônes à filtre'] },
+        { id: 'AC-MOL-3', intitule: 'Caractérisation : gel d\'agarose et restriction', codes: 'C2.5 · T2.2',
+          description: 'Électrophorèse avec marqueurs de taille, digestion par enzymes de restriction.',
+          motsCles: 'agarose|restriction|amplicons?|marqueurs? de taille',
+          materiel: ['Agarose et tampon', 'Marqueur de taille', 'Enzymes de restriction et tampons', 'Transilluminateur', 'Intercalant'] }
+      ] },
+      { nom: 'Biologie cellulaire (C2.6, T2.2)', tps: [
+        { id: 'AC-CEL-1', intitule: 'Culture de cellules eucaryotes et repiquage', codes: 'C2.6 · T2.2',
+          description: 'Travail aseptique sous PSM II, entretien de lignées (trypsination, étuve CO2), culture in vitro de tissus végétaux, congélation et décongélation.',
+          motsCles: 'culture cellulaire|lignées? cellulaires?|trypsin|\\bco2\\b|eucaryote|végéta|\\bcals?\\b|congélation',
+          materiel: ['PSM II dédié', 'Étuve à CO2', 'Milieux de culture cellulaire et sérum', 'Trypsine-EDTA', 'Flasques et plaques', 'Pipettes sérologiques', 'Microscope inversé'] },
+        { id: 'AC-CEL-2', intitule: 'Numération et viabilité cellulaires', codes: 'C2.6 · T2.2',
+          description: 'Observation au microscope inversé, numération sur cellule hématimétrique, bleu trypan ou tests colorimétriques de viabilité.',
+          motsCles: 'numération|viabilité|bleu trypan|malassez|bürker|cytotox|confluence',
+          materiel: ['Cellules de Malassez ou Bürker', 'Bleu trypan', 'Microscopes', 'Réactif MTT ou équivalent', 'Lecteur de microplaques'] }
+      ] },
+      { nom: 'Métrologie, contrôle qualité et données (C1.2, C2.7, C2.8)', tps: [
+        { id: 'AC-QUA-1', intitule: 'Contrôle et suivi métrologique des équipements', codes: 'C1.2 · C2.7',
+          description: 'Vérification de pipettes, étalonnage de balances, qualification de température d\'enceintes.',
+          motsCles: 'métrolog|vérification|étalonnage|gravimétr|qualification|enceintes?|balances?|pipettes?',
+          materiel: ['Balance analytique', 'Masses étalons', 'Thermomètres ou enregistreurs étalonnés', 'Micropipettes à vérifier'] },
+        { id: 'AC-QUA-2', intitule: 'Validation de série et incertitudes', codes: 'C2.7 · C2.8',
+          description: 'Matériaux de référence, cartes de Levey-Jennings, incertitudes de mesure (ISO 5725, ISO 17025).',
+          motsCles: 'levey|validation|incertitude|matériaux de référence|carte de contrôle|iso 5725|17025|fidélité|justesse',
+          materiel: ['Matériaux de référence', 'Étalons-contrôles', 'Tableur de cartes de contrôle'] }
+      ] }
+    ]
+  }
+};
+
+if (typeof module !== 'undefined') module.exports = LaboReferentiel;
+
+</script>
+<script>
+/* Suivi labo Aurlom BTS+ — interface. */
+(function () {
+  'use strict';
+
+  // Mode normal : page servie par Google Apps Script (comptes de l'école uniquement),
+  // les appels passent par google.script.run. API_URL ne sert qu'à l'ancien mode
+  // par PIN, fermé par défaut côté serveur. Ni l'un ni l'autre : démonstration.
+  var API_URL = '';
+
+  var GOOGLE = typeof google !== 'undefined' && google.script && google.script.run ? true : false;
+  var DEMO = !GOOGLE && !API_URL;
+  var CLE_SESSION = 'labo-session-v2';
+  var CLE_FILE = 'labo-file-attente';
+  var demoCore = null;
+  if (DEMO) { demoCore = LaboCore.create(LaboNav.store(), LaboNav.env); LaboNav.amorcer(demoCore); }
+
+  var S = {
+    session: GOOGLE ? { jeton: 'google' } : lire(CLE_SESSION), etat: null, erreurAcces: '', onglet: null, releve: null, releveEnCours: false,
+    filtres: { demandes: 'avenir', incidents: 'ouverts', inventaire: '', invFiliere: '', invAlerte: false, commandes: 'actives', progFiliere: '', progTout: false },
+    programmeComplet: null, preDemande: null, preCommande: null, occupe: false
+  };
+  var app = document.getElementById('app');
+
+  // ---------------------------------------------------------------------------
+  // Utilitaires
+  // ---------------------------------------------------------------------------
+  function lire(cle) { try { return JSON.parse(localStorage.getItem(cle)); } catch (e) { return null; } }
+  function ecrire(cle, v) { try { if (v === null) localStorage.removeItem(cle); else localStorage.setItem(cle, JSON.stringify(v)); } catch (e) { /* stockage bloqué */ } }
+  function esc(s) {
+    return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmt(iso, motif) { return iso ? LaboNav.format(new Date(iso), motif) : ''; }
+  var JOURS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+  function jourLisible(d) {
+    if (!d) return '';
+    var x = new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10)));
+    return JOURS[x.getUTCDay()] + ' ' + d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4);
+  }
+  function dateCourte(d) { return d ? d.slice(8, 10) + '/' + d.slice(5, 7) : ''; }
+  function duree(min) { min = Number(min) || 0; var h = Math.floor(min / 60), m = min % 60; return h + ' h ' + (m < 10 ? '0' : '') + m; }
+  var nf2 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var nf = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+  function euros(n) { return nf2.format(Number(n) || 0) + ' €'; }
+  function num(n) { return nf.format(Number(n) || 0); }
+  function aujourdhui() { return LaboNav.format(new Date(), 'yyyy-MM-dd'); }
+  function moisCourant() { return LaboNav.format(new Date(), 'yyyy-MM'); }
+  function plusJours(n) { return LaboNav.format(new Date(Date.now() + n * 86400000), 'yyyy-MM-dd'); }
+  function options(l, choisi, vide) {
+    return (vide !== undefined ? '<option value="">' + esc(vide) + '</option>' : '') + l.map(function (x) {
+      var v = typeof x === 'string' ? x : x.v, t = typeof x === 'string' ? x : x.l;
+      return '<option value="' + esc(v) + '"' + (String(v) === String(choisi) ? ' selected' : '') + '>' + esc(t) + '</option>';
+    }).join('');
+  }
+  function C() { return S.etat.config; }
+  function moi() { return S.etat.moi; }
+  function peut(d) { return !!(S.etat && S.etat.moi.droits[d]); }
+  function filLib(f) { return f && C().filieres[f] ? C().filieres[f].court : (f || 'Commun'); }
+  function badge(t, cls) { return '<span class="badge ' + (cls || '') + '">' + esc(t) + '</span>'; }
+  function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+  // Boîte de dialogue intégrée à la page (les fenêtres natives peuvent être bloquées
+  // dans la page servie par Google). Renvoie une promesse : true / texte / null.
+  function boite(message, o) {
+    o = o || {};
+    return new Promise(function (fin) {
+      var d = document.createElement('dialog');
+      d.className = 'boite';
+      d.setAttribute('aria-label', message);
+      var champ = '';
+      if (o.saisie) champ = '<label class="champ"><span>' + esc(o.saisie) + '</span><input id="boite-v" ' + (o.nombre ? 'type="number" step="any" inputmode="decimal"' : '') + ' value="' + esc(o.defaut === undefined ? '' : o.defaut) + '"></label>';
+      if (o.choix) champ = '<div class="cases" style="grid-template-columns:1fr">' + o.choix.map(function (c, i) { return '<label class="case"><input type="radio" name="boite-c" value="' + esc(c) + '"' + (i === 0 ? ' checked' : '') + '><span>' + esc(c) + '</span></label>'; }).join('') + '</div>';
+      d.innerHTML = '<p>' + esc(message) + '</p>' + champ + '<p class="petit" id="boite-err" style="color:var(--violet-profond)"></p>' +
+        '<div class="actions"><button type="button" class="btn" data-r="non">Annuler</button><button type="button" class="btn plein" data-r="oui">' + esc(o.ok || 'Confirmer') + '</button></div>';
+      document.body.appendChild(d);
+      function fermer(oui) {
+        var v = null;
+        if (oui) {
+          if (o.saisie) {
+            v = d.querySelector('#boite-v').value.trim();
+            if (o.requis && !v) { d.querySelector('#boite-err').textContent = 'Ce champ est obligatoire.'; return; }
+          } else if (o.choix) v = d.querySelector('input[name="boite-c"]:checked').value;
+          else v = true;
+        }
+        d.close(); d.remove(); fin(v);
+      }
+      d.addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (b) fermer(b.getAttribute('data-r') === 'oui'); });
+      d.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'radio') { e.preventDefault(); fermer(true); } });
+      d.addEventListener('cancel', function (e) { e.preventDefault(); fermer(false); });
+      d.showModal();
+      var f = d.querySelector('input'); if (f) f.focus();
+    });
+  }
+
+  var toastTimer;
+  function toast(msg, err) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (err ? ' erreur' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.className = 'toast cache'; }, err ? 6500 : 3500);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Serveur
+  // ---------------------------------------------------------------------------
+  function envoyer(req) {
+    if (DEMO) return Promise.resolve(demoCore.handle(JSON.parse(JSON.stringify(req))));
+    if (GOOGLE) {
+      return new Promise(function (ok, ko) {
+        google.script.run.withSuccessHandler(ok).withFailureHandler(ko).appel({ action: req.action, data: req.data });
+      });
+    }
+    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(req), credentials: 'omit', referrerPolicy: 'no-referrer' })
+      .then(function (r) { return r.json(); });
+  }
+
+  function api(action, data) {
+    var req = { action: action, jeton: S.session ? S.session.jeton : null, data: data || {} };
+    return envoyer(req).then(function (r) {
+      if (!r.ok && /Session expirée|Compte désactivé|n'est pas autorisé|Accès réservé|non identifié/.test(r.error)) {
+        if (GOOGLE) { S.erreurAcces = r.error; S.etat = null; } else finSession();
+      }
+      return r;
+    }).catch(function () {
+      if (action === 'arrivee' || action === 'depart') {
+        var file = lire(CLE_FILE) || [];
+        req.data.hors_ligne = true;
+        req.data.client_time = new Date().toISOString();
+        file.push(req);
+        ecrire(CLE_FILE, file);
+        return { ok: true, enAttente: true };
+      }
+      return { ok: false, error: 'Connexion impossible. Réessaie dans un instant.' };
+    });
+  }
+
+  function finSession() { if (GOOGLE) return; ecrire(CLE_SESSION, null); S.session = null; S.etat = null; S.releve = null; rendre(); }
+
+  function viderFile() {
+    var file = lire(CLE_FILE) || [];
+    if (!file.length || DEMO || !S.session) return Promise.resolve();
+    var reste = [];
+    return file.reduce(function (p, req) {
+      return p.then(function () {
+        req.jeton = S.session.jeton;
+        return envoyer(req).then(function (r) { if (!r.ok) toast('Badge hors connexion refusé : ' + r.error, true); })
+          .catch(function () { reste.push(req); });
+      });
+    }, Promise.resolve()).then(function () {
+      ecrire(CLE_FILE, reste.length ? reste : null);
+      if (file.length > reste.length) toast((file.length - reste.length) + ' badge(s) hors connexion envoyé(s).');
+    });
+  }
+
+  function charger() {
+    return viderFile().then(function () { return api('etat'); }).then(function (r) {
+      if (r.ok) S.etat = r.data;
+      else if (S.session) toast(r.error, true);
+      rendre();
+    });
+  }
+
+  function agir(action, data, msgOk) {
+    if (S.occupe) return Promise.resolve(null);
+    S.occupe = true;
+    return api(action, data).then(function (r) {
+      S.occupe = false;
+      if (!r.ok) { toast(r.error, true); return null; }
+      if (r.enAttente) toast('Pas de réseau : badge gardé sur ce téléphone avec son heure, envoi automatique au retour du réseau.');
+      else if (msgOk) toast(msgOk);
+      return charger().then(function () { return r.data || true; });
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Structure
+  // ---------------------------------------------------------------------------
+  function onglets() {
+    var o = [];
+    if (peut('voirEquipe')) o.push(['tableau', 'Tableau de bord']);
+    if (peut('badge')) o.push(['presence', 'Présence']);
+    o.push(['demandes', moi().role === 'enseignant' ? 'Mes demandes de TP' : 'Demandes de TP']);
+    o.push(['programme', 'Programme']);
+    o.push(['inventaire', 'Inventaire']);
+    o.push(['commandes', 'Commandes']);
+    if (peut('rangement') || peut('voirEquipe')) o.push(['rangement', 'Rangement']);
+    o.push(['incidents', peut('traiterIncident') ? 'Incidents' : 'Signaler']);
+    if (peut('badge')) o.push(['heures', 'Mes heures']);
+    if (peut('voirEquipe')) o.push(['heures', peut('facturation') ? 'Heures et facturation' : 'Activité des techniciennes']);
+    return o;
+  }
+
+  function compteurs() {
+    var e = S.etat, c = {}, auj = aujourdhui();
+    var inc = (e.incidents || []).filter(function (i) { return i.statut !== 'resolu'; }).length;
+    if (inc && peut('traiterIncident')) c.incidents = inc;
+    if (peut('preparerTP') || peut('piloterTP')) c.demandes = (e.demandes || []).filter(function (d) { return d.statut === 'demandee' && d.date_tp >= auj; }).length;
+    if (peut('validerPresence')) c.heures = (e.sessions || []).filter(function (s) { return s.statut === 'a_valider'; }).length;
+    if (peut('approuverCommande')) c.commandes = (e.commandes || []).filter(function (x) { return x.statut === 'soumise' && (String(x.user_id) !== String(moi().id) || moi().role === 'directeur'); }).length;
+    else if (peut('suivreCommande')) c.commandes = (e.commandes || []).filter(function (x) { return x.statut === 'approuvee'; }).length;
+    c.inventaire = alertesStock().length;
+    return c;
+  }
+
+  function rendre() {
+    if (S.erreurAcces) { app.innerHTML = '<div class="connexion">' + titre('aurlom BTS+ · Suivi labo', 'Accès refusé', '') + '<div class="encart urgent">' + esc(S.erreurAcces) + '</div></div>'; return; }
+    if (!S.session) return rendreConnexion();
+    if (!S.etat) { app.innerHTML = '<p class="vide">Chargement…</p>'; return; }
+    var ongl = onglets();
+    if (!S.onglet || !ongl.some(function (o) { return o[0] === S.onglet; })) S.onglet = ongl[0][0];
+    var cpt = compteurs();
+    var h = '<header class="entete"><p class="sur">aurlom BTS+ · Suivi labo</p>' +
+      '<div class="qui"><b>' + esc(moi().nom) + '</b> · ' + esc(C().roles[moi().role]) + (moi().filiere ? ' ' + esc(filLib(moi().filiere)) : '') +
+      (GOOGLE ? '' : ' · <button class="btn lien" data-act="deconnexion">Se déconnecter</button>') + '</div></header>';
+    if (DEMO) h += '<div class="demo"><span><b>Démonstration.</b> Données fictives, stockées dans ce navigateur.</span><button class="btn petit" data-act="reinit">Réinitialiser la démo</button></div>';
+    h += '<nav class="onglets" role="tablist">' + ongl.map(function (o) {
+      return '<button role="tab" data-onglet="' + o[0] + '" aria-selected="' + (S.onglet === o[0]) + '">' + esc(o[1]) +
+        (cpt[o[0]] ? '<span class="compte">' + cpt[o[0]] + '</span>' : '') + '</button>';
+    }).join('') + '</nav>';
+    var vues = { tableau: vueTableau, presence: vuePresence, demandes: vueDemandes, programme: vueProgramme, inventaire: vueInventaire, commandes: vueCommandes, rangement: vueRangement, incidents: vueIncidents, heures: vueHeures };
+    h += '<section role="tabpanel">' + vues[S.onglet]() + '</section>';
+    app.innerHTML = h;
+    if (S.onglet === 'heures' && !S.releve && !S.releveEnCours) chargerReleve();
+    majTotalCommande();
+  }
+
+  function titre(sur, t, lead) {
+    return '<p class="sur" style="margin-top:24px">' + esc(sur) + '</p><h1>' + esc(t) + '<span class="point">.</span></h1>' + (lead ? '<p class="lead">' + lead + '</p>' : '');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Connexion
+  // ---------------------------------------------------------------------------
+  function rendreConnexion() {
+    var demo = '';
+    if (DEMO) {
+      demo = '<div class="encart ambre"><b>Démonstration.</b> Choisis un compte fictif :<div class="actions">' +
+        LaboNav.comptes.map(function (c) { return '<button type="button" class="btn petit" data-act="demoCompte" data-email="' + esc(c[2]) + '" data-pin="' + esc(c[6]) + '">' + esc(c[1]) + '</button>'; }).join('') + '</div></div>';
+    }
+    app.innerHTML = '<div class="connexion">' + titre('aurlom BTS+ · Suivi labo', 'Connexion', 'Ton adresse e-mail et ton code PIN personnel (6 chiffres).') + demo +
+      '<form data-form="connexion" class="grille" style="grid-template-columns:1fr" autocomplete="on">' +
+      '<label class="champ"><span>E-mail</span><input name="email" type="email" autocomplete="username" required></label>' +
+      '<label class="champ"><span>Code PIN</span><input name="pin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" autocomplete="current-password" required></label>' +
+      '<button class="btn plein" type="submit">Se connecter</button></form>' +
+      '<p class="petit sourd">PIN oublié : demande au directeur de t\'en attribuer un nouveau. Après 5 essais erronés, le compte est bloqué 15 minutes.</p></div>';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Tableau de bord (prof référent, coordinateur, directeur)
+  // ---------------------------------------------------------------------------
+  function alertesStock() {
+    var lim = plusJours(C().alertePeremptionJours), auj = aujourdhui();
+    return (S.etat.articles || []).filter(function (a) {
+      var q = Number(a.quantite) || 0, s = a.seuil === '' ? NaN : Number(a.seuil);
+      return (isFinite(s) && q <= s) || (a.peremption && a.peremption <= lim) || q === 0 || (a.peremption && a.peremption < auj);
+    });
+  }
+
+  function vueTableau() {
+    var e = S.etat, auj = aujourdhui();
+    var aValider = (e.sessions || []).filter(function (s) { return s.statut === 'a_valider'; });
+    var incOuverts = (e.incidents || []).filter(function (i) { return i.statut !== 'resolu'; });
+    var bloquants = incOuverts.filter(function (i) { return i.gravite === 'Bloquant'; });
+    var avenir = (e.demandes || []).filter(function (d) { return d.date_tp >= auj && ['annulee', 'realisee'].indexOf(d.statut) === -1; });
+    var sansPrepa = avenir.filter(function (d) { return !d.prepa_id && LaboCore.joursEntre(auj, d.date_tp) <= 7; });
+    var horsDelai = avenir.filter(function (d) { return Number(d.delai_jours) < C().delaiPrepaJours; });
+    var aApprouver = (e.commandes || []).filter(function (c) { return c.statut === 'soumise'; });
+    var stock = alertesStock();
+    var h = titre(jourLisible(auj), 'Où en est le labo', 'Ce qui demande ton attention aujourd\'hui.');
+    h += '<div class="chiffres">' +
+      '<div class="chiffre"><b>' + (e.presentes || []).length + '</b><span>personne(s) au labo</span></div>' +
+      (peut('validerPresence') ? '<div class="chiffre' + (aValider.length ? ' accent' : '') + '"><b>' + aValider.length + '</b><span>présence(s) à valider</span></div>' : '') +
+      '<div class="chiffre' + (aApprouver.length && peut('approuverCommande') ? ' accent' : '') + '"><b>' + aApprouver.length + '</b><span>commande(s) en attente d\'approbation</span></div>' +
+      '<div class="chiffre"><b>' + incOuverts.length + '</b><span>incident(s) non résolu(s), dont ' + bloquants.length + ' bloquant(s)</span></div>' +
+      '<div class="chiffre"><b>' + sansPrepa.length + '</b><span>TP dans les 7 jours sans préparatrice</span></div>' +
+      '<div class="chiffre"><b>' + stock.length + '</b><span>article(s) en alerte de stock ou de péremption</span></div></div>';
+
+    h += '<h2>Au labo en ce moment</h2>' + tablePresentes(e.presentes);
+
+    if (peut('validerPresence')) {
+      h += '<h2>Présences à valider</h2>' + (aValider.length ? '<div class="tableau-wrap"><table><thead><tr><th>Qui</th><th>Date</th><th>Horaires</th><th class="num">Durée</th><th>Missions</th><th>À vérifier</th><th></th></tr></thead><tbody>' +
+        aValider.sort(function (a, b) { return a.arrivee < b.arrivee ? -1 : 1; }).map(function (s) {
+          return '<tr><td>' + esc(s.user_nom) + '</td><td>' + esc(jourLisible(s.date)) + '</td><td class="mono">' + fmt(s.arrivee, 'HH:mm') + '–' + fmt(s.depart, 'HH:mm') + '</td><td class="num">' + duree(s.duree_min) + '</td>' +
+            '<td class="petit">' + esc(String(s.missions).split(' | ').join(', ')) + (s.commentaire ? '<br><span class="sourd">' + esc(s.commentaire) + '</span>' : '') + '</td>' +
+            '<td class="petit">' + (s.source !== 'badge' ? badge(SOURCES[s.source], 'ambre') + ' ' : '') + esc(s.corrections) + '</td><td>' + boutonsValidation(s) + '</td></tr>';
+        }).join('') + '</tbody></table></div>' : '<p class="vide">Rien à valider.</p>');
+    }
+    if (aApprouver.length) {
+      h += '<h2>Commandes en attente</h2>' + aApprouver.map(carteCommande).join('');
+    }
+    if (bloquants.length) {
+      h += '<h2>Incidents bloquants</h2>' + bloquants.map(function (i) {
+        return '<div class="encart urgent"><b>' + esc(i.categorie) + (i.labo ? ' · ' + esc(i.labo) : '') + '</b> (' + esc(i.user_nom) + ', ' + fmt(i.horodatage, 'dd/MM HH:mm') + ') : ' + esc(i.description) + '</div>';
+      }).join('');
+    }
+    if (sansPrepa.length || horsDelai.length) {
+      h += '<h2>Demandes de TP à surveiller</h2><div class="tableau-wrap"><table><thead><tr><th>TP</th><th>Date</th><th>Classe</th><th>Enseignant·e</th><th>Alerte</th></tr></thead><tbody>' +
+        avenir.filter(function (d) { return sansPrepa.indexOf(d) !== -1 || horsDelai.indexOf(d) !== -1; }).map(function (d) {
+          return '<tr><td>' + esc(d.titre) + '</td><td>' + esc(jourLisible(d.date_tp)) + '<br><span class="petit sourd">' + esc(d.creneau) + '</span></td><td>' + esc(d.classe) + '</td><td>' + esc(d.prof_nom) + '</td><td>' +
+            (sansPrepa.indexOf(d) !== -1 ? badge('Sans préparatrice', 'ambre') + ' ' : '') + (horsDelai.indexOf(d) !== -1 ? badge('Demandée à J-' + d.delai_jours, 'urgent') : '') + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    if (stock.length) h += '<h2>Stock à surveiller</h2>' + tableArticles(stock);
+    return h;
+  }
+
+  function tablePresentes(p) {
+    p = p || [];
+    return p.length ? '<div class="tableau-wrap"><table><thead><tr><th>Qui</th><th>Depuis</th><th>Labo</th></tr></thead><tbody>' +
+      p.map(function (x) { return '<tr><td>' + esc(x.user_nom) + '</td><td class="mono">' + fmt(x.arrivee, 'dd/MM HH:mm') + '</td><td>' + esc(x.labo) + '</td></tr>'; }).join('') +
+      '</tbody></table></div>' : '<p class="vide">Personne n\'a déclaré sa présence.</p>';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Présence (technicienne, aide-laborantine)
+  // ---------------------------------------------------------------------------
+  function casesMissions() {
+    return '<div class="cases">' + C().missions.map(function (m) { return '<label class="case"><input type="checkbox" name="missions" value="' + esc(m) + '"><span>' + esc(m) + '</span></label>'; }).join('') + '</div>';
+  }
+
+  function vuePresence() {
+    var e = S.etat, s = e.sessionOuverte, auj = aujourdhui(), file = lire(CLE_FILE) || [];
+    var h = titre(jourLisible(auj), s ? 'Tu es au labo' : 'Déclarer ta présence',
+      'L\'heure retenue est celle du serveur au moment où tu appuies. Chaque présence est ensuite validée : c\'est la base de ta facture.');
+    if (file.length) {
+      h += '<div class="encart ambre"><b>' + file.length + ' badge(s) en attente d\'envoi</b> : ' +
+        file.map(function (r) { return (r.action === 'arrivee' ? 'arrivée' : 'départ') + ' à ' + fmt(r.data.client_time, 'HH:mm'); }).join(', ') +
+        '. <button class="btn lien" data-act="recharger">Réessayer maintenant</button></div>';
+    }
+    if (!s) {
+      h += '<div class="panneau"><p class="label">Il est</p><div class="heure"><span id="horloge">' + LaboNav.format(new Date(), 'HH:mm') + '</span><span class="point">.</span></div>' +
+        '<form data-form="arrivee" class="grille" style="grid-template-columns:1fr"><label class="champ"><span class="label">Labo</span><select name="labo" required>' + options(C().labos, '', 'Choisir le labo…') + '</select></label>' +
+        '<button class="btn badge" type="submit">Je déclare mon arrivée</button></form></div>';
+    } else {
+      var duJour = (e.demandes || []).filter(function (d) { return d.date_tp === s.date && d.statut !== 'annulee'; });
+      h += '<div class="panneau"><p class="label">Arrivée ' + (s.source === 'hors_ligne' ? '(hors connexion) ' : '') + '· ' + esc(s.labo) + '</p>' +
+        '<div class="heure">' + fmt(s.arrivee, 'HH:mm') + '<span class="point">.</span></div>' +
+        '<p class="sourd">Depuis <span id="duree" data-depuis="' + esc(s.arrivee) + '">' + duree(Math.round((Date.now() - new Date(s.arrivee)) / 60000)) + '</span>' +
+        (s.date !== auj ? ' · <b>présence ouverte le ' + jourLisible(s.date) + ' : saisis l\'heure réelle de départ</b>' : '') + '</p></div>';
+      h += '<form data-form="depart"><h2>Ce que tu as fait</h2>' + casesMissions();
+      if (duJour.length) {
+        h += '<h2>TP concernés</h2><div class="cases">' + duJour.map(function (d) {
+          return '<label class="case"><input type="checkbox" name="demandes_ids" value="' + esc(d.id) + '"><span><b>' + esc(d.creneau) + '</b> · ' + esc(d.classe) + ' · ' + esc(d.titre) + '</span></label>';
+        }).join('') + '</div>';
+      }
+      h += '<div class="grille" style="margin-top:16px"><label class="champ large"><span>Commentaire (facultatif)</span><textarea name="commentaire" placeholder="Ex. : milieux coulés pour jeudi, TP décalé de 30 min"></textarea></label>' +
+        '<label class="champ"><span>Départ oublié ? Heure réelle</span><input type="time" name="heure_depart"' + (s.date !== auj ? ' required' : '') + '></label></div>' +
+        '<p class="petit sourd">Laisse l\'heure vide si tu pars maintenant. Une heure saisie à la main est signalée à la validation.</p>' +
+        '<div class="actions"><button class="btn plein" type="submit" style="min-height:56px;flex:1">Je déclare mon départ</button></div></form>';
+    }
+    h += '<h2>Au labo en ce moment</h2>' + tablePresentes(e.presentes);
+    h += '<details class="carte" style="margin-top:24px"><summary><h3 style="margin:0">Présence non badgée : la déclarer après coup</h3><p class="meta">Elle part en validation avec ton motif.</p></summary>' +
+      '<form data-form="saisieManuelle" style="margin-top:16px"><div class="grille">' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" max="' + auj + '" required></label>' +
+      '<label class="champ"><span>Début</span><input type="time" name="debut" required></label>' +
+      '<label class="champ"><span>Fin</span><input type="time" name="fin" required></label>' +
+      '<label class="champ"><span>Labo</span><select name="labo" required>' + options(C().labos, '', 'Choisir…') + '</select></label>' +
+      '<label class="champ large"><span>Motif</span><input name="motif" required placeholder="Ex. : téléphone déchargé"></label></div>' +
+      '<p class="label" style="margin:16px 0 8px">Missions</p>' + casesMissions() +
+      '<label class="champ" style="margin-top:12px"><span>Commentaire</span><textarea name="commentaire"></textarea></label>' +
+      '<div class="actions"><button class="btn" type="submit">Envoyer en validation</button></div></form></details>';
+    return h;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Demandes de TP
+  // ---------------------------------------------------------------------------
+  var ST_DEM = { demandee: ['Demandée', 'ambre'], prise_en_charge: ['Prise en charge', 'violet'], prete: ['Prête', 'vert'], realisee: ['Réalisée', ''], annulee: ['Annulée', ''] };
+
+  function classesOptions() {
+    var l = [], f = C().filieres;
+    Object.keys(f).forEach(function (k) { f[k].classes.forEach(function (c) { l.push({ v: c, l: c + ' · ' + f[k].libelle }); }); });
+    return l;
+  }
+  function disciplinesOptions() {
+    var l = [], f = C().filieres;
+    Object.keys(f).forEach(function (k) { f[k].disciplines.forEach(function (d) { if (l.indexOf(d) === -1) l.push(d); }); });
+    return l;
+  }
+  function blocsOptions(choisi) {
+    var f = C().filieres;
+    return Object.keys(f).map(function (k) {
+      return '<optgroup label="' + esc(f[k].libelle + ' (' + f[k].rncp + ')') + '">' + options(f[k].blocs.map(function (b) { return { v: f[k].rncp + ' ' + b, l: b }; }), choisi) + '</optgroup>';
+    }).join('');
+  }
+
+  function optionsTP(choisi) {
+    var o = '<option value="">Aucun / autre TP</option>';
+    Object.keys(LaboReferentiel).forEach(function (f) {
+      if (moi().role === 'enseignant' && moi().filiere && moi().filiere !== f) return;
+      LaboReferentiel[f].domaines.forEach(function (d) {
+        o += '<optgroup label="' + esc(f + ' · ' + d.nom) + '">' + options(d.tps.map(function (t) { return { v: t.id, l: t.intitule + ' (' + t.codes + ')' }; }), choisi) + '</optgroup>';
+      });
+    });
+    return o;
+  }
+
+  function formDemande() {
+    var p = S.preDemande || {}, auj = aujourdhui();
+    var classeDefaut = p.classe || '';
+    return '<details class="carte" id="form-demande"' + (S.preDemande || !(S.etat.demandes || []).length ? ' open' : '') + '><summary><h3 style="margin:0">Nouvelle demande de préparation</h3>' +
+      '<p class="meta">Au moins ' + C().delaiPrepaJours + ' jours avant le TP. En dessous, le prof référent est alerté.</p></summary>' +
+      (p.origine ? '<div class="encart">Préremplie depuis <b>' + esc(p.origine) + '</b>. Ajuste le besoin matériel, les quantités et la date.</div>' : '') +
+      '<form data-form="demande" style="margin-top:16px"><input type="hidden" name="sequence_id" value="' + esc(p.sequence_id || '') + '"><div class="grille">' +
+      '<label class="champ large"><span>TP incontournable de référence</span><select name="tp_ref">' + optionsTP(p.tp_ref) + '</select></label>' +
+      '<label class="champ"><span>Date du TP</span><input type="date" name="date_tp" min="' + auj + '" required></label>' +
+      '<label class="champ"><span>Créneau</span><select name="creneau" required>' + options(C().creneaux, '', 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Labo</span><select name="labo" required>' + options(C().labos, '', 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Classe</span><select name="classe" required>' + options(classesOptions(), classeDefaut, 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Discipline</span><select name="discipline" required>' + options(disciplinesOptions(), p.discipline || (moi().disciplines || '').split(',')[0], 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Effectif</span><input type="number" name="effectif" min="1" max="60"></label>' +
+      '<label class="champ large"><span>Bloc de compétences visé</span><select name="competence"><option value="">Choisir…</option>' + blocsOptions(p.competence) + '</select></label>' +
+      '<label class="champ large"><span>Titre du TP (verbe d\'action)</span><input name="titre" required value="' + esc(p.titre || '') + '"></label>' +
+      '<label class="champ large"><span>Besoin matériel et réactifs</span><textarea name="besoin" required placeholder="Réactifs avec référence, quantités par binôme, appareils, consommables">' + esc(p.besoin || '') + '</textarea></label>' +
+      '</div><div class="actions"><button class="btn plein" type="submit">Envoyer la demande</button>' + (S.preDemande ? '<button type="button" class="btn" data-act="viderPre" data-v="preDemande">Effacer le préremplissage</button>' : '') + '</div></form></details>';
+  }
+
+  function vueDemandes() {
+    var e = S.etat, auj = aujourdhui();
+    var lead = moi().role === 'enseignant'
+      ? 'Décris ton TP ici. La technicienne qui le prend en charge te répond dans le fil de la demande.'
+      : 'Toutes les demandes des enseignants, avec leur fil d\'échange.';
+    var h = titre('Préparation des TP', moi().role === 'enseignant' ? 'Mes demandes de TP' : 'Demandes de TP', lead);
+    if (peut('creerDemandeTP')) h += formDemande();
+    h += filtreBoutons('demandes', [['avenir', 'À venir'], ['passees', 'Passées'], ['toutes', 'Toutes']]);
+    var f = S.filtres.demandes;
+    var l = (e.demandes || []).filter(function (d) {
+      if (f === 'avenir') return d.date_tp >= auj && d.statut !== 'annulee';
+      if (f === 'passees') return d.date_tp < auj;
+      return true;
+    }).sort(function (a, b) { return (a.date_tp + a.creneau).localeCompare(b.date_tp + b.creneau) * (f === 'passees' ? -1 : 1); });
+    return h + (l.length ? l.map(carteDemande).join('') : '<p class="vide">Aucune demande.</p>');
+  }
+
+  function filtreBoutons(cle, choix) {
+    return '<div class="actions" style="margin:16px 0">' + choix.map(function (x) {
+      return '<button class="btn petit' + (S.filtres[cle] === x[0] ? ' plein' : '') + '" data-act="filtre" data-cle="' + cle + '" data-v="' + x[0] + '">' + x[1] + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function carteDemande(d) {
+    var e = S.etat, auj = aujourdhui(), j = LaboCore.joursEntre(auj, d.date_tp);
+    var hors = Number(d.delai_jours) < C().delaiPrepaJours;
+    var msgs = (e.messages || []).filter(function (m) { return m.demande_id === d.id; });
+    var st = ST_DEM[d.statut] || [d.statut, ''];
+    var h = '<article class="carte" id="' + esc(d.id) + '"><div class="tete"><div><p class="label" style="color:var(--violet-profond)">' + esc(jourLisible(d.date_tp)) + ' · ' + esc(d.creneau) + '</p>' +
+      '<h3 style="margin-top:4px">' + esc(d.titre) + '</h3></div><div>' + badge(st[0], st[1]) +
+      (d.date_tp >= auj && d.statut !== 'annulee' ? ' ' + badge(j === 0 ? 'Aujourd\'hui' : 'J-' + j, j <= 2 ? 'encre' : '') : '') +
+      (hors ? ' ' + badge('Demandée à J-' + d.delai_jours, 'urgent') : '') + '</div></div>' +
+      '<p class="meta">' + esc(d.classe) + ' · ' + esc(filLib(d.filiere)) + ' · ' + esc(d.labo) + ' · ' + esc(d.discipline) + (d.effectif ? ' · ' + esc(d.effectif) + ' élèves' : '') + '</p>' +
+      (d.competence ? '<p class="petit sourd">' + esc(d.competence) + '</p>' : '') +
+      (tpRef(d.tp_ref) ? '<p class="petit"><b>TP de référence :</b> ' + esc(tpRef(d.tp_ref).intitule) + ' <span class="mono sourd">' + esc(tpRef(d.tp_ref).codes) + '</span></p>' : '') +
+      '<div class="encart" style="white-space:pre-wrap"><span class="label" style="display:block">Besoin</span>' + esc(d.besoin) + '</div>' +
+      (peut('preparerTP') && ['annulee', 'realisee'].indexOf(d.statut) === -1 ? '<details><summary class="petit" style="cursor:pointer;color:var(--violet-profond);font-weight:700">Vérifier le stock pour ce TP</summary>' +
+        listeMateriel(String(d.besoin).split(/\n|;|,(?![^(]*\))/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 2; }).slice(0, 25), { act: 'commanderDemandeItem', id: d.id }) + '</details>' : '') +
+      '<p class="petit">Enseignant·e : <b>' + esc(d.prof_nom) + '</b> · Préparation : ' + (d.prepa_nom ? '<b>' + esc(d.prepa_nom) + '</b>' : badge('Non attribuée', 'ambre')) + ' · <span class="mono sourd">' + esc(d.id) + '</span></p>';
+    var a = [];
+    var actif = ['annulee', 'realisee'].indexOf(d.statut) === -1;
+    if (peut('preparerTP') && actif) {
+      if (String(d.prepa_id) !== String(moi().id)) a.push('<button class="btn petit" data-act="prendre" data-id="' + esc(d.id) + '">Je prends en charge</button>');
+      if (d.statut !== 'prete') a.push('<button class="btn petit plein" data-act="statutDemande" data-v="prete" data-id="' + esc(d.id) + '">Marquer prête</button>');
+    }
+    if (!peut('piloterTP') && String(d.prof_id) === String(moi().id) && actif) {
+      if (d.date_tp <= auj) a.push('<button class="btn petit plein" data-act="statutDemande" data-v="realisee" data-id="' + esc(d.id) + '">TP réalisé</button>');
+      a.push('<button class="btn petit" data-act="statutDemande" data-v="annulee" data-id="' + esc(d.id) + '">Annuler</button>');
+    }
+    if (peut('piloterTP')) {
+      var preps = (e.utilisateurs || []).filter(function (u) { return u.role === 'technicienne' || u.role === 'aide_laborantine'; });
+      a.push('<label class="champ" style="min-width:200px"><span>Attribuer à</span><select data-change="attribuer" data-id="' + esc(d.id) + '">' + options(preps.map(function (u) { return { v: u.id, l: u.nom }; }), d.prepa_id, 'Personne') + '</select></label>');
+      a.push('<label class="champ" style="min-width:180px"><span>Statut</span><select data-change="statutDemande" data-id="' + esc(d.id) + '">' + options(Object.keys(ST_DEM).map(function (k) { return { v: k, l: ST_DEM[k][0] }; }), d.statut) + '</select></label>');
+    }
+    if (peut('proposerCommande') && actif) a.push('<button class="btn petit" data-act="commanderPour" data-id="' + esc(d.id) + '">Commander pour ce TP</button>');
+    if (a.length) h += '<div class="actions" style="align-items:flex-end">' + a.join('') + '</div>';
+    h += '<div class="fil"><p class="label" style="margin:0">Échanges (' + msgs.filter(function (m) { return m.role !== 'systeme'; }).length + ')</p>' +
+      msgs.map(function (m) {
+        return '<div class="msg' + (m.role === 'systeme' ? ' systeme' : '') + '"><span class="mono sourd">' + fmt(m.horodatage, 'dd/MM HH:mm') + '</span> ' +
+          (m.role === 'systeme' ? esc(m.user_nom) + ' · ' + esc(m.texte) : '<span class="de">' + esc(m.user_nom) + '</span> : ' + esc(m.texte)) + '</div>';
+      }).join('') +
+      '<form data-form="message" data-id="' + esc(d.id) + '"><input name="texte" placeholder="Écrire un message…" required aria-label="Message"><button class="btn petit" type="submit">Envoyer</button></form></div></article>';
+    return h;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Programme : TP prévus aux scénarios pédagogiques, rapprochés du stock
+  // ---------------------------------------------------------------------------
+  function correspondances(item) {
+    var mots = norm(item).split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 4 && ['coffret', 'kit', 'reactif', 'reactifs', 'deux', 'niveaux', 'pour', 'avec', 'cites', 'dans', 'sequence'].indexOf(w) === -1; });
+    if (!mots.length) return [];
+    return (S.etat.articles || []).filter(function (a) {
+      var d = norm(a.designation + ' ' + a.reference);
+      return mots.some(function (w) { return d.indexOf(w) !== -1; });
+    });
+  }
+
+  function etatMateriel(item) {
+    var arts = correspondances(item);
+    if (!arts.length && categorieDe(item) === 'Équipement') return { cls: '', txt: 'Équipement : vérifier la disponibilité', manque: false };
+    if (!arts.length) return { cls: '', txt: 'Absent de l\'inventaire', manque: true };
+    var lim = plusJours(C().alertePeremptionJours);
+    var bas = arts.some(function (a) { var q = Number(a.quantite) || 0, s = Number(a.seuil); return q === 0 || (isFinite(s) && a.seuil !== '' && q <= s); });
+    var perime = arts.some(function (a) { return a.peremption && a.peremption <= lim; });
+    var total = arts.reduce(function (t, a) { return t + (Number(a.quantite) || 0); }, 0);
+    if (bas) return { cls: 'ambre', txt: 'Stock bas (' + num(total) + ')', manque: true };
+    if (perime) return { cls: 'ambre', txt: 'Péremption proche', manque: true };
+    return { cls: 'vert', txt: 'En stock (' + num(total) + ')', manque: false };
+  }
+
+  // --- Catalogue des TP incontournables (referentiel.js) ---
+  function catalogue(filiere) {
+    var l = [];
+    Object.keys(LaboReferentiel).forEach(function (f) {
+      if (filiere && f !== filiere) return;
+      LaboReferentiel[f].domaines.forEach(function (d) { d.tps.forEach(function (t) { l.push(Object.assign({ filiere: f, domaine: d.nom }, t)); }); });
+    });
+    return l;
+  }
+  function tpRef(id) { return catalogue().filter(function (t) { return t.id === id; })[0] || null; }
+  function tpsDeSequence(p) {
+    var txt = (p.titre + ' ' + p.tp + ' ' + p.renforcement).toLowerCase();
+    return catalogue(p.filiere).filter(function (t) { try { return new RegExp(t.motsCles, 'i').test(txt); } catch (e) { return false; } });
+  }
+  function listeMateriel(items, ctx) {
+    return '<ul class="materiel">' + items.map(function (it) {
+      var st = etatMateriel(it);
+      return '<li>' + esc(it) + ' ' + badge(st.txt, st.cls) +
+        (st.manque && peut('proposerCommande') ? ' <button class="btn lien petit" data-act="' + ctx.act + '" data-id="' + esc(ctx.id) + '" data-item="' + esc(it) + '">Proposer une commande</button>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  function preDemandeDepuis(t, seq) {
+    var fl = C().filieres[t ? t.filiere : seq.filiere];
+    var items = [];
+    (seq ? String(seq.materiel || '').split(' | ') : []).concat(t ? t.materiel : []).forEach(function (x) { if (x && items.indexOf(x) === -1) items.push(x); });
+    var bloc = '';
+    var num = seq && seq.bloc ? (String(seq.bloc).match(/BC0?(\d)/) || [])[1] : '';
+    if (fl && num) bloc = fl.blocs.filter(function (b) { return (b.match(/^BC0?(\d)/) || [])[1] === num; })[0] || '';
+    return {
+      tp_ref: t ? t.id : '', sequence_id: seq ? seq.id : '',
+      titre: seq ? seq.titre : t.intitule, besoin: items.join('\n'),
+      classe: fl ? fl.classes[seq && seq.annee === '2A' ? 1 : 0] : '',
+      competence: bloc ? fl.rncp + ' ' + bloc : '', origine: t ? t.intitule + ' (' + t.codes + ')' : seq.titre
+    };
+  }
+
+  function vueCatalogue(ff) {
+    var auj = aujourdhui(), prog = S.programmeComplet || [];
+    var demandes = S.etat.demandes || [];
+    var h = DEMO ? '<div class="encart ambre">Démonstration : le scénario fictif ne compte que 6 séquences, d\'où une couverture faible. Avec les scénarios importés, la couverture réelle s\'affiche ici.</div>' : '';
+    var filieres = Object.keys(LaboReferentiel).filter(function (f) { return !ff || f === ff; });
+    filieres.forEach(function (f) {
+      var tps = catalogue(f);
+      var couverture = {};
+      prog.filter(function (p) { return p.filiere === f; }).forEach(function (p) {
+        tpsDeSequence(p).forEach(function (t) { (couverture[t.id] = couverture[t.id] || []).push(p); });
+      });
+      var absents = tps.filter(function (t) { return !couverture[t.id]; });
+      h += '<h2>' + esc(C().filieres[f].libelle) + '</h2><p class="petit sourd">' + esc(LaboReferentiel[f].intro) + '</p>';
+      h += '<div class="chiffres"><div class="chiffre"><b>' + (tps.length - absents.length) + ' / ' + tps.length + '</b><span>TP incontournables repérés dans le scénario</span></div>' +
+        '<div class="chiffre' + (absents.length ? ' accent' : '') + '"><b>' + absents.length + '</b><span>non repérés : à vérifier ou à intégrer au SPG</span></div></div>';
+      LaboReferentiel[f].domaines.forEach(function (d) {
+        h += '<h3 style="margin-top:24px">' + esc(d.nom) + '</h3>';
+        d.tps.forEach(function (t0) {
+          var t = Object.assign({ filiere: f }, t0);
+          var seqs = (couverture[t.id] || []).slice().sort(function (a, b) { return (a.debut || '').localeCompare(b.debut || ''); });
+          var prochaine = seqs.filter(function (p) { return p.fin >= auj; })[0];
+          var nbDem = demandes.filter(function (x) { return x.tp_ref === t.id; }).length;
+          h += '<details class="carte"><summary><div class="tete"><div><p class="label">' + esc(t.codes) + '</p><h3 style="margin:4px 0 0">' + esc(t.intitule) + '</h3></div><div>' +
+            (seqs.length ? badge(prochaine ? 'Prochaine : ' + dateCourte(prochaine.debut) + ' – ' + dateCourte(prochaine.fin) : 'Passé pour ce cycle', prochaine ? 'violet' : '') : badge('Non repéré dans le SPG', 'ambre')) +
+            (nbDem ? ' ' + badge(nbDem + ' demande(s)', 'vert') : '') + '</div></div></summary>' +
+            '<p class="petit">' + esc(t.description) + '</p>' +
+            (seqs.length ? '<p class="label" style="margin:12px 0 4px">Séquences du scénario</p><ul class="petit">' + seqs.map(function (p) {
+              return '<li>' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + ' (' + dateCourte(p.debut) + ' – ' + dateCourte(p.fin) + ') : ' + esc(p.titre) + '</li>';
+            }).join('') + '</ul>' : '<div class="encart ambre">Aucune séquence du scénario ne correspond aux mots-clés de ce TP. Vérifie s\'il est traité sous un autre intitulé, sinon il manque au SPG.</div>') +
+            '<p class="label" style="margin:12px 0 4px">Matériel type</p>' + listeMateriel(t.materiel, { act: 'commanderTP', id: t.id }) +
+            (peut('creerDemandeTP') ? '<div class="actions"><button class="btn petit plein" data-act="preparerTP" data-id="' + esc(t.id) + '"' + (prochaine ? ' data-seq="' + esc(prochaine.id) + '"' : '') + '>Préparer ce TP</button></div>' : '') +
+            '</details>';
+        });
+      });
+    });
+    return h;
+  }
+
+  function vueProgramme() {
+    var e = S.etat, auj = aujourdhui();
+    var src = S.filtres.progTout && S.programmeComplet ? S.programmeComplet : (e.programme || []);
+    var ff = S.filtres.progFiliere || (moi().role === 'enseignant' ? moi().filiere : '');
+    var l = src.filter(function (p) { return !ff || p.filiere === ff; }).sort(function (a, b) { return (a.debut || '').localeCompare(b.debut || ''); });
+    var cat = S.filtres.progVue === 'catalogue';
+    var h = titre('Scénarios pédagogiques 2026-2028', cat ? 'TP incontournables' : 'Ce qui arrive en TP',
+      cat ? 'Le catalogue des TP attendus par le référentiel, relié aux séquences des scénarios (SPG). Un TP « non repéré » signale un manque possible dans le SPG.'
+        : 'Les séquences avec manipulation au labo, tirées des scénarios BIOMED et BIOALC, rapprochées de l\'inventaire. Anticipe : une préparation demande ' + C().delaiPrepaJours + ' jours.');
+    h += '<div class="actions">' + [['sequences', 'Séquences à venir'], ['catalogue', 'TP incontournables']].map(function (x) {
+      return '<button class="btn petit' + ((S.filtres.progVue || 'sequences') === x[0] ? ' plein' : '') + '" data-act="progVue" data-v="' + x[0] + '">' + x[1] + '</button>';
+    }).join('') + '</div>';
+    h += '<div class="actions" style="align-items:flex-end;margin-bottom:16px"><label class="champ"><span>Filière</span><select data-change="progFiliere">' +
+      options(Object.keys(C().filieres).map(function (k) { return { v: k, l: C().filieres[k].libelle }; }), ff, 'Toutes') + '</select></label>' +
+      (cat ? '' : '<button class="btn petit' + (S.filtres.progTout ? ' plein' : '') + '" data-act="progTout">' + (S.filtres.progTout ? 'Voir les 10 prochaines semaines' : 'Voir tout le cycle') + '</button>') + '</div>';
+    if (cat) return h + (S.programmeComplet ? vueCatalogue(ff) : '<p class="vide">Chargement du scénario complet…</p>');
+    if (!src.length) return h + '<div class="encart ambre">Aucune séquence chargée. Le directeur importe le programme dans la feuille Programme (voir README).</div>';
+    var manques = {};
+    var cartes = l.map(function (p) {
+      var enCours = p.debut <= auj && p.fin >= auj;
+      var items = String(p.materiel || '').split(' | ').filter(Boolean);
+      var chips = items.map(function (it) {
+        var st = etatMateriel(it);
+        if (st.manque && p.fin >= auj) (manques[it] = manques[it] || []).push(p);
+        return '<li>' + esc(it) + ' ' + badge(st.txt, st.cls) +
+          (st.manque && peut('proposerCommande') ? ' <button class="btn lien petit" data-act="commanderSeq" data-id="' + esc(p.id) + '" data-item="' + esc(it) + '">Proposer une commande</button>' : '') + '</li>';
+      }).join('');
+      return '<article class="carte"><div class="tete"><div><p class="label" style="color:var(--violet-profond)">' + esc(filLib(p.filiere)) + ' ' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + '</p>' +
+        '<h3 style="margin-top:4px">' + esc(p.titre) + '</h3></div><div>' + (enCours ? badge('En cours', 'violet') : badge('Du ' + dateCourte(p.debut) + ' au ' + dateCourte(p.fin))) + '</div></div>' +
+        (p.tp ? '<p class="petit"><b>Tronc commun :</b> ' + esc(p.tp) + '</p>' : '') +
+        (p.renforcement ? '<p class="petit sourd"><b>Renforcement :</b> ' + esc(p.renforcement) + '</p>' : '') +
+        (function () { var r = tpsDeSequence(p); return r.length ? '<p class="petit"><b>TP de référence :</b> ' + r.map(function (t) { return esc(t.intitule) + ' <span class="mono sourd">' + esc(t.codes) + '</span>'; }).join(' · ') + '</p>' : ''; })() +
+        '<p class="label" style="margin:12px 0 4px">Matériel repéré dans la séquence</p><ul class="materiel">' + chips + '</ul>' +
+        (peut('creerDemandeTP') ? '<div class="actions"><button class="btn petit" data-act="demanderSeq" data-id="' + esc(p.id) + '">Préparer la demande de TP</button></div>' : '') + '</article>';
+    }).join('');
+    var nbManques = Object.keys(manques).length;
+    if (nbManques) {
+      h += '<div class="encart ambre"><b>Achats à anticiper : ' + nbManques + ' article(s)</b> cité(s) dans les séquences à venir sont absents de l\'inventaire, en stock bas ou proches de la péremption. ' +
+        'Le rapprochement se fait sur les mots de la désignation : vérifie avant de commander.</div>';
+    }
+    return h + (l.length ? cartes : '<p class="vide">Aucune séquence sur cette période.</p>');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Inventaire
+  // ---------------------------------------------------------------------------
+  function tableArticles(l) {
+    var auj = aujourdhui(), lim = plusJours(C().alertePeremptionJours);
+    return '<div class="tableau-wrap"><table><thead><tr><th>Article</th><th>Filière</th><th class="num">Stock</th><th class="num">Seuil</th><th>Péremption</th><th>Emplacement</th><th></th></tr></thead><tbody>' +
+      l.map(function (a) {
+        var q = Number(a.quantite) || 0, s = a.seuil === '' ? NaN : Number(a.seuil);
+        var etat = q === 0 ? badge('Rupture', 'urgent') : (isFinite(s) && q <= s ? badge('Stock bas', 'ambre') : '');
+        var per = a.peremption ? (a.peremption < auj ? badge('Périmé ' + dateCourte(a.peremption) + '/' + a.peremption.slice(2, 4), 'urgent') : (a.peremption <= lim ? badge(jourLisible(a.peremption), 'ambre') : esc(jourLisible(a.peremption)))) : '<span class="sourd">' + esc(a.notes || '—') + '</span>';
+        var act = '<button class="btn petit" data-act="consommer" data-id="' + esc(a.id) + '">Consommer</button>';
+        if (peut('gererInventaire')) act += ' <button class="btn petit" data-act="entree" data-id="' + esc(a.id) + '">Entrée / correction</button> <button class="btn petit" data-act="editerArticle" data-id="' + esc(a.id) + '">Modifier</button>';
+        if (peut('proposerCommande') && (etat || a.peremption && a.peremption <= lim)) act += ' <button class="btn petit plein" data-act="commanderArticle" data-id="' + esc(a.id) + '">Commander</button>';
+        return '<tr><td>' + esc(a.designation) + '<br><span class="petit sourd">' + esc(a.categorie) + (a.reference ? ' · réf. <span class="mono">' + esc(a.reference) + '</span>' : '') + (a.fournisseur ? ' · ' + esc(a.fournisseur) : '') + '</span></td>' +
+          '<td>' + esc(filLib(a.filiere)) + '</td><td class="num">' + num(q) + ' <span class="sourd">' + esc(a.unite) + '</span> ' + etat + '</td><td class="num">' + (isFinite(s) ? num(s) : '') + '</td>' +
+          '<td>' + per + '</td><td>' + esc(a.emplacement) + '</td><td><div class="actions" style="margin:0">' + act + '</div></td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  function formArticle(a) {
+    a = a || {};
+    return '<form data-form="article" class="carte" id="form-article"><h3>' + (a.id ? 'Modifier « ' + esc(a.designation) + ' »' : 'Ajouter un article') + '</h3>' +
+      '<input type="hidden" name="id" value="' + esc(a.id || '') + '"><div class="grille">' +
+      '<label class="champ large"><span>Désignation</span><input name="designation" required value="' + esc(a.designation || '') + '"></label>' +
+      '<label class="champ"><span>Catégorie</span><select name="categorie">' + options(C().categoriesArticle, a.categorie) + '</select></label>' +
+      '<label class="champ"><span>Filière</span><select name="filiere">' + options([{ v: 'Commun', l: 'Commun' }, { v: 'BIOMED', l: 'BIOMED' }, { v: 'BIOALC', l: 'BIOALC' }], a.filiere) + '</select></label>' +
+      '<label class="champ"><span>Référence</span><input name="reference" value="' + esc(a.reference || '') + '"></label>' +
+      '<label class="champ"><span>Fournisseur</span><input name="fournisseur" list="liste-fournisseurs" value="' + esc(a.fournisseur || '') + '"></label>' +
+      (a.id ? '' : '<label class="champ"><span>Quantité en stock</span><input type="number" step="any" min="0" name="quantite" value="0"></label>') +
+      '<label class="champ"><span>Unité</span><input name="unite" value="' + esc(a.unite || '') + '" placeholder="coffret, flacon, boîte…"></label>' +
+      '<label class="champ"><span>Seuil d\'alerte</span><input type="number" step="any" min="0" name="seuil" value="' + esc(a.seuil === undefined ? '' : a.seuil) + '"></label>' +
+      '<label class="champ"><span>Péremption</span><input type="date" name="peremption" value="' + esc(a.peremption || '') + '"></label>' +
+      '<label class="champ"><span>Emplacement</span><input name="emplacement" value="' + esc(a.emplacement || '') + '" placeholder="Labo, armoire, frigo"></label>' +
+      '<label class="champ large"><span>Notes</span><input name="notes" value="' + esc(a.notes || '') + '"></label></div>' +
+      '<div class="actions"><button class="btn plein" type="submit">Enregistrer</button>' + (a.id ? '<button type="button" class="btn" data-act="annulerEdition">Annuler</button><button type="button" class="btn" data-act="retirerArticle" data-id="' + esc(a.id) + '">Retirer de l\'inventaire</button>' : '') + '</div></form>';
+  }
+
+  function datalistFournisseurs() {
+    return '<datalist id="liste-fournisseurs">' + (S.etat.fournisseurs || []).map(function (f) { return '<option value="' + esc(f.nom) + '">'; }).join('') + '</datalist>';
+  }
+
+  function vueInventaire() {
+    var e = S.etat, f = S.filtres;
+    var h = titre('Stock en temps réel', 'Inventaire',
+      'Toute personne qui utilise un kit ou un réactif le déclare ici (« Consommer »). Les commandes partent de ce stock : plus il est juste, moins on manque.');
+    var alertes = alertesStock();
+    if (alertes.length) h += '<div class="encart ambre"><b>' + alertes.length + ' article(s) en alerte</b> : rupture, stock sous le seuil ou péremption dans moins de ' + C().alertePeremptionJours + ' jours. <button class="btn lien" data-act="invAlerte">' + (f.invAlerte ? 'Voir tout' : 'Afficher seulement ceux-là') + '</button></div>';
+    h += '<div class="actions" style="align-items:flex-end;margin-bottom:12px"><label class="champ" style="flex:1;min-width:200px"><span>Rechercher</span><input data-input="inventaire" value="' + esc(f.inventaire) + '" placeholder="Nom, référence, fournisseur"></label>' +
+      '<label class="champ"><span>Filière</span><select data-change="invFiliere">' + options([{ v: 'BIOMED', l: 'BIOMED' }, { v: 'BIOALC', l: 'BIOALC' }, { v: 'Commun', l: 'Commun' }], f.invFiliere, 'Toutes') + '</select></label></div>';
+    var q = norm(f.inventaire);
+    var l = (f.invAlerte ? alertes : (e.articles || [])).filter(function (a) {
+      return (!f.invFiliere || a.filiere === f.invFiliere) && (!q || norm(a.designation + ' ' + a.reference + ' ' + a.fournisseur).indexOf(q) !== -1);
+    }).sort(function (a, b) { return a.designation.localeCompare(b.designation); });
+    h += '<div id="table-inventaire">' + (l.length ? tableArticles(l) : '<p class="vide">Aucun article.</p>') + '</div>';
+    if (peut('gererInventaire')) h += '<div id="zone-article">' + (S.edition ? formArticle(S.edition) : '<details class="carte"><summary><h3 style="margin:0">Ajouter un article</h3></summary>' + formArticle().replace('<form data-form="article" class="carte" id="form-article"><h3>Ajouter un article</h3>', '<form data-form="article" id="form-article" style="margin-top:12px">') + '</details>') + '</div>';
+    var mv = (e.mouvements || []).slice().reverse().slice(0, 40);
+    h += '<h2>Derniers mouvements</h2>' + (mv.length ? '<div class="tableau-wrap"><table><thead><tr><th>Quand</th><th>Article</th><th class="num">Mouvement</th><th class="num">Reste</th><th>Motif</th><th>Qui</th></tr></thead><tbody>' +
+      mv.map(function (m) { return '<tr><td class="mono">' + fmt(m.horodatage, 'dd/MM HH:mm') + '</td><td>' + esc(m.designation) + '</td><td class="num">' + (Number(m.delta) > 0 ? '+' : '') + num(m.delta) + '</td><td class="num">' + num(m.quantite_apres) + '</td><td>' + esc(m.motif) + '</td><td>' + esc(m.user_nom) + '</td></tr>'; }).join('') +
+      '</tbody></table></div>' : '<p class="vide">Aucun mouvement.</p>');
+    return h + datalistFournisseurs();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Commandes
+  // ---------------------------------------------------------------------------
+  var ST_CMD = { soumise: ['À approuver', 'ambre'], approuvee: ['Approuvée', 'violet'], refusee: ['Refusée', 'urgent'], commandee: ['Commandée', 'violet'], livree: ['Livrée', 'vert'], annulee: ['Annulée', ''] };
+
+  function fournisseursPour(categorie) {
+    var c = norm(categorie);
+    return (S.etat.fournisseurs || []).filter(function (f) { return c && norm(f.categories).indexOf(c) !== -1; });
+  }
+
+  function formCommande() {
+    var p = S.preCommande || {}, e = S.etat, seuil = C().seuilTroisDevisTTC;
+    var demandes = (e.demandes || []).filter(function (d) { return d.date_tp >= aujourdhui() && d.statut !== 'annulee'; });
+    var sugg = fournisseursPour(p.categorie);
+    return '<form data-form="commande" class="carte" id="form-commande"><h3>Proposer une commande</h3>' +
+      '<div class="encart ambre"><b>Règle d\'achat.</b> Au-delà de ' + euros(seuil) + ' TTC, joindre <b>trois devis de fournisseurs différents</b> est obligatoire. En dessous, compare quand même au moins deux prix dès que le montant est significatif. Le prof référent approuve avant tout achat.</div>' +
+      (p.contexte ? '<div class="encart">' + esc(p.contexte) + '</div>' : '') +
+      '<input type="hidden" name="sequence_id" value="' + esc(p.sequence_id || '') + '"><div class="grille">' +
+      '<label class="champ large"><span>Article à commander</span><input name="designation" required value="' + esc(p.designation || '') + '"></label>' +
+      '<label class="champ"><span>Filière qui porte la dépense</span><select name="filiere" required>' + options([{ v: 'BIOMED', l: 'BIOMED' }, { v: 'BIOALC', l: 'BIOALC' }], p.filiere || moi().filiere, 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Catégorie</span><select name="categorie" data-change="categorieCommande">' + options(C().categoriesArticle, p.categorie, 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Référence fournisseur</span><input name="reference" value="' + esc(p.reference || '') + '"></label>' +
+      '<label class="champ"><span>Quantité</span><input type="number" name="quantite" min="1" step="any" required value="' + esc(p.quantite || 1) + '" data-total></label>' +
+      '<label class="champ"><span>Prix unitaire TTC estimé (€)</span><input type="number" name="prix_unitaire_ttc" min="0" step="0.01" required data-total></label>' +
+      '<div class="champ"><span>Total TTC estimé</span><p id="total-commande" class="mono" style="margin:10px 0 0;font-size:16px">0,00 €</p></div>' +
+      '<label class="champ"><span>Fournisseur pressenti</span><input name="fournisseur" list="liste-fournisseurs" value="' + esc(p.fournisseur || '') + '"></label>' +
+      '<label class="champ large"><span>Lien vers l\'article</span><input name="lien" type="url" placeholder="https://"></label>' +
+      '<div class="champ large" id="sugg-fournisseurs">' + suggestionsHtml(sugg) + '</div>' +
+      '<label class="champ"><span>TP concerné</span><select name="demande_tp_id">' + options(demandes.map(function (d) { return { v: d.id, l: dateCourte(d.date_tp) + ' · ' + d.classe + ' · ' + d.titre }; }), p.demande_tp_id, 'Aucun') + '</select></label>' +
+      '<label class="champ"><span>Article de l\'inventaire à réapprovisionner</span><select name="article_id">' + options((e.articles || []).map(function (a) { return { v: a.id, l: a.designation }; }), p.article_id, 'Aucun / nouvel article') + '</select></label>' +
+      '<label class="champ large"><span>Justification pédagogique</span><textarea name="justification" required placeholder="TP, séquence, classe, bloc de compétences : pourquoi cet achat, pour quand">' + esc(p.justification || '') + '</textarea></label></div>' +
+      '<fieldset class="devis" id="bloc-devis"><legend class="label">Devis concurrents <span id="devis-oblig"></span></legend>' +
+      [1, 2, 3].map(function (i) {
+        return '<div class="grille devis-ligne"><label class="champ"><span>Fournisseur ' + i + '</span><input name="devis_f' + i + '" list="liste-fournisseurs"></label>' +
+          '<label class="champ"><span>Montant TTC (€)</span><input type="number" min="0" step="0.01" name="devis_m' + i + '"></label>' +
+          '<label class="champ"><span>Lien ou n° de devis</span><input name="devis_l' + i + '"></label></div>';
+      }).join('') + '</fieldset>' +
+      '<div class="actions"><button class="btn plein" type="submit">Envoyer pour approbation</button>' + (S.preCommande ? '<button type="button" class="btn" data-act="viderPre" data-v="preCommande">Effacer le préremplissage</button>' : '') + '</div></form>' + datalistFournisseurs();
+  }
+
+  function suggestionsHtml(l) {
+    if (!l.length) return '<span class="petit sourd">Choisis une catégorie pour voir les fournisseurs déjà utilisés par l\'école.</span>';
+    return '<span class="label">Déjà utilisés pour cette catégorie</span><p class="petit" style="margin:4px 0 0">' + l.slice(0, 6).map(function (f) {
+      return '<button type="button" class="btn lien" data-act="choisirFournisseur" data-v="' + esc(f.nom) + '">' + esc(f.nom) + '</button>';
+    }).join(' · ') + '</p>';
+  }
+
+  function majTotalCommande() {
+    var f = document.getElementById('form-commande');
+    if (!f) return;
+    var t = (Number(f.quantite.value) || 0) * (Number(f.prix_unitaire_ttc.value) || 0);
+    document.getElementById('total-commande').textContent = euros(t);
+    var oblig = t >= C().seuilTroisDevisTTC;
+    document.getElementById('devis-oblig').innerHTML = oblig ? badge('Obligatoires : ' + euros(t) + ' TTC', 'urgent') : '<span class="petit sourd">(facultatifs sous ' + euros(C().seuilTroisDevisTTC) + ' TTC)</span>';
+    [1, 2, 3].forEach(function (i) { f['devis_f' + i].required = oblig; f['devis_m' + i].required = oblig; });
+  }
+
+  function carteCommande(c) {
+    var st = ST_CMD[c.statut] || [c.statut, ''];
+    var devis = []; try { devis = JSON.parse(c.devis || '[]'); } catch (e) { devis = []; }
+    var mien = String(c.user_id) === String(moi().id);
+    var h = '<article class="carte"><div class="tete"><div><p class="label">' + esc(filLib(c.filiere)) + ' · ' + fmt(c.cree_le, 'dd/MM/yyyy') + ' · ' + esc(c.user_nom) + '</p>' +
+      '<h3 style="margin-top:4px">' + esc(num(c.quantite)) + ' × ' + esc(c.designation) + '</h3></div><div>' + badge(st[0], st[1]) + (Number(c.total_ttc) >= C().seuilTroisDevisTTC ? ' ' + badge('3 devis', 'encre') : '') + '</div></div>' +
+      '<p class="meta"><span class="mono">' + euros(c.total_ttc) + '</span> TTC estimés (' + euros(c.prix_unitaire_ttc) + ' l\'unité)' + (c.fournisseur ? ' · ' + esc(c.fournisseur) : '') + (c.reference ? ' · réf. <span class="mono">' + esc(c.reference) + '</span>' : '') +
+      (c.lien && /^https?:\/\//.test(c.lien) ? ' · <a href="' + esc(c.lien) + '" target="_blank" rel="noopener noreferrer">lien</a>' : '') + '</p>' +
+      '<p class="petit">' + esc(c.justification) + '</p>' +
+      (devis.length ? '<p class="petit sourd">Devis : ' + devis.map(function (d) { return esc(d.fournisseur) + ' ' + euros(d.montant); }).join(' · ') + '</p>' : '') +
+      (c.approuve_par ? '<p class="petit">Approuvée par <b>' + esc(c.approuve_par) + '</b> le ' + fmt(c.approuve_le, 'dd/MM/yyyy') + (c.pilotage_id ? ' · reportée dans Pilotage dépenses sous <span class="mono">' + esc(c.pilotage_id) + '</span>' : '') + '</p>' : '') +
+      (c.motif_refus ? '<div class="encart urgent">Refus : ' + esc(c.motif_refus) + '</div>' : '');
+    var a = [];
+    if (c.statut === 'soumise' && peut('approuverCommande') && (!mien || moi().role === 'directeur')) {
+      a.push('<button class="btn petit plein" data-act="cmd" data-v="approuvee" data-id="' + esc(c.id) + '">Approuver</button>');
+      a.push('<button class="btn petit" data-act="cmd" data-v="refusee" data-id="' + esc(c.id) + '">Refuser</button>');
+    }
+    if (c.statut === 'soumise' && mien) a.push('<button class="btn petit" data-act="cmd" data-v="annulee" data-id="' + esc(c.id) + '">Annuler ma demande</button>');
+    if (peut('suivreCommande')) {
+      if (c.statut === 'approuvee') a.push('<button class="btn petit" data-act="cmd" data-v="commandee" data-id="' + esc(c.id) + '">Marquer commandée</button>');
+      if (c.statut === 'approuvee' || c.statut === 'commandee') a.push('<button class="btn petit plein" data-act="cmd" data-v="livree" data-id="' + esc(c.id) + '">Réceptionner</button>');
+    }
+    if (a.length) h += '<div class="actions">' + a.join('') + '</div>';
+    return h + '</article>';
+  }
+
+  function vueCommandes() {
+    var e = S.etat, f = S.filtres.commandes;
+    var h = titre('Achats du labo', 'Commandes',
+      'Une demande d\'achat part au prof référent. Une fois approuvée, elle est recopiée dans le classeur Pilotage dépenses de la filière, puis suivie jusqu\'à la réception, qui remet le stock à jour.');
+    if (peut('proposerCommande')) h += S.preCommande ? formCommande() : '<details class="carte"><summary><h3 style="margin:0">Proposer une commande</h3><p class="meta">Au-delà de ' + euros(C().seuilTroisDevisTTC) + ' TTC : trois devis concurrents obligatoires.</p></summary>' + formCommande().replace('class="carte" id="form-commande"><h3>Proposer une commande</h3>', 'id="form-commande" style="margin-top:12px">') + '</details>';
+    h += filtreBoutons('commandes', [['actives', 'En cours'], ['toutes', 'Toutes']]);
+    var l = (e.commandes || []).filter(function (c) { return f === 'toutes' || ['soumise', 'approuvee', 'commandee'].indexOf(c.statut) !== -1; })
+      .sort(function (a, b) { var o = { soumise: 0, approuvee: 1, commandee: 2 }; return ((o[a.statut] === undefined ? 3 : o[a.statut]) - (o[b.statut] === undefined ? 3 : o[b.statut])) || (a.cree_le < b.cree_le ? 1 : -1); });
+    return h + (l.length ? l.map(carteCommande).join('') : '<p class="vide">Aucune commande.</p>');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Rangement
+  // ---------------------------------------------------------------------------
+  function vueRangement() {
+    var e = S.etat, auj = aujourdhui();
+    var h = titre('Contrôle de fin de TP', 'Rangement', 'Contrôle par labo, daté et signé. Chaque point non conforme ouvre un incident.');
+    if (peut('rangement')) {
+      var duJour = (e.demandes || []).filter(function (d) { return d.date_tp === auj && d.statut !== 'annulee'; });
+      h += '<form data-form="rangement" class="carte"><div class="grille">' +
+        '<label class="champ"><span>Labo</span><select name="labo" required>' + options(C().labos, (e.sessionOuverte || {}).labo, 'Choisir…') + '</select></label>' +
+        '<label class="champ"><span>TP concerné</span><select name="demande_id">' + options(duJour.map(function (d) { return { v: d.id, l: d.creneau + ' · ' + d.classe + ' · ' + d.titre }; }), '', 'Aucun / hors TP') + '</select></label></div>' +
+        '<div class="actions" style="justify-content:space-between;align-items:center"><p class="label" style="margin:0">Points de contrôle</p><button type="button" class="btn petit" data-act="toutOk">Tout conforme</button></div>' +
+        C().controlesRangement.map(function (c, i) {
+          return '<div class="controle"><span>' + esc(c) + '</span><div class="seg" role="radiogroup" aria-label="' + esc(c) + '">' +
+            [['ok', 'OK'], ['nc', 'NC'], ['na', 'N/A']].map(function (o) { return '<label><input type="radio" name="c' + i + '" value="' + o[0] + '"><span class="' + o[0] + '">' + o[1] + '</span></label>'; }).join('') + '</div></div>';
+        }).join('') +
+        '<label class="champ" style="margin-top:16px"><span>Remarques</span><textarea name="remarques" placeholder="Ex. : poste 7, bécher cassé ; DASRI plein"></textarea></label>' +
+        '<div class="actions"><button class="btn plein" type="submit">Enregistrer le contrôle</button></div></form>';
+    }
+    var l = (e.rangements || []).slice().reverse();
+    h += '<h2>Derniers contrôles</h2>' + (l.length ? '<div class="tableau-wrap"><table><thead><tr><th>Date</th><th>Labo</th><th>Par</th><th>Non conformes</th><th>Remarques</th></tr></thead><tbody>' +
+      l.slice(0, 80).map(function (x) {
+        var c = {}; try { c = JSON.parse(x.controles); } catch (err) { /* ligne ancienne */ }
+        var nc = Object.keys(c).filter(function (k) { return c[k] === 'nc'; });
+        return '<tr><td class="mono">' + fmt(x.horodatage, 'dd/MM/yyyy HH:mm') + '</td><td>' + esc(x.labo) + '</td><td>' + esc(x.user_nom) + '</td><td>' + (nc.length ? badge(nc.length + ' NC', 'urgent') + ' ' + esc(nc.join(', ')) : badge('Conforme', 'vert')) + '</td><td>' + esc(x.remarques) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '<p class="vide">Aucun contrôle enregistré.</p>');
+    return h;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Incidents
+  // ---------------------------------------------------------------------------
+  var GRAV = { Faible: '', 'Gênant': 'ambre', Bloquant: 'urgent' };
+  var ST_INC = { ouvert: ['Ouvert', 'ambre'], en_cours: ['En cours', 'violet'], resolu: ['Résolu', 'vert'] };
+
+  function vueIncidents() {
+    var e = S.etat;
+    var h = titre('Problèmes au labo', peut('traiterIncident') ? 'Incidents' : 'Signaler un problème',
+      'Panne, casse, rupture, réactif périmé, souci d\'hygiène : un signalement daté remplace le message oral oublié. Un incident « bloquant » part aussi par e-mail.');
+    h += '<form data-form="incident" class="carte"><div class="grille">' +
+      '<label class="champ"><span>Labo</span><select name="labo">' + options(C().labos, '', 'Général / hors labo') + '</select></label>' +
+      '<label class="champ"><span>Catégorie</span><select name="categorie" required>' + options(C().categoriesIncident, '', 'Choisir…') + '</select></label>' +
+      '<label class="champ"><span>Gravité</span><select name="gravite">' + options(C().gravites, 'Gênant') + '</select></label>' +
+      '<label class="champ large"><span>Description</span><textarea name="description" required placeholder="Quoi, où, depuis quand, référence du réactif ou n° de l\'appareil"></textarea></label>' +
+      '</div><div class="actions"><button class="btn plein" type="submit">Signaler</button></div></form>';
+    h += '<h2>Suivi</h2>' + filtreBoutons('incidents', [['ouverts', 'Non résolus'], ['tous', 'Tous']]);
+    var ordre = { Bloquant: 0, 'Gênant': 1, Faible: 2 };
+    var l = (e.incidents || []).filter(function (i) { return S.filtres.incidents === 'tous' || i.statut !== 'resolu'; })
+      .sort(function (a, b) { return (ordre[a.gravite] - ordre[b.gravite]) || (a.horodatage < b.horodatage ? 1 : -1); });
+    return h + (l.length ? l.map(function (i) {
+      var st = ST_INC[i.statut] || [i.statut, ''];
+      var x = '<article class="carte"><div class="tete"><div><p class="label">' + esc(i.categorie) + (i.labo ? ' · ' + esc(i.labo) : '') + '</p>' +
+        '<p style="margin:4px 0 0;white-space:pre-wrap">' + esc(i.description) + '</p></div><div>' + badge(i.gravite, GRAV[i.gravite]) + ' ' + badge(st[0], st[1]) + '</div></div>' +
+        '<p class="meta">' + esc(i.user_nom) + ' · <span class="mono">' + fmt(i.horodatage, 'dd/MM/yyyy HH:mm') + '</span>' + (i.traite_par ? ' · suivi par ' + esc(i.traite_par) : '') + '</p>' +
+        (i.resolution ? '<div class="encart vert"><b>Résolution' + (i.resolu_le ? ' du ' + fmt(i.resolu_le, 'dd/MM/yyyy') : '') + ' :</b> ' + esc(i.resolution) + '</div>' : '');
+      if (peut('traiterIncident') && i.statut !== 'resolu') {
+        x += '<form data-form="majIncident" data-id="' + esc(i.id) + '" class="actions" style="align-items:flex-end">' +
+          '<label class="champ" style="flex:1;min-width:220px"><span>Ce qui a été fait</span><input name="resolution" placeholder="Ex. : lampe changée, commande proposée"></label>' +
+          (i.statut === 'ouvert' ? '<button class="btn petit" type="submit" name="statut" value="en_cours">Je m\'en occupe</button>' : '') +
+          '<button class="btn petit plein" type="submit" name="statut" value="resolu">Résolu</button></form>';
+      }
+      return x + '</article>';
+    }).join('') : '<p class="vide">Aucun incident.</p>');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Heures : relevé personnel, activité de l'équipe, facturation (directeur)
+  // ---------------------------------------------------------------------------
+  var ST_SES = { en_cours: ['En cours', 'violet'], a_valider: ['À valider', 'ambre'], validee: ['Validée', 'vert'], contestee: ['Contestée', 'urgent'] };
+  var SOURCES = { badge: 'Badge', hors_ligne: 'Badge hors connexion', saisie_manuelle: 'Saisie après coup' };
+
+  function equipeLabo() { return (S.etat.utilisateurs || []).filter(function (u) { return u.role === 'technicienne' || u.role === 'aide_laborantine'; }); }
+
+  function vueHeures() {
+    var rel = S.releve, equipe = peut('voirEquipe'), fact = peut('facturation');
+    var h = titre('Relevé mensuel', fact ? 'Heures et facturation' : (equipe ? 'Activité des techniciennes' : 'Mes heures'),
+      fact ? 'Seules les présences validées entrent dans le relevé. Imprime-le pour le rapprocher de la facture de la prestataire.'
+        : (equipe ? 'Heures passées au labo, missions et TP préparés. Les montants facturés ne sont visibles que par le directeur.'
+          : 'Tes présences du mois. Les heures validées sont celles à facturer.'));
+    h += '<form data-form="releve" class="actions" style="align-items:flex-end">' +
+      (equipe ? '<label class="champ" style="min-width:220px"><span>Personne</span><select name="user_id" required>' + options(equipeLabo().map(function (u) { return { v: u.id, l: u.nom + ' · ' + C().roles[u.role] }; }), rel ? rel.personne.id : (equipeLabo()[0] || {}).id) + '</select></label>' : '') +
+      '<label class="champ"><span>Mois</span><input type="month" name="mois" value="' + esc(rel ? rel.mois : moisCourant()) + '" required></label>' +
+      '<button class="btn plein" type="submit">Afficher</button></form>';
+    if (!rel) return h + '<p class="vide">Chargement du relevé…</p>';
+    h += '<div class="chiffres"><div class="chiffre accent"><b>' + num(rel.heures_validees) + '</b><span>heures validées · ' + esc(rel.personne.nom) + '</span></div>' +
+      (rel.montant_ht !== undefined ? '<div class="chiffre"><b>' + euros(rel.montant_ht) + '</b><span>HT au taux de ' + euros(rel.taux_horaire) + '/h</span></div>' : '') +
+      '<div class="chiffre"><b>' + rel.non_validees + '</b><span>présence(s) non validée(s)</span></div>' +
+      '<div class="chiffre"><b>' + rel.preparations.length + '</b><span>TP préparé(s) ce mois</span></div></div>';
+    if (rel.non_validees) h += '<div class="encart ambre">' + rel.non_validees + ' présence(s) pas encore validée(s) : elles ne comptent pas dans le total.</div>';
+    h += rel.sessions.length ? '<div class="tableau-wrap"><table><thead><tr><th>Date</th><th>Arrivée</th><th>Départ</th><th class="num">Durée</th><th>Labo</th><th>Missions</th><th>Origine</th><th>Statut</th>' + (peut('validerPresence') ? '<th></th>' : '') + '</tr></thead><tbody>' +
+      rel.sessions.map(function (s) {
+        var st = ST_SES[s.statut] || [s.statut, ''];
+        return '<tr><td>' + esc(jourLisible(s.date)) + '</td><td class="mono">' + fmt(s.arrivee, 'HH:mm') + '</td><td class="mono">' + fmt(s.depart, 'HH:mm') + '</td><td class="num">' + (s.depart ? duree(s.duree_min) : '') + '</td><td>' + esc(s.labo) + '</td>' +
+          '<td class="petit">' + esc(String(s.missions).split(' | ').join(', ')) + (s.commentaire ? '<br><span class="sourd">' + esc(s.commentaire) + '</span>' : '') + '</td>' +
+          '<td class="petit">' + esc(SOURCES[s.source] || s.source) + (s.corrections ? '<br><span class="sourd">' + esc(s.corrections) + '</span>' : '') + '</td>' +
+          '<td>' + badge(st[0], st[1]) + (s.motif_validation ? '<br><span class="petit sourd">' + esc(s.motif_validation) + '</span>' : '') + '</td>' +
+          (peut('validerPresence') ? '<td>' + boutonsValidation(s) + '</td>' : '') + '</tr>';
+      }).join('') + '</tbody><tfoot><tr><td colspan="3">Total validé</td><td class="num">' + duree(rel.minutes_validees) + '</td><td colspan="' + (peut('validerPresence') ? 5 : 4) + '"></td></tr></tfoot></table></div>'
+      : '<p class="vide">Aucune présence ce mois-ci.</p>';
+    if (rel.preparations.length) {
+      h += '<h2>TP préparés</h2><div class="tableau-wrap"><table><thead><tr><th>Date</th><th>Créneau</th><th>Classe</th><th>TP</th><th>Statut</th></tr></thead><tbody>' +
+        rel.preparations.map(function (d) { var st = ST_DEM[d.statut] || [d.statut, '']; return '<tr><td>' + esc(jourLisible(d.date_tp)) + '</td><td>' + esc(d.creneau) + '</td><td>' + esc(d.classe) + '</td><td>' + esc(d.titre) + '</td><td>' + badge(st[0], st[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    }
+    if (rel.sessions.length) h += '<div class="actions"><button class="btn" data-act="csv">Exporter en CSV</button><button class="btn" data-act="imprimer">Imprimer le relevé</button></div>';
+    return h;
+  }
+
+  function boutonsValidation(s) {
+    if (s.statut === 'en_cours' || !peut('validerPresence')) return '';
+    var b = '';
+    if (s.statut !== 'validee') b += '<button class="btn petit plein" data-act="valider" data-id="' + esc(s.id) + '">Valider</button> ';
+    if (s.statut !== 'contestee') b += '<button class="btn petit" data-act="contester" data-id="' + esc(s.id) + '">Contester</button>';
+    return '<div class="actions" style="margin:0;flex-wrap:nowrap">' + b + '</div>';
+  }
+
+  function chargerReleve(userId, mois) {
+    var data = { mois: mois || (S.releve ? S.releve.mois : moisCourant()) };
+    if (peut('voirEquipe')) {
+      data.user_id = userId || (S.releve ? S.releve.personne.id : (equipeLabo()[0] || {}).id);
+      if (!data.user_id) { toast('Aucune technicienne dans la feuille Utilisateurs.', true); return; }
+    }
+    S.releveEnCours = true;
+    api('releve', data).then(function (r) {
+      S.releveEnCours = false;
+      if (!r.ok) return toast(r.error, true);
+      S.releve = r.data;
+      rendre();
+    });
+  }
+
+  function csvCellule(c) {
+    var s = String(c === undefined || c === null ? '' : c);
+    if (/^[=+\-@]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  function csv() {
+    var rel = S.releve;
+    var l = [['Personne', 'Date', 'Arrivée', 'Départ', 'Durée (h)', 'Labo', 'Missions', 'Origine', 'Corrections', 'Statut', 'Validé par', 'Référence']];
+    rel.sessions.forEach(function (s) {
+      l.push([rel.personne.nom, s.date, fmt(s.arrivee, 'HH:mm'), fmt(s.depart, 'HH:mm'), String(Math.round((Number(s.duree_min) || 0) / 60 * 100) / 100).replace('.', ','),
+        s.labo, s.missions, SOURCES[s.source] || s.source, s.corrections, (ST_SES[s.statut] || [s.statut])[0], s.valide_par, s.id]);
+    });
+    var txt = '﻿' + l.map(function (r) { return r.map(csvCellule).join(';'); }).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'releve-' + rel.mois + '-' + rel.personne.nom.replace(/\W+/g, '-') + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function imprimer() {
+    var rel = S.releve, fact = rel.montant_ht !== undefined;
+    var val = rel.sessions.filter(function (s) { return s.statut === 'validee'; });
+    var moisLib = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(+rel.mois.slice(0, 4), +rel.mois.slice(5, 7) - 1, 1)));
+    document.getElementById('imprimable').innerHTML =
+      '<p class="sur">aurlom BTS+ · Laboratoires de TP · BTS BIOMED (RNCP40027) et BIOALC (RNCP38884)</p>' +
+      '<h1>' + (fact ? 'Relevé de prestations' : 'Relevé d\'activité') + '<span class="point">.</span></h1>' +
+      '<p><b>' + esc(C().roles[rel.personne.role] || '') + ' :</b> ' + esc(rel.personne.nom) + ' · <b>Période :</b> ' + esc(moisLib) + '</p>' +
+      '<table><thead><tr><th>Date</th><th>Arrivée</th><th>Départ</th><th class="num">Durée</th><th>Labo</th><th>Missions</th><th>Réf.</th></tr></thead><tbody>' +
+      val.map(function (s) { return '<tr><td>' + esc(jourLisible(s.date)) + '</td><td>' + fmt(s.arrivee, 'HH:mm') + '</td><td>' + fmt(s.depart, 'HH:mm') + '</td><td class="num">' + duree(s.duree_min) + '</td><td>' + esc(s.labo) + '</td><td>' + esc(String(s.missions).split(' | ').join(', ')) + '</td><td class="mono">' + esc(s.id) + '</td></tr>'; }).join('') +
+      '</tbody><tfoot><tr><td colspan="3">Total</td><td class="num">' + duree(rel.minutes_validees) + '</td><td colspan="3">' + num(rel.heures_validees) + ' h' +
+      (fact ? ' × ' + euros(rel.taux_horaire) + '/h = ' + euros(rel.montant_ht) + ' HT' : '') + '</td></tr></tfoot></table>' +
+      (rel.non_validees ? '<p>' + rel.non_validees + ' présence(s) non validée(s) à la date d\'édition, non incluses.</p>' : '') +
+      '<div class="signatures"><div>Pour Aurlom BTS+, service fait<br>Nom, date, signature</div><div>La prestataire<br>Nom, date, signature</div></div>' +
+      '<div class="pied"><span>Édité le ' + fmt(rel.edite_le, 'dd/MM/yyyy à HH:mm') + ' depuis le suivi labo · horodatages serveur</span><span class="mono">' + esc(rel.mois) + '</span></div>';
+    window.print();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Préremplissages
+  // ---------------------------------------------------------------------------
+  function sequence(id) {
+    return (S.etat.programme || []).concat(S.programmeComplet || []).filter(function (p) { return p.id === id; })[0];
+  }
+  function categorieDe(item) {
+    var n = norm(item);
+    if (/gelose|milieu|bouillon|culture cellulaire/.test(n)) return 'Milieu de culture';
+    if (/souche|echantillon|parasit|paillette|lait|eau/.test(n)) return 'Souche / échantillon pédagogique';
+    if (/spectrophotometre|microscope|centrifug|etuve|autoclave|ph-metre|conductimetre|balance|bain-marie|automate|poste de securite|rampe/.test(n)) return 'Équipement';
+    if (/verrerie|burette|fiole/.test(n)) return 'Verrerie';
+    if (/epi|dasri|desinfect/.test(n)) return 'EPI / hygiène';
+    if (/lames|cones|boites|tubes|bandelettes|flacons|cuves|huile/.test(n)) return 'Consommable';
+    if (/micropipette|anses|cellules de numeration|chromatographie/.test(n)) return 'Petit matériel';
+    return 'Réactif / coffret';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Événements
+  // ---------------------------------------------------------------------------
+  function valeurs(form) {
+    var o = {};
+    Array.prototype.forEach.call(form.elements, function (el) {
+      if (!el.name || el.disabled || el.type === 'submit') return;
+      if (el.type === 'checkbox') { if (!o[el.name]) o[el.name] = []; if (el.checked) o[el.name].push(el.value); return; }
+      if (el.type === 'radio') { if (el.checked) o[el.name] = el.value; return; }
+      o[el.name] = el.value;
+    });
+    return o;
+  }
+
+  function connecter(email, pin) {
+    api('connexion', { email: email, pin: pin }).then(function (r) {
+      if (!r.ok) return toast(r.error, true);
+      S.session = { jeton: r.data.jeton };
+      ecrire(CLE_SESSION, S.session);
+      S.onglet = null; S.releve = null; S.preDemande = null; S.preCommande = null;
+      charger();
+    });
+  }
+
+  app.addEventListener('submit', function (ev) {
+    var form = ev.target, type = form.getAttribute('data-form');
+    if (!type) return;
+    ev.preventDefault();
+    var v = valeurs(form);
+    if (ev.submitter && ev.submitter.name) v[ev.submitter.name] = ev.submitter.value;
+    switch (type) {
+      case 'connexion': connecter(v.email, v.pin); break;
+      case 'arrivee': agir('arrivee', v, 'Arrivée enregistrée.'); break;
+      case 'depart':
+        (v.heure_depart ? boite('Départ à ' + v.heure_depart + ' saisi à la main : il sera signalé à la validation.') : Promise.resolve(true))
+          .then(function (ok) { if (ok) agir('depart', v, 'Départ enregistré.'); });
+        break;
+      case 'saisieManuelle': agir('saisieManuelle', v, 'Présence envoyée en validation.'); break;
+      case 'demande': agir('demande', v, 'Demande envoyée.').then(function (r) { if (r) S.preDemande = null; rendre(); }); break;
+      case 'message': agir('message', { demande_id: form.getAttribute('data-id'), texte: v.texte }); break;
+      case 'incident': agir('incident', v, 'Signalement enregistré.'); break;
+      case 'majIncident': agir('majIncident', { id: form.getAttribute('data-id'), statut: v.statut, resolution: v.resolution }, 'Incident mis à jour.'); break;
+      case 'releve': chargerReleve(v.user_id, v.mois); break;
+      case 'article': agir('article', v, 'Inventaire mis à jour.').then(function (r) { if (r) { S.edition = null; rendre(); } }); break;
+      case 'commande':
+        v.devis = [1, 2, 3].map(function (i) { return { fournisseur: v['devis_f' + i], montant: v['devis_m' + i], lien: v['devis_l' + i] }; });
+        agir('commande', v, 'Demande envoyée au prof référent.').then(function (r) { if (r) { S.preCommande = null; rendre(); } });
+        break;
+      case 'rangement':
+        var controles = {};
+        C().controlesRangement.forEach(function (c, i) { if (v['c' + i]) controles[c] = v['c' + i]; });
+        var manq = C().controlesRangement.length - Object.keys(controles).length;
+        (manq ? boite(manq + ' point(s) sans réponse seront notés « N/A ».', { ok: 'Continuer' }) : Promise.resolve(true)).then(function (ok) {
+          if (ok) agir('rangement', { labo: v.labo, demande_id: v.demande_id, controles: controles, remarques: v.remarques }, 'Contrôle enregistré.');
+        });
+        break;
+    }
+  });
+
+  app.addEventListener('click', function (ev) {
+    var t = ev.target.closest('[data-act],[data-onglet]');
+    if (!t) return;
+    if (t.hasAttribute('data-onglet')) { S.onglet = t.getAttribute('data-onglet'); S.edition = null; window.scrollTo(0, 0); return charger(); }
+    var id = t.getAttribute('data-id'), v = t.getAttribute('data-v');
+    var art = id ? (S.etat && (S.etat.articles || []).filter(function (a) { return a.id === id; })[0]) : null;
+    switch (t.getAttribute('data-act')) {
+      case 'demoCompte': connecter(t.getAttribute('data-email'), t.getAttribute('data-pin')); break;
+      case 'deconnexion': api('deconnexion').then(finSession); break;
+      case 'reinit':
+        boite('Effacer les données de démonstration et repartir des exemples ?').then(function (ok) {
+          if (ok) { LaboNav.reinitialiser(); demoCore = LaboCore.create(LaboNav.store(), LaboNav.env); LaboNav.amorcer(demoCore); finSession(); }
+        });
+        break;
+      case 'recharger': charger(); break;
+      case 'filtre': S.filtres[t.getAttribute('data-cle')] = v; rendre(); break;
+      case 'prendre': agir('majDemande', { id: id, prendre: true }, 'Demande prise en charge.'); break;
+      case 'statutDemande':
+        (v === 'annulee' ? boite('Annuler cette demande de TP ?', { ok: 'Annuler la demande' }) : Promise.resolve(true))
+          .then(function (ok) { if (ok) agir('majDemande', { id: id, statut: v }, 'Statut mis à jour.'); });
+        break;
+      case 'toutOk': Array.prototype.forEach.call(app.querySelectorAll('.seg input[value="ok"]'), function (i) { i.checked = true; }); break;
+      case 'valider': agir('validerSession', { id: id, decision: 'validee' }, 'Présence validée.').then(function () { if (S.releve) chargerReleve(); }); break;
+      case 'contester':
+        boite('Contester cette présence', { saisie: 'Motif (visible par la prestataire)', requis: true, ok: 'Contester' }).then(function (motif) {
+          if (motif) agir('validerSession', { id: id, decision: 'contestee', motif: motif }, 'Présence contestée.').then(function () { if (S.releve) chargerReleve(); });
+        });
+        break;
+      case 'csv': csv(); break;
+      case 'imprimer': imprimer(); break;
+      case 'viderPre': S[v] = null; rendre(); break;
+      case 'progTout':
+        S.filtres.progTout = !S.filtres.progTout;
+        if (S.filtres.progTout && !S.programmeComplet) {
+          api('programme', {}).then(function (r) { if (r.ok) S.programmeComplet = r.data; else toast(r.error, true); rendre(); });
+        } else rendre();
+        break;
+      case 'demanderSeq':
+        var p = sequence(id);
+        S.preDemande = preDemandeDepuis(tpsDeSequence(p)[0] || null, p);
+        S.onglet = 'demandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'preparerTP':
+        var tref = tpRef(id), sq0 = t.getAttribute('data-seq') ? sequence(t.getAttribute('data-seq')) : null;
+        S.preDemande = preDemandeDepuis(tref, sq0);
+        S.onglet = 'demandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'commanderDemandeItem':
+        var dd = (S.etat.demandes || []).filter(function (x) { return x.id === id; })[0], itd = t.getAttribute('data-item');
+        S.preCommande = { designation: itd, filiere: dd.filiere, demande_tp_id: dd.id, categorie: categorieDe(itd), contexte: 'Pour le TP « ' + dd.titre + ' » du ' + jourLisible(dd.date_tp) + ' (' + dd.classe + ').',
+          justification: 'TP « ' + dd.titre + ' », ' + dd.classe + ', ' + jourLisible(dd.date_tp) + '.' };
+        S.onglet = 'commandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'commanderTP':
+        var tc = tpRef(id), itc = t.getAttribute('data-item');
+        S.preCommande = { designation: itc, filiere: tc.filiere, categorie: categorieDe(itc), contexte: 'Matériel type du TP incontournable « ' + tc.intitule + ' » (' + tc.codes + ').',
+          justification: filLib(tc.filiere) + ' · TP incontournable « ' + tc.intitule + ' » (' + tc.codes + ').' };
+        S.onglet = 'commandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'progVue':
+        S.filtres.progVue = v;
+        if (v === 'catalogue' && !S.programmeComplet) api('programme', {}).then(function (r) { if (r.ok) S.programmeComplet = r.data; else toast(r.error, true); rendre(); });
+        else rendre();
+        break;
+      case 'commanderSeq':
+        var sq = sequence(id), item = t.getAttribute('data-item');
+        S.preCommande = { designation: item, filiere: sq.filiere, sequence_id: sq.id, categorie: categorieDe(item),
+          contexte: 'Pour la séquence « ' + sq.titre + ' » (' + filLib(sq.filiere) + ' ' + sq.annee + ', du ' + dateCourte(sq.debut) + ' au ' + dateCourte(sq.fin) + ').',
+          justification: filLib(sq.filiere) + ' ' + sq.annee + ' · ' + sq.matiere + ' · séquence « ' + sq.titre + ' » (' + sq.semaines + ', du ' + dateCourte(sq.debut) + ' au ' + dateCourte(sq.fin) + ').' };
+        S.onglet = 'commandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'commanderPour':
+        var d = (S.etat.demandes || []).filter(function (x) { return x.id === id; })[0];
+        S.preCommande = { filiere: d.filiere, demande_tp_id: d.id, contexte: 'Pour le TP « ' + d.titre + ' » du ' + jourLisible(d.date_tp) + ' (' + d.classe + ').',
+          justification: 'TP « ' + d.titre + ' », ' + d.classe + ', ' + jourLisible(d.date_tp) + ' (' + d.creneau + ').' };
+        S.onglet = 'commandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'commanderArticle':
+        S.preCommande = { designation: art.designation, reference: art.reference, fournisseur: art.fournisseur, article_id: art.id, categorie: art.categorie,
+          filiere: art.filiere === 'Commun' ? '' : art.filiere, contexte: 'Réapprovisionnement : il reste ' + num(art.quantite) + ' ' + art.unite + '.', justification: 'Réapprovisionnement de « ' + art.designation + ' » (stock : ' + num(art.quantite) + ' ' + art.unite + '). TP concernés : ' };
+        S.onglet = 'commandes'; rendre(); window.scrollTo(0, 0);
+        break;
+      case 'choisirFournisseur': var fo = document.querySelector('#form-commande [name=fournisseur]'); if (fo) fo.value = v; break;
+      case 'consommer':
+        boite('Consommer « ' + art.designation + ' »', { saisie: 'Quantité utilisée (' + art.unite + ')', nombre: true, defaut: 1, requis: true, ok: 'Enregistrer' }).then(function (qc) {
+          if (qc) agir('mouvement', { article_id: art.id, delta: -Math.abs(Number(String(qc).replace(',', '.'))), motif: 'Consommation TP' }, 'Consommation enregistrée.');
+        });
+        break;
+      case 'entree':
+        boite('Mouvement de stock : « ' + art.designation + ' »', { saisie: 'Quantité (positive = entrée, négative = sortie)', nombre: true, requis: true, ok: 'Suivant' }).then(function (qe) {
+          if (!qe) return;
+          var dq = Number(String(qe).replace(',', '.'));
+          var motifs = dq > 0 ? ['Réception de commande', 'Correction d\'inventaire'] : ['Correction d\'inventaire', 'Casse / perte', 'Péremption (mise au rebut)'];
+          boite('Motif du mouvement', { choix: motifs, ok: 'Enregistrer' }).then(function (mot) {
+            if (mot) agir('mouvement', { article_id: art.id, delta: dq, motif: mot }, 'Stock mis à jour.');
+          });
+        });
+        break;
+      case 'editerArticle': S.edition = art; rendre(); var z = document.getElementById('zone-article'); if (z) z.scrollIntoView(); break;
+      case 'annulerEdition': S.edition = null; rendre(); break;
+      case 'retirerArticle':
+        boite('Retirer cet article de l\'inventaire ? Son historique reste dans le classeur.', { ok: 'Retirer' }).then(function (ok) {
+          if (ok) { var a2 = S.edition; agir('article', Object.assign({}, a2, { actif: 'non' }), 'Article retiré.').then(function () { S.edition = null; rendre(); }); }
+        });
+        break;
+      case 'invAlerte': S.filtres.invAlerte = !S.filtres.invAlerte; rendre(); break;
+      case 'cmd':
+        var cm = (S.etat.commandes || []).filter(function (x) { return x.id === id; })[0];
+        var etape;
+        if (v === 'refusee') etape = boite('Refuser « ' + cm.designation + ' »', { saisie: 'Motif (envoyé au demandeur)', requis: true, ok: 'Refuser' }).then(function (m) { return m ? { motif: m } : null; });
+        else if (v === 'annulee') etape = boite('Annuler cette demande d\'achat ?', { ok: 'Annuler la demande' }).then(function (ok) { return ok ? {} : null; });
+        else if (v === 'approuvee') etape = boite('Approuver l\'achat de ' + cm.designation + ' pour ' + euros(cm.total_ttc) + ' TTC ? La ligne passe à « Validé » dans le classeur Pilotage dépenses.', { ok: 'Approuver' }).then(function (ok) { return ok ? {} : null; });
+        else if (v === 'livree' && cm.article_id) etape = boite('Réception de « ' + cm.designation + ' »', { saisie: 'Quantité reçue (ajoutée au stock)', nombre: true, defaut: cm.quantite, requis: true, ok: 'Réceptionner' }).then(function (q) { return q ? { quantite_recue: q } : null; });
+        else etape = Promise.resolve({});
+        etape.then(function (extra) { if (extra) agir('majCommande', Object.assign({ id: id, statut: v }, extra), 'Commande mise à jour.'); });
+        break;
+    }
+  });
+
+  app.addEventListener('change', function (ev) {
+    var t = ev.target, act = t.getAttribute('data-change');
+    if (act === 'attribuer') agir('majDemande', { id: t.getAttribute('data-id'), prepa_id: t.value }, 'Demande attribuée.');
+    if (act === 'statutDemande') agir('majDemande', { id: t.getAttribute('data-id'), statut: t.value }, 'Statut mis à jour.');
+    if (act === 'progFiliere') { S.filtres.progFiliere = t.value; rendre(); }
+    if (act === 'invFiliere') { S.filtres.invFiliere = t.value; rendre(); }
+    if (act === 'categorieCommande') document.getElementById('sugg-fournisseurs').innerHTML = suggestionsHtml(fournisseursPour(t.value));
+  });
+
+  app.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (t.hasAttribute('data-total')) majTotalCommande();
+    if (t.getAttribute('data-input') === 'inventaire') {
+      S.filtres.inventaire = t.value;
+      var pos = t.selectionStart;
+      rendre();
+      var n = app.querySelector('[data-input="inventaire"]');
+      if (n) { n.focus(); n.setSelectionRange(pos, pos); }
+    }
+  });
+
+  setInterval(function () {
+    var h = document.getElementById('horloge');
+    if (h) h.textContent = LaboNav.format(new Date(), 'HH:mm');
+    var d = document.getElementById('duree');
+    if (d) d.textContent = duree(Math.round((Date.now() - new Date(d.getAttribute('data-depuis'))) / 60000));
+  }, 15000);
+
+  // Rafraîchissement discret quand rien n'est en cours de saisie.
+  setInterval(function () {
+    if (!S.session || document.hidden || S.occupe) return;
+    var a = document.activeElement;
+    if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
+    if (app.querySelector('details[open]') || S.edition || S.preCommande || S.preDemande) return;
+    charger();
+  }, 90000);
+
+  window.addEventListener('online', function () { if (S.session) charger(); });
+
+  if (S.session) charger(); else rendre();
+})();
+
+</script>
+</body>
+</html>

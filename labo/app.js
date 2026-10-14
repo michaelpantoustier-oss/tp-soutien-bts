@@ -431,7 +431,7 @@
       '<label class="champ"><span>Labo</span><select name="labo" required>' + options(C().labos, '', 'Choisir…') + '</select></label>' +
       '<label class="champ"><span>Classe</span><select name="classe" required>' + options(classesOptions(), classeDefaut, 'Choisir…') + '</select></label>' +
       '<label class="champ"><span>Discipline</span><select name="discipline" required>' + options(disciplinesOptions(), p.discipline || (moi().disciplines || '').split(',')[0], 'Choisir…') + '</select></label>' +
-      '<label class="champ"><span>Effectif</span><input type="number" name="effectif" min="1" max="60"></label>' +
+      '<label class="champ"><span>Nombre d\'élèves</span><input type="number" name="effectif" min="1" max="60" required></label>' +
       '<label class="champ large"><span>Bloc de compétences visé</span><select name="competence"><option value="">Choisir…</option>' + blocsOptions(p.competence) + '</select></label>' +
       '<label class="champ large"><span>Titre du TP (verbe d\'action)</span><input name="titre" required value="' + esc(p.titre || '') + '"></label>' +
       '<label class="champ large"><span>Besoin matériel et réactifs</span><textarea name="besoin" required placeholder="Réactifs avec référence, quantités par binôme, appareils, consommables">' + esc(p.besoin || '') + '</textarea></label>' +

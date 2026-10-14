@@ -487,12 +487,15 @@ var LaboCore = (function () {
       if (!ymd(data.date_tp)) throw erreur('Date du TP invalide.');
       var titre = texte(data.titre, 300), besoin = texte(data.besoin, 3000);
       if (!titre || !besoin) throw erreur('Le titre du TP et le besoin matériel sont obligatoires.');
+      var effectif = nombre(data.effectif);
+      if (!(effectif >= 1 && effectif <= 60)) throw erreur('Indique le nombre d\'élèves (entre 1 et 60).');
+      if (!texte(data.creneau) || !texte(data.labo) || !texte(data.classe)) throw erreur('Créneau, labo et classe sont obligatoires.');
       var h = now(), classe = texte(data.classe, 40);
       var d = {
         id: nouvelId('D'), cree_le: iso(h), prof_id: user.id, prof_nom: user.nom, filiere: filiereDeClasse(classe) || filiereUnique(user),
         date_tp: data.date_tp, creneau: texte(data.creneau, 40), labo: texte(data.labo, 80), classe: classe,
         discipline: texte(data.discipline, 80), competence: texte(data.competence, 200), sequence_id: texte(data.sequence_id, 40), tp_ref: texte(data.tp_ref, 20),
-        titre: titre, besoin: besoin, effectif: texte(data.effectif, 10), delai_jours: joursEntre(jour(h), data.date_tp),
+        titre: titre, besoin: besoin, effectif: String(effectif), delai_jours: joursEntre(jour(h), data.date_tp),
         prepa_id: '', prepa_nom: '', statut: 'demandee', maj_le: iso(h)
       };
       if (d.delai_jours < 0) throw erreur('La date du TP est passée.');

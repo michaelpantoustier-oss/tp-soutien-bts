@@ -21,6 +21,9 @@ var LaboCore = (function () {
     alerteSessionHeures: 11,
     seuilTroisDevisTTC: 1000, // à ajuster : au-delà, trois devis concurrents obligatoires
     alertePeremptionJours: 30,
+    // Premier jour facturable dans l'outil : les présences antérieures ne peuvent
+    // pas être déclarées, celles depuis cette date peuvent être rattrapées.
+    debutSuivi: '2026-10-06',
     // Facturation : une heure de pause déjeuner est retirée de chaque journée qui
     // couvre la plage 12 h – 14 h, moins le temps déjà badgé en sortie dans cette plage.
     pauseDejeuner: { minutes: 60, debut: '12:00', fin: '14:00' },
@@ -337,6 +340,12 @@ var LaboCore = (function () {
       var debut = heureLocale(data.date, data.debut), fin = heureLocale(data.date, data.fin);
       if (fin <= debut) throw erreur('L\'heure de fin doit suivre l\'heure de début.');
       if (fin > now()) throw erreur('Impossible de déclarer une présence future.');
+      if (String(data.date) < CONFIG.debutSuivi) throw erreur('Le suivi commence le ' + CONFIG.debutSuivi.split('-').reverse().join('/') + ' : pas de déclaration avant cette date.');
+      var chevauche = store.all('Sessions').filter(function (x) {
+        return String(x.user_id) === String(user.id) && x.statut !== 'contestee' && x.arrivee &&
+          new Date(x.arrivee) < fin && (x.depart ? new Date(x.depart) : now()) > debut;
+      })[0];
+      if (chevauche) throw erreur('Ce créneau recoupe une présence déjà déclarée le ' + chevauche.date.split('-').reverse().join('/') + ' (' + env.format(new Date(chevauche.arrivee), 'HH:mm') + (chevauche.depart ? '–' + env.format(new Date(chevauche.depart), 'HH:mm') : '') + ').');
       var missions = liste(data.missions);
       if (!missions.length) throw erreur('Coche au moins une mission réalisée.');
       var s = {

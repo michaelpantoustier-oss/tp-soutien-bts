@@ -168,5 +168,8 @@ var LaboNav = (function () {
     try { localStorage.removeItem(CLE); } catch (e) { /* rien */ }
   }
 
+  // La démonstration tourne sur des dates relatives : son suivi démarre il y a 10 jours.
+  LaboCore.CONFIG.debutSuivi = decaler(-10);
+
   return { env: env, store: store, amorcer: amorcer, reinitialiser: reinitialiser, format: format, comptes: COMPTES };
 })();

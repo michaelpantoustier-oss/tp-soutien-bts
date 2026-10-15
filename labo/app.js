@@ -340,6 +340,19 @@
     return '<div class="cases">' + C().missions.map(function (m) { return '<label class="case"><input type="checkbox" name="missions" value="' + esc(m) + '"><span>' + esc(m) + '</span></label>'; }).join('') + '</div>';
   }
 
+  // Jours ouvrés entre le début du suivi et hier sans aucune présence (hors contestées).
+  function joursSansPresence(sessions, auj) {
+    var debut = C().debutSuivi, faits = {}, r = [];
+    if (!debut) return r;
+    (sessions || []).forEach(function (s) { if (s.statut !== 'contestee') faits[s.date] = true; });
+    for (var d = new Date(debut + 'T12:00:00Z'); ; d = new Date(d.getTime() + 86400000)) {
+      var j = d.toISOString().slice(0, 10);
+      if (j >= auj) break;
+      if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6 && !faits[j]) r.push(j);
+    }
+    return r;
+  }
+
   function vuePresence() {
     var e = S.etat, s = e.sessionOuverte, auj = aujourdhui(), file = lire(CLE_FILE) || [];
     var h = titre(jourLisible(auj), s ? 'Tu es au labo' : 'Déclarer ta présence',
@@ -371,13 +384,21 @@
         '<div class="actions"><button class="btn plein" type="submit" style="min-height:56px;flex:1">Je déclare mon départ</button></div></form>';
     }
     h += '<h2>Au labo en ce moment</h2>' + tablePresentes(e.presentes);
-    h += '<details class="carte" style="margin-top:24px"><summary><h3 style="margin:0">Présence non badgée : la déclarer après coup</h3><p class="meta">Elle part en validation avec ton motif.</p></summary>' +
+    var manquants = joursSansPresence(e.sessions, auj), debut = C().debutSuivi;
+    if (manquants.length) {
+      h += '<div class="encart ambre" style="margin-top:24px"><b>Rattrapage depuis le ' + esc(jourLisible(debut)) + '</b> : ' + manquants.length +
+        ' jour(s) de semaine sans présence déclarée. Si tu étais au labo, clique sur le jour puis indique tes horaires. Sinon, ignore-le.' +
+        '<div class="actions" style="margin-top:8px;flex-wrap:wrap">' + manquants.map(function (j) {
+          return '<button type="button" class="btn petit" data-act="rattraper" data-v="' + esc(j) + '">' + esc(jourLisible(j)) + '</button>';
+        }).join('') + '</div></div>';
+    }
+    h += '<details class="carte" id="saisie-manuelle" style="margin-top:24px"' + (manquants.length ? ' open' : '') + '><summary><h3 style="margin:0">Présence non badgée : la déclarer après coup</h3><p class="meta">Une présence par demi-journée ou journée. Elle part en validation avec ton motif ; la pause déjeuner est déduite automatiquement.</p></summary>' +
       '<form data-form="saisieManuelle" style="margin-top:16px"><div class="grille">' +
-      '<label class="champ"><span>Date</span><input type="date" name="date" max="' + auj + '" required></label>' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" min="' + esc(debut) + '" max="' + auj + '" required></label>' +
       '<label class="champ"><span>Début</span><input type="time" name="debut" required></label>' +
       '<label class="champ"><span>Fin</span><input type="time" name="fin" required></label>' +
       '<label class="champ"><span>Labo</span><select name="labo" required>' + options(C().labos, '', 'Choisir…') + '</select></label>' +
-      '<label class="champ large"><span>Motif</span><input name="motif" required placeholder="Ex. : téléphone déchargé"></label></div>' +
+      '<label class="champ large"><span>Motif</span><input name="motif" required placeholder="Ex. : téléphone déchargé"' + (manquants.length ? ' value="Rattrapage : outil de suivi mis en service après le ' + esc(jourLisible(debut)) + '"' : '') + '></label></div>' +
       '<p class="label" style="margin:16px 0 8px">Missions</p>' + casesMissions() +
       '<label class="champ" style="margin-top:12px"><span>Commentaire</span><textarea name="commentaire"></textarea></label>' +
       '<div class="actions"><button class="btn" type="submit">Envoyer en validation</button></div></form></details>';
@@ -1081,6 +1102,15 @@
         });
         break;
       case 'recharger': charger(); break;
+      case 'rattraper':
+        var bloc = document.getElementById('saisie-manuelle');
+        if (bloc) {
+          bloc.open = true;
+          bloc.querySelector('input[name="date"]').value = v;
+          bloc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          bloc.querySelector('input[name="debut"]').focus();
+        }
+        break;
       case 'filtre': S.filtres[t.getAttribute('data-cle')] = v; rendre(); break;
       case 'prendre': agir('majDemande', { id: id, prendre: true }, 'Demande prise en charge.'); break;
       case 'statutDemande':

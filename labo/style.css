@@ -88,6 +88,10 @@ details.carte summary::-webkit-details-marker { display: none; }
 .encart.ambre { background: var(--ambre-pale); border-color: var(--ambre); }
 .encart.vert { background: var(--vert-pale); border-color: var(--vert); }
 .encart.urgent { background: var(--rouge-pale); border-color: var(--violet-profond); }
+/* Bandeau d'aperçu du directeur : reste visible pendant le défilement. */
+.encart.apercu { position: sticky; top: 0; z-index: 5; }
+.encart.apercu .btn { margin-left: var(--space-2); }
+ol.guide { margin: var(--space-3) 0 0; padding-left: 1.4em; display: grid; gap: var(--space-2); line-height: 1.5; }
 .panneau { background: var(--encre); color: var(--sur-encre); border-radius: var(--radius-md); padding: var(--space-5); margin: var(--space-4) 0; }
 .panneau .label { color: var(--sur-encre-sourd); }
 .panneau .heure { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: clamp(44px, 12vw, 64px); line-height: 1; letter-spacing: -0.02em; display: inline-block; transform: rotate(var(--inclinaison)); transform-origin: left bottom; margin: var(--space-4) 0 var(--space-4); color: var(--papier); }

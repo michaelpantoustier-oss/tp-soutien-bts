@@ -734,11 +734,36 @@ var LaboCore = (function () {
       return u;
     }
 
+    // Aperçu « voir comme » : réservé au directeur, en lecture seule. Le serveur
+    // répond comme si la personne visée était connectée, mais refuse toute écriture
+    // (pas de badge, de validation ou de commande au nom de quelqu'un d'autre).
+    var LECTURE_SEULE = ['etat', 'programme', 'releve'];
+    A.equipe = function (user) {
+      if (user.role !== 'directeur') throw erreur('Réservé au directeur.');
+      return actifs().map(function (u) { return { id: u.id, nom: u.nom, role: u.role, filiere: u.filiere || '' }; });
+    };
+
+    function apercu(reel, action, cibleId) {
+      if (reel.role !== 'directeur') throw erreur('Aperçu réservé au directeur.');
+      if (LECTURE_SEULE.indexOf(action) === -1) throw erreur('Aperçu en lecture seule : rien n\'est enregistré. Quitte l\'aperçu pour agir en ton nom.');
+      var cible = actifs().filter(function (u) { return String(u.id) === String(cibleId); })[0];
+      if (!cible) throw erreur('Personne introuvable.');
+      if (action === 'etat') {
+        var cle = 'apercu:' + reel.id + ':' + cible.id;
+        if (!env.cache.get(cle)) { journal(reel, 'apercu', cible.id, cible.nom); env.cache.put(cle, '1', 600); }
+      }
+      return cible;
+    }
+
     function handle(req, ctx) {
       try {
         var action = req && req.action;
         if (!A[action]) throw erreur('Action inconnue.');
-        return { ok: true, data: A[action](parCompte(ctx && ctx.email), req.data || {}) };
+        var user = parCompte(ctx && ctx.email);
+        if (req.voirComme) user = apercu(user, action, req.voirComme);
+        var r = A[action](user, req.data || {});
+        if (req.voirComme && action === 'etat') r.apercu = true;
+        return { ok: true, data: r };
       } catch (e) {
         if (!e.metier && env.log) env.log(e);
         return { ok: false, error: e.metier ? e.message : 'Erreur serveur. Réessaie ou préviens le directeur.' };

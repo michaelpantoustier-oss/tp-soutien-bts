@@ -15,7 +15,8 @@
   var S = {
     session: GOOGLE ? { google: true } : lireProfilDemo(), etat: null, erreurAcces: '', onglet: null, releve: null, releveEnCours: false,
     filtres: { demandes: 'avenir', incidents: 'ouverts', inventaire: '', invFiliere: '', invAlerte: false, commandes: 'actives', progFiliere: '', progTout: false },
-    programmeComplet: null, preDemande: null, preCommande: null, occupe: false
+    programmeComplet: null, preDemande: null, preCommande: null, occupe: false,
+    voirComme: null, equipe: null // aperçu du directeur (lecture seule, contrôlé par le serveur)
   };
   var app = document.getElementById('app');
 
@@ -116,9 +117,11 @@
   // Serveur
   // ---------------------------------------------------------------------------
   function envoyer(req) {
-    if (DEMO) return Promise.resolve(demoCore.handle(JSON.parse(JSON.stringify(req)), { email: S.session ? S.session.email : '' }));
+    var r = { action: req.action, data: req.data };
+    if (S.voirComme && !req.hors_apercu) r.voirComme = S.voirComme;
+    if (DEMO) return Promise.resolve(demoCore.handle(JSON.parse(JSON.stringify(r)), { email: S.session ? S.session.email : '' }));
     return new Promise(function (ok, ko) {
-      google.script.run.withSuccessHandler(ok).withFailureHandler(ko).appel({ action: req.action, data: req.data });
+      google.script.run.withSuccessHandler(ok).withFailureHandler(ko).appel(r);
     });
   }
 
@@ -146,12 +149,20 @@
   function finSession() {
     if (GOOGLE) return;
     try { sessionStorage.removeItem(CLE_PROFIL_DEMO); } catch (x) { /* rien */ }
-    S.session = null; S.etat = null; S.releve = null; rendre();
+    S.session = null; S.etat = null; S.releve = null; S.voirComme = null; S.estDirecteur = false; S.equipe = null; rendre();
+  }
+
+  // Aperçu du directeur : recharge tout l'état au nom de la personne choisie (id) ou de soi (null).
+  function changerApercu(id) {
+    S.voirComme = id;
+    S.onglet = null; S.releve = null; S.programmeComplet = null; S.preDemande = null; S.preCommande = null;
+    S.etat = null; rendre();
+    charger().then(function () { window.scrollTo(0, 0); });
   }
 
   function viderFile() {
     var file = lire(CLE_FILE) || [];
-    if (!file.length || !S.session) return Promise.resolve();
+    if (!file.length || !S.session || S.voirComme) return Promise.resolve();
     var reste = [];
     return file.reduce(function (p, req) {
       return p.then(function () {
@@ -166,13 +177,17 @@
 
   function charger() {
     return viderFile().then(function () { return api('etat'); }).then(function (r) {
-      if (r.ok) S.etat = r.data;
+      if (r.ok) {
+        S.etat = r.data;
+        if (!r.data.apercu) S.estDirecteur = r.data.moi.role === 'directeur';
+      }
       else if (S.session) toast(r.error, true);
       rendre();
     });
   }
 
   function agir(action, data, msgOk) {
+    if (S.voirComme) { toast('Aperçu en lecture seule : rien n\'est enregistré. Quitte l\'aperçu pour agir en ton nom.', true); return Promise.resolve(null); }
     if (S.occupe) return Promise.resolve(null);
     S.occupe = true;
     return api(action, data).then(function (r) {
@@ -199,6 +214,7 @@
     o.push(['incidents', peut('traiterIncident') ? 'Incidents' : 'Signaler']);
     if (peut('badge')) o.push(['heures', 'Mes heures']);
     if (peut('voirEquipe')) o.push(['heures', peut('facturation') ? 'Heures et facturation' : 'Activité des techniciennes']);
+    o.push(['guide', 'Guide']);
     return o;
   }
 
@@ -223,13 +239,17 @@
     var cpt = compteurs();
     var h = '<header class="entete"><div class="marque">' + logo() + '<p class="sur">BTS+ · Suivi labo</p></div>' +
       '<div class="qui"><b>' + esc(moi().nom) + '</b> · ' + esc(C().roles[moi().role]) + (moi().filiere ? ' ' + esc(LaboCore.filieresDe(moi()).join(' et ')) : '') +
-      (DEMO ? ' · <button class="btn lien" data-act="changerProfil">Changer de profil</button>' : '') + '</div></header>';
+      (S.estDirecteur && !S.voirComme ? ' · <button class="btn lien" data-act="voirComme">Voir le site comme…</button>' : '') +
+      (DEMO && !S.voirComme ? ' · <button class="btn lien" data-act="changerProfil">Changer de profil</button>' : '') + '</div></header>';
     if (DEMO) h += '<div class="demo"><span><b>Démonstration.</b> Données fictives, stockées dans ce navigateur.</span><button class="btn petit" data-act="reinit">Réinitialiser la démo</button></div>';
+    if (S.voirComme) h += '<div class="encart ambre apercu"><b>Aperçu : tu vois le site comme ' + esc(moi().nom) + ' (' + esc(C().roles[moi().role]) + ').</b> ' +
+      'Lecture seule : les boutons ne font rien, aucune action n\'est enregistrée. ' +
+      '<button class="btn petit" data-act="voirComme">Changer de personne</button> <button class="btn petit plein" data-act="quitterApercu">Quitter l\'aperçu</button></div>';
     h += '<nav class="onglets" role="tablist">' + ongl.map(function (o) {
       return '<button role="tab" data-onglet="' + o[0] + '" aria-selected="' + (S.onglet === o[0]) + '">' + esc(o[1]) +
         (cpt[o[0]] ? '<span class="compte">' + cpt[o[0]] + '</span>' : '') + '</button>';
     }).join('') + '</nav>';
-    var vues = { tableau: vueTableau, presence: vuePresence, demandes: vueDemandes, programme: vueProgramme, inventaire: vueInventaire, commandes: vueCommandes, rangement: vueRangement, incidents: vueIncidents, heures: vueHeures };
+    var vues = { tableau: vueTableau, presence: vuePresence, demandes: vueDemandes, programme: vueProgramme, inventaire: vueInventaire, commandes: vueCommandes, rangement: vueRangement, incidents: vueIncidents, heures: vueHeures, guide: vueGuide };
     h += '<section role="tabpanel">' + vues[S.onglet]() + '</section>' + piedDePage();
     app.innerHTML = h;
     if (S.onglet === 'heures' && !S.releve && !S.releveEnCours) chargerReleve();
@@ -331,6 +351,110 @@
     return p.length ? '<div class="tableau-wrap"><table><thead><tr><th>Qui</th><th>Depuis</th><th>Labo</th></tr></thead><tbody>' +
       p.map(function (x) { return '<tr><td>' + esc(x.user_nom) + '</td><td class="mono">' + fmt(x.arrivee, 'dd/MM HH:mm') + '</td><td>' + esc(x.labo) + '</td></tr>'; }).join('') +
       '</tbody></table></div>' : '<p class="vide">Personne n\'a déclaré sa présence.</p>';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Guide : mode d'emploi adapté au rôle de la personne connectée
+  // ---------------------------------------------------------------------------
+  function vueGuide() {
+    var r = moi().role, c = C(), seuil = euros(c.seuilTroisDevisTTC).replace(',00', '');
+    var labo = r === 'technicienne' || r === 'aide_laborantine';
+    function fiche(t, etapes, ouvert) {
+      return '<details class="carte"' + (ouvert ? ' open' : '') + '><summary><h3 style="margin:0">' + esc(t) + '</h3></summary><ol class="guide">' +
+        etapes.map(function (e) { return '<li>' + e + '</li>'; }).join('') + '</ol></details>';
+    }
+    var h = titre('Guide', 'Mode d\'emploi', 'Les étapes de ton poste (' + esc(c.roles[r]) + '). Les noms en gras sont ceux des onglets et des boutons. Une question ? Le directeur peut t\'accompagner en voyant le site comme toi.');
+    var f = [];
+    f.push(fiche('Ouvrir le site', [
+      'Ouvre le lien reçu par mail, connecté·e avec ton compte <b>@aurlom.com</b>. Il n\'y a ni mot de passe ni code.',
+      'Sur téléphone : menu du navigateur, puis <b>Ajouter à l\'écran d\'accueil</b>, pour retrouver le site comme une application.',
+      'Un message « compte non autorisé » ? Préviens le directeur : ton adresse doit être ajoutée à la liste des comptes.'
+    ], true));
+    if (labo) {
+      f.push(fiche('Badger chaque jour', [
+        'En arrivant : onglet <b>Présence</b>, choisis le labo, puis <b>Je déclare mon arrivée</b>. L\'heure retenue est celle du serveur.',
+        'En partant : coche les missions réalisées et les TP concernés, ajoute un commentaire si besoin, puis <b>Je déclare mon départ</b>.',
+        'Départ oublié la veille ? Le site te le rappelle : saisis l\'heure réelle de départ.',
+        'Pas de réseau : le badge reste sur le téléphone avec son heure et part tout seul au retour du réseau.',
+        'Chaque présence est validée par le prof référent. La pause déjeuner (1 h entre 12 h et 14 h) est retirée automatiquement de la journée.'
+      ]));
+      f.push(fiche('Déclarer une présence oubliée', [
+        'Onglet <b>Présence</b>, bloc <b>Présence non badgée</b> : date, début, fin, labo, motif et missions.',
+        'Les jours de semaine sans présence depuis le ' + esc(jourLisible(c.debutSuivi)) + ' sont listés : clique sur un jour pour préremplir le formulaire.',
+        'Une demi-journée le matin et une l\'après-midi : fais deux déclarations. Deux créneaux qui se recoupent sont refusés.'
+      ]));
+      f.push(fiche('Préparer les TP', [
+        'Onglet <b>Demandes de TP</b> : chaque demande indique la date, le créneau, la classe, le nombre d\'élèves et le matériel.',
+        '<b>Je prends en charge</b> pour t\'attribuer la préparation. Pose tes questions au prof dans les messages de la demande.',
+        '<b>Marquer prête</b> quand tout est en place, puis <b>TP réalisé</b> après la séance.',
+        'Une demande arrivée moins de ' + c.delaiPrepaJours + ' jours avant le TP est signalée « hors délai » au prof référent.'
+      ]));
+      f.push(fiche('Ranger et signaler', [
+        'Après chaque TP : onglet <b>Rangement</b>, coche la check-list du labo et note ce qui manque. Le prof référent voit les non-conformités dans le même onglet.',
+        'Panne, casse, produit manquant, accident : onglet <b>Incidents</b>, avec la gravité. Le suivi se fait dans le même onglet.'
+      ]));
+      f.push(fiche('Stock et commandes', [
+        'Onglet <b>Inventaire</b> : retire ce qui est utilisé, ajoute ce qui est livré. Un article sous son seuil passe en alerte.',
+        'Onglet <b>Commandes</b> : propose un achat avec fournisseur, prix TTC, lien et justification (TP ou séquence).',
+        'Au-delà de ' + seuil + ' TTC, joins trois devis concurrents. Le prof référent approuve ou refuse ; la demande est reportée dans le classeur « Pilotage dépenses ».',
+        'Commande approuvée : passe-la, puis indique <b>Commandée</b> et <b>Livrée</b> à réception.'
+      ]));
+      f.push(fiche('Suivre mes heures', [
+        'Onglet <b>Mes heures</b> : relevé du mois, jour par jour, avec le statut de validation.',
+        'Seules les présences validées comptent. Une présence contestée affiche le motif : corrige-la en la déclarant à nouveau.'
+      ]));
+    }
+    if (r === 'enseignant' || r === 'prof_referent' || r === 'coordinateur' || r === 'directeur') {
+      f.push(fiche('Demander la préparation d\'un TP', [
+        'Le plus simple : onglet <b>Programme</b>, trouve la séquence, puis <b>Préparer ce TP</b>. La demande est préremplie.',
+        'Sinon : onglet <b>' + (r === 'enseignant' ? 'Mes demandes de TP' : 'Demandes de TP') + '</b>, formulaire de demande.',
+        'Indique la date, le créneau, le labo, la classe, le nombre d\'élèves et le matériel attendu.',
+        'Envoie-la au moins ' + c.delaiPrepaJours + ' jours avant le TP : la technicienne a besoin de ce délai pour commander et préparer.',
+        'Suis l\'état : <b>Demandée</b>, <b>Prise en charge</b>, <b>Prête</b>. Réponds aux questions dans les messages de la demande.'
+      ], r === 'enseignant'));
+      f.push(fiche('Signaler un problème ou proposer un achat', [
+        'Onglet <b>' + (r === 'enseignant' ? 'Signaler' : 'Incidents') + '</b> : panne, casse, produit manquant, avec la gravité.',
+        'Onglet <b>Commandes</b> : propose un achat utile à un TP. Au-delà de ' + seuil + ' TTC, trois devis concurrents sont obligatoires.',
+        'Onglet <b>Inventaire</b> : consulte le stock avant de prévoir un TP.'
+      ]));
+    }
+    if (r === 'prof_referent' || r === 'directeur') {
+      f.push(fiche('Valider les présences', [
+        'Onglet <b>' + (r === 'directeur' ? 'Heures et facturation' : 'Activité des techniciennes') + '</b> (ou le <b>Tableau de bord</b>) : présences à valider.',
+        '<b>Valider</b> si l\'horaire est juste. <b>Contester</b> avec un motif sinon : la personne le voit et corrige.',
+        'Les saisies a posteriori et les heures modifiées à la main sont signalées : vérifie-les en priorité.'
+      ], r === 'prof_referent'));
+      f.push(fiche('Approuver les commandes', [
+        'Onglet <b>Commandes</b> : chaque proposition indique le TP ou la séquence, le prix TTC et le fournisseur.',
+        'Au-delà de ' + seuil + ' TTC, vérifie la présence des trois devis concurrents avant d\'approuver.',
+        'Un refus demande un motif ; la personne est prévenue par mail. Le statut est reporté dans « Pilotage dépenses ».'
+      ]));
+    }
+    if (r === 'prof_referent' || r === 'coordinateur' || r === 'directeur') {
+      f.push(fiche('Piloter les TP et le labo', [
+        '<b>Tableau de bord</b> : présences en cours, demandes sans préparatrice ou hors délai, incidents ouverts, stock à surveiller.',
+        'Onglet <b>Programme</b> : séquences du scénario pédagogique et TP recommandés par filière.',
+        'Onglet <b>Rangement</b> : historique des contrôles et non-conformités par labo.'
+      ]));
+    }
+    if (r === 'directeur') {
+      f.push(fiche('Facturation', [
+        'Onglet <b>Heures et facturation</b> : choisis la personne et le mois. Le relevé reprend les journées validées, pause déjeuner déduite, au taux horaire.',
+        'Exporte en CSV ou imprime le relevé pour le rapprocher de la facture.',
+        'Les montants ne sont visibles que par toi.'
+      ]));
+      f.push(fiche('Former et accompagner l\'équipe', [
+        'En haut de page : <b>Voir le site comme…</b>, puis choisis la personne. Tu vois exactement ses onglets et ses données.',
+        'L\'aperçu est en lecture seule : aucun bouton n\'enregistre rien en son nom. Chaque aperçu est noté dans le journal.',
+        '<b>Quitter l\'aperçu</b> pour revenir à ton compte.'
+      ], true));
+      f.push(fiche('Gérer les comptes', [
+        'Dans le classeur, feuille <b>Utilisateurs</b> : une ligne par personne (nom, email @aurlom.com, rôle, filière, taux horaire).',
+        'Rôles possibles : technicienne, aide_laborantine, enseignant, prof_referent, coordinateur, directeur.',
+        'Pour retirer un accès, mets <b>non</b> dans la colonne actif plutôt que de supprimer la ligne : l\'historique reste lisible.'
+      ]));
+    }
+    return h + f.join('') + '<p class="petit sourd" style="margin-top:16px">Codes couleurs : voir la légende en bas de page.</p>';
   }
 
   // ---------------------------------------------------------------------------
@@ -1102,6 +1226,19 @@
         });
         break;
       case 'recharger': charger(); break;
+      case 'voirComme':
+        (S.equipe ? Promise.resolve({ ok: true, data: S.equipe }) : envoyer({ action: 'equipe', data: {}, hors_apercu: true })).then(function (r) {
+          if (!r.ok) { toast(r.error, true); return; }
+          S.equipe = r.data;
+          var l = r.data.filter(function (u) { return u.role !== 'directeur'; });
+          var noms = l.map(function (u) { return u.nom + ' · ' + C().roles[u.role]; });
+          return boite('Voir le site comme…', { choix: noms, ok: 'Voir' }).then(function (choix) {
+            if (!choix) return;
+            changerApercu(l[noms.indexOf(choix)].id);
+          });
+        });
+        break;
+      case 'quitterApercu': changerApercu(null); break;
       case 'rattraper':
         var bloc = document.getElementById('saisie-manuelle');
         if (bloc) {

@@ -36,9 +36,10 @@ function doGet() {
   var sortie = email
     ? HtmlService.createHtmlOutputFromFile('Page')
     : HtmlService.createHtmlOutput('<p style="font-family:sans-serif;padding:24px">Accès réservé aux comptes Google de l\'école.</p>');
+  // Mode d'intégration laissé à DEFAULT : Google refuse alors l'affichage de la
+  // page dans un cadre d'un autre site (ALLOWALL l'autoriserait).
   return sortie.setTitle('Suivi labo TP')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DENY);
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
 // Appelé par la page via google.script.run : l'identité vient de Google, pas du navigateur.

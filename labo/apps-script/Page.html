@@ -6,156 +6,175 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,700;1,900&family=Hanken+Grotesk:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* Suivi labo — charte interne Aurlom BTS+ (Guide interne Aurlom, jetons du design system). */
+/* Suivi labo — charte Aurlom (guides internes et brochure BTS+ 2026-27) :
+   Inter Tight droit et serré, un seul accent rose vif, fond sable pour les encarts,
+   panneaux noirs, trois états RAS / À suivre / Urgent en vert, jaune et rose.
+   Aucun arrondi, aucune ombre, aucun dégradé. */
 :root {
-  --papier: #ffffff; --pierre: #f5f4f1; --encre: #111111; --encre-sourde: #5c5a57; --encre-faible: #8c8c8c;
-  --filet: #e2dfda; --filet-fort: #cfccc7; --violet: #c57aff; --violet-profond: #902edb; --violet-pale: #f4ecff;
-  --violet-2: #cdb0ff; --violet-nuit: #391959; --vert: #1d7a50; --vert-pale: #e8f4ee; --ambre: #a85f00;
-  --ambre-pale: #fbf1e3; --rouge-pale: #fbeceb; --sur-encre: #e9e6e2; --sur-encre-sourd: #bdb9b4;
+  --papier: #ffffff; --sable: #f4f2ee; --encre: #111111; --noir: #0d0d0d;
+  --encre-sourde: #4a4a4a; --gris: #8a8a8a; --filet: #e2dfda; --filet-fort: #cfccc7;
+  --rose: #ff2e93;          /* accent : aplats, filets, point final, texte sur noir */
+  --rose-texte: #d1006a;    /* même teinte foncée pour le petit texte sur fond clair (lisibilité) */
+  --rose-pale: #ffebf4;
+  --vert: #127a6b; --vert-pale: #e5f2ef;     /* RAS : fait, validé */
+  --jaune: #ffd43b; --jaune-pale: #fff6d6;   /* À suivre : à faire, à valider */
+  --sur-noir: #ffffff; --sur-noir-sourd: #b5b5b5;
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
-  --radius-xs: 3px; --radius-sm: 5px; --radius-md: 8px;
-  --filet-fin: 1px solid var(--filet); --filet-encre: 1px solid var(--encre);
-  --inclinaison: -8deg;
-  --font-display: 'Poppins', system-ui, sans-serif;
-  --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+  --filet-fin: 1px solid var(--filet); --filet-encre: 1px solid var(--encre); --filet-gras: 2px solid var(--encre);
+  --font-titre: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter Tight', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--papier); color: var(--encre); font-family: var(--font-sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-.page { max-width: 1040px; margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-7); }
+body { margin: 0; background: var(--papier); color: var(--encre); font-family: var(--font-sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1120px; margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-7); }
 button, input, select, textarea { font: inherit; color: inherit; }
 
-/* Titres */
-.sur { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet-profond); margin: 0; }
-h1 { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: clamp(32px, 7vw, 45px); line-height: 1; letter-spacing: -0.02em; margin: var(--space-5) 0 var(--space-5); display: inline-block; transform: rotate(var(--inclinaison)); transform-origin: left bottom; }
-h1 .point, h2 .point { color: var(--violet); }
-h2 { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 23px; line-height: 1.15; letter-spacing: -0.01em; margin: var(--space-6) 0 var(--space-4); }
-h3 { font-size: 16px; font-weight: 700; margin: 0 0 var(--space-2); }
-.lead { font-size: 17px; margin: 0 0 var(--space-5); color: var(--encre-sourde); max-width: 640px; }
-.label, th, .champ > span { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--encre-faible); }
+/* Titres : droits, serrés, point final rose */
+.sur { font-family: var(--font-titre); font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--rose-texte); margin: 0; }
+.sur::before { content: '→ '; }
+h1 { font-family: var(--font-titre); font-weight: 900; font-size: clamp(32px, 6vw, 46px); line-height: 0.98; letter-spacing: -0.045em; margin: var(--space-2) 0 var(--space-4); }
+h1 .point, h2 .point { color: var(--rose); }
+h2 { font-family: var(--font-titre); font-weight: 800; font-size: 23px; line-height: 1.15; letter-spacing: -0.03em; margin: var(--space-6) 0 var(--space-3); }
+h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 var(--space-2); }
+.lead { font-size: 16px; margin: 0 0 var(--space-5); color: var(--encre-sourde); max-width: 680px; }
+.label, th, .champ > span { font-family: var(--font-titre); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); }
 .sourd { color: var(--encre-sourde); }
 .petit { font-size: 14px; }
 .mono { font-family: var(--font-mono); font-size: 13px; }
 
-/* En-tête */
-.entete { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding-bottom: var(--space-3); border-bottom: var(--filet-encre); }
+/* En-tête : logo, puis filet noir comme en tête des guides */
+.entete { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding-bottom: var(--space-3); border-bottom: var(--filet-gras); }
 .entete .qui { font-size: 14px; color: var(--encre-sourde); }
 .entete .qui b { color: var(--encre); }
-.demo { background: var(--ambre-pale); border-left: 3px solid var(--ambre); padding: var(--space-2) var(--space-3); font-size: 14px; margin: var(--space-3) 0 0; display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.demo { background: var(--jaune-pale); border-left: 3px solid var(--jaune); padding: var(--space-2) var(--space-3); font-size: 14px; margin: var(--space-3) 0 0; display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; justify-content: space-between; }
 
-/* Onglets */
-.onglets { display: flex; gap: var(--space-1); overflow-x: auto; margin: var(--space-4) 0 0; border-bottom: var(--filet-fin); scrollbar-width: none; }
-.onglets button { background: none; border: 0; border-bottom: 2px solid transparent; padding: var(--space-2) var(--space-3); font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--encre-sourde); cursor: pointer; white-space: nowrap; }
-.onglets button[aria-selected="true"] { color: var(--encre); border-bottom-color: var(--violet); }
-.onglets .compte { font-family: var(--font-mono); color: var(--violet-profond); margin-left: 4px; }
+/* Onglets : tous visibles, retour à la ligne au lieu du défilement horizontal */
+.onglets { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0 0; padding-bottom: var(--space-3); border-bottom: var(--filet-fin); }
+.onglets button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; background: var(--papier); border: var(--filet-encre); padding: 0 var(--space-3); font-family: var(--font-titre); font-weight: 700; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--encre); cursor: pointer; white-space: nowrap; }
+.onglets button:hover { background: var(--sable); }
+.onglets button[aria-selected="true"] { background: var(--encre); color: var(--papier); }
+.onglets .compte { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0; background: var(--rose); color: var(--papier); padding: 2px 6px; line-height: 1.2; }
+@media (max-width: 560px) {
+  .onglets { gap: 6px; }
+  .onglets button { flex: 1 1 calc(50% - 6px); justify-content: center; font-size: 11px; letter-spacing: 0.06em; padding: 0 var(--space-2); white-space: normal; text-align: center; line-height: 1.2; }
+}
 
-/* Boutons */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-sm); border: var(--filet-encre); background: var(--papier); color: var(--encre); font-weight: 700; cursor: pointer; text-decoration: none; }
-.btn:hover { background: var(--pierre); }
+/* Boutons : rectangles nets */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4); border: var(--filet-encre); background: var(--papier); color: var(--encre); font-weight: 700; cursor: pointer; text-decoration: none; }
+.btn:hover { background: var(--sable); }
 .btn.plein { background: var(--encre); color: var(--papier); }
-.btn.plein:hover { background: #2a2a2a; }
-.btn.violet { background: var(--violet-profond); border-color: var(--violet-profond); color: var(--papier); }
-.btn.lien { border: 0; background: none; color: var(--violet-profond); padding: 0; min-height: 0; }
+.btn.plein:hover { background: #2b2b2b; }
+.btn.violet { background: var(--rose); border-color: var(--rose); color: var(--papier); }
+.btn.lien { border: 0; background: none; color: var(--encre); padding: 0; min-height: 0; text-decoration: underline; text-decoration-color: var(--rose); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.btn.lien:hover { background: none; color: var(--rose-texte); }
 .btn.petit { min-height: 34px; padding: 0 var(--space-3); font-size: 13px; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn:focus-visible, .onglets button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .seg label:focus-within { outline: 2px solid var(--violet-profond); outline-offset: 2px; }
+.btn:focus-visible, .onglets button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .seg label:focus-within, summary:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
 .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
 
 /* Formulaires */
 .grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3) var(--space-4); }
 .champ { display: flex; flex-direction: column; gap: var(--space-1); }
 .champ.large { grid-column: 1 / -1; }
-input, select, textarea { width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border: var(--filet-fin); border-color: var(--filet-fort); border-radius: var(--radius-sm); background: var(--papier); font-size: 16px; }
+input, select, textarea { width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--filet-fort); border-radius: 0; background: var(--papier); font-size: 16px; }
+input:hover, select:hover, textarea:hover { border-color: var(--encre); }
 textarea { min-height: 88px; resize: vertical; }
 .cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-2); }
-.case { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-2) var(--space-3); border: var(--filet-fin); border-radius: var(--radius-sm); cursor: pointer; }
-.case input { width: 18px; height: 18px; min-height: 0; margin: 3px 0 0; accent-color: var(--violet-profond); flex: none; }
-.case:has(input:checked) { border-color: var(--violet-2); background: var(--violet-pale); }
+.case { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-2) var(--space-3); border: var(--filet-fin); cursor: pointer; }
+.case input { width: 18px; height: 18px; min-height: 0; margin: 3px 0 0; accent-color: var(--rose); flex: none; }
+.case:has(input:checked) { border-color: var(--rose); background: var(--rose-pale); }
 
 /* Segmenté OK / NC / N.A. */
 .controle { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: var(--filet-fin); }
-.seg { display: inline-flex; border: var(--filet-fin); border-color: var(--filet-fort); border-radius: var(--radius-sm); overflow: hidden; flex: none; }
+.seg { display: inline-flex; border: 1px solid var(--encre); overflow: hidden; flex: none; }
 .seg label { position: relative; }
 .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
 .seg span { display: block; padding: var(--space-2) var(--space-3); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; min-width: 52px; text-align: center; }
-.seg label + label span { border-left: var(--filet-fin); }
-.seg input:checked + span.ok { background: var(--vert-pale); color: var(--vert); }
-.seg input:checked + span.nc { background: var(--rouge-pale); color: var(--violet-profond); }
-.seg input:checked + span.na { background: var(--pierre); color: var(--encre-sourde); }
+.seg label + label span { border-left: 1px solid var(--encre); }
+.seg input:checked + span.ok { background: var(--vert); color: var(--papier); }
+.seg input:checked + span.nc { background: var(--rose); color: var(--papier); }
+.seg input:checked + span.na { background: var(--sable); color: var(--encre-sourde); }
 
-/* Cartes, encarts, panneau */
-.carte { border: var(--filet-fin); border-radius: var(--radius-sm); padding: var(--space-4); margin-bottom: var(--space-3); background: var(--papier); }
+/* Cartes, encarts, panneau noir */
+.carte { border: var(--filet-fin); padding: var(--space-4); margin-bottom: var(--space-3); background: var(--papier); }
 .carte .tete { display: flex; justify-content: space-between; gap: var(--space-3); align-items: flex-start; flex-wrap: wrap; }
 .carte .meta { font-size: 14px; color: var(--encre-sourde); margin: var(--space-1) 0 0; }
 .carte p { margin: var(--space-2) 0 0; }
 details.carte summary { cursor: pointer; list-style: none; }
 details.carte summary::-webkit-details-marker { display: none; }
-.encart { padding: var(--space-3) var(--space-4); border-left: 3px solid var(--encre); background: var(--pierre); margin: var(--space-3) 0; font-size: 14px; }
-.encart.ambre { background: var(--ambre-pale); border-color: var(--ambre); }
+details.carte > summary h3::after { content: ' +'; color: var(--rose-texte); }
+details.carte[open] > summary h3::after { content: ' –'; }
+.encart { padding: var(--space-3) var(--space-4); border-left: 3px solid var(--encre); background: var(--sable); margin: var(--space-3) 0; font-size: 14px; }
+.encart.ambre { background: var(--jaune-pale); border-color: var(--jaune); }
 .encart.vert { background: var(--vert-pale); border-color: var(--vert); }
-.encart.urgent { background: var(--rouge-pale); border-color: var(--violet-profond); }
-/* Bandeau d'aperçu du directeur : reste visible pendant le défilement. */
-.encart.apercu { position: sticky; top: 0; z-index: 5; }
-.encart.apercu .btn { margin-left: var(--space-2); }
-ol.guide { margin: var(--space-3) 0 0; padding-left: 1.4em; display: grid; gap: var(--space-2); line-height: 1.5; }
-.panneau { background: var(--encre); color: var(--sur-encre); border-radius: var(--radius-md); padding: var(--space-5); margin: var(--space-4) 0; }
-.panneau .label { color: var(--sur-encre-sourd); }
-.panneau .heure { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: clamp(44px, 12vw, 64px); line-height: 1; letter-spacing: -0.02em; display: inline-block; transform: rotate(var(--inclinaison)); transform-origin: left bottom; margin: var(--space-4) 0 var(--space-4); color: var(--papier); }
-.panneau .heure .point { color: var(--violet); }
-.panneau select { background: var(--encre); color: var(--sur-encre); border-color: #3a3a3a; }
-.panneau .btn.badge { width: 100%; min-height: 64px; font-size: 18px; background: var(--violet); border-color: var(--violet); color: var(--encre); }
-.panneau .btn.badge:hover { background: var(--violet-2); }
-.panneau .sourd { color: var(--sur-encre-sourd); }
+.encart.urgent { background: var(--rose-pale); border-color: var(--rose); }
+/* Bandeau d'aperçu du directeur : noir, reste visible pendant le défilement. */
+.encart.apercu { position: sticky; top: 0; z-index: 5; background: var(--noir); color: var(--sur-noir); border-color: var(--rose); }
+.encart.apercu b { color: var(--rose); }
+.encart.apercu .btn { margin-left: var(--space-2); background: var(--noir); color: var(--sur-noir); border-color: var(--sur-noir); }
+.encart.apercu .btn.plein { background: var(--rose); border-color: var(--rose); }
+ol.guide { margin: var(--space-3) 0 0; padding-left: 0; list-style: none; counter-reset: etape; display: grid; gap: var(--space-2); line-height: 1.5; }
+ol.guide li { counter-increment: etape; display: grid; grid-template-columns: 28px 1fr; gap: var(--space-2); padding: var(--space-2) 0; border-top: var(--filet-fin); }
+ol.guide li::before { content: counter(etape); font-family: var(--font-titre); font-weight: 900; font-size: 18px; line-height: 1.2; color: var(--rose-texte); }
+.panneau { background: var(--noir); color: var(--sur-noir); padding: var(--space-5); margin: var(--space-4) 0; }
+.panneau .label { color: var(--rose); }
+.panneau .heure { font-family: var(--font-titre); font-weight: 900; font-size: clamp(48px, 12vw, 72px); line-height: 1; letter-spacing: -0.05em; margin: var(--space-3) 0; color: var(--sur-noir); }
+.panneau .heure .point { color: var(--rose); }
+.panneau select { background: var(--noir); color: var(--sur-noir); border-color: #444; }
+.panneau .btn.badge { width: 100%; min-height: 64px; font-size: 18px; background: var(--rose); border-color: var(--rose); color: var(--papier); }
+.panneau .btn.badge:hover { background: #e01f80; }
+.panneau .sourd { color: var(--sur-noir-sourd); }
 
-/* Badges d'état (toujours un mot + une couleur) */
-.badge { display: inline-block; font-family: var(--font-display); font-size: 11px; line-height: 1; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 7px; border-radius: var(--radius-xs); white-space: nowrap; vertical-align: middle; background: var(--pierre); color: var(--encre-sourde); }
-.badge.vert { background: var(--vert-pale); color: var(--vert); }
-.badge.ambre { background: var(--ambre-pale); color: var(--ambre); }
-.badge.violet { background: var(--violet-pale); color: var(--violet-profond); }
-.badge.urgent { background: var(--rouge-pale); color: var(--violet-profond); }
-.badge.encre { background: var(--encre); color: var(--sur-encre); }
+/* Badges d'état : toujours un mot + une couleur, aplats comme dans les guides */
+.badge { display: inline-block; font-family: var(--font-titre); font-size: 11px; line-height: 1; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 7px; white-space: nowrap; vertical-align: middle; background: var(--sable); color: var(--encre-sourde); }
+.badge.vert { background: var(--vert); color: var(--papier); }
+.badge.ambre { background: var(--jaune); color: var(--encre); }
+.badge.violet { background: var(--encre); color: var(--papier); }
+.badge.urgent { background: var(--rose); color: var(--papier); }
+.badge.encre { background: var(--papier); color: var(--encre); box-shadow: inset 0 0 0 1px var(--encre); }
 
-/* Chiffres clés */
-.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-top: var(--filet-encre); margin: var(--space-4) 0; }
+/* Chiffres clés : bandeau comme en couverture de brochure */
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-top: var(--filet-gras); margin: var(--space-4) 0; }
 .chiffre { padding: var(--space-4) var(--space-4) var(--space-4) 0; border-bottom: var(--filet-fin); }
-.chiffre b { display: inline-block; font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 38px; line-height: 1; letter-spacing: -0.02em; transform: rotate(var(--inclinaison)); transform-origin: left bottom; margin: var(--space-2) 0 var(--space-3); }
-.chiffre.accent b { color: var(--violet-profond); }
-.chiffre span { display: block; font-size: 14px; color: var(--encre-sourde); line-height: 1.4; }
+.chiffre b { display: block; font-family: var(--font-titre); font-weight: 900; font-size: 40px; line-height: 1; letter-spacing: -0.05em; margin: var(--space-1) 0 var(--space-2); }
+.chiffre.accent b { color: var(--rose); }
+.chiffre span { display: block; font-family: var(--font-titre); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); line-height: 1.4; }
 
-/* Tableaux */
+/* Tableaux : sans fond, règle noire sous l'en-tête, filets fins */
 .tableau-wrap { overflow-x: auto; margin: var(--space-3) 0; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
-th { text-align: left; padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: var(--filet-encre); white-space: nowrap; }
+th { text-align: left; padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: var(--filet-gras); color: var(--encre); white-space: nowrap; }
 td { padding: var(--space-3) var(--space-3) var(--space-3) 0; border-bottom: var(--filet-fin); vertical-align: top; }
 td:first-child { font-weight: 600; }
 td.num, th.num, td.mono { white-space: nowrap; }
 td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-tfoot td { border-top: var(--filet-encre); border-bottom: 0; font-weight: 700; }
+tfoot td { border-top: var(--filet-gras); border-bottom: 0; font-weight: 700; }
 
 /* Fil de messages */
 .fil { margin-top: var(--space-3); border-top: var(--filet-fin); padding-top: var(--space-3); }
 .msg { padding: var(--space-2) 0; font-size: 14px; }
 .msg .de { font-weight: 700; }
-.msg.systeme { color: var(--encre-faible); font-size: 13px; }
+.msg.systeme { color: var(--gris); font-size: 13px; }
 .fil form { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
 .fil input { flex: 1; }
 
-.vide { color: var(--encre-faible); font-size: 14px; padding: var(--space-3) 0; }
-.toast { position: fixed; left: 50%; bottom: var(--space-5); transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--encre); color: var(--sur-encre); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size: 14px; z-index: 10; }
-.toast.erreur { background: var(--violet-nuit); }
-.connexion { max-width: 420px; margin: var(--space-6) auto 0; }
+.vide { color: var(--gris); font-size: 14px; padding: var(--space-3) 0; }
+.toast { position: fixed; left: 50%; bottom: var(--space-5); transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--noir); color: var(--sur-noir); padding: var(--space-3) var(--space-4); border-left: 3px solid var(--vert); font-size: 14px; z-index: 10; }
+.toast.erreur { border-left-color: var(--rose); }
+.connexion { max-width: 440px; margin: var(--space-6) auto 0; }
 .cache { display: none !important; }
 .deux { display: grid; grid-template-columns: 1fr; gap: var(--space-5); }
 @media (min-width: 860px) { .deux { grid-template-columns: 1fr 1fr; } }
 
 /* Programme et commandes */
 ul.materiel { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); font-size: 14px; }
-ul.materiel li::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--violet); margin-right: var(--space-2); vertical-align: middle; }
-fieldset.devis { border: var(--filet-fin); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); margin: var(--space-4) 0 0; }
+ul.materiel li::before { content: '→'; color: var(--rose-texte); font-weight: 700; margin-right: var(--space-2); }
+fieldset.devis { border: var(--filet-encre); padding: var(--space-3) var(--space-4); margin: var(--space-4) 0 0; }
 fieldset.devis legend { padding: 0 var(--space-2); }
 .devis-ligne + .devis-ligne { margin-top: var(--space-3); padding-top: var(--space-3); border-top: var(--filet-fin); }
 
@@ -165,46 +184,46 @@ fieldset.devis legend { padding: 0 var(--space-2); }
   body * { visibility: hidden; }
   .imprimable, .imprimable * { visibility: visible; }
   .imprimable { display: block; position: absolute; inset: 0; padding: 18mm; font-size: 10pt; }
-  .imprimable h1 { font-size: 25pt; transform: none; margin: 4mm 0 6mm; }
+  .imprimable h1 { font-size: 25pt; margin: 4mm 0 6mm; }
   .imprimable .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; margin-top: 14mm; }
   .imprimable .signatures div { border-top: 1px solid #111; padding-top: 2mm; min-height: 22mm; }
-  .imprimable .pied { margin-top: 10mm; font-size: 8pt; color: #8c8c8c; display: flex; justify-content: space-between; }
+  .imprimable .pied { margin-top: 10mm; font-size: 8pt; color: #8a8a8a; display: flex; justify-content: space-between; }
 }
 
 /* Boîte de dialogue intégrée */
-dialog.boite { border: var(--filet-encre); border-radius: var(--radius-md); padding: var(--space-5); max-width: min(480px, calc(100% - 32px)); width: 100%; background: var(--papier); color: var(--encre); }
-dialog.boite::backdrop { background: rgba(17, 17, 17, 0.45); }
-dialog.boite > p:first-child { font-weight: 700; margin: 0 0 var(--space-3); }
+dialog.boite { border: var(--filet-gras); padding: var(--space-5); max-width: min(480px, calc(100% - 32px)); width: 100%; background: var(--papier); color: var(--encre); }
+dialog.boite::backdrop { background: rgba(13, 13, 13, 0.5); }
+dialog.boite > p:first-child { font-weight: 800; letter-spacing: -0.01em; margin: 0 0 var(--space-3); }
 details.carte summary .tete { margin: 0; }
 
 /* ------------------------------------------------------------------ */
-/* Codes couleurs (palette de la charte interne : états, filières)     */
+/* Codes couleurs : états et filières                                  */
 /* ------------------------------------------------------------------ */
 .entete .marque { display: flex; align-items: center; gap: var(--space-3); }
 .logo { display: block; height: 28px; width: auto; }
-.connexion .logo { height: 32px; margin-bottom: var(--space-2); }
+.connexion .logo { height: 36px; margin-bottom: var(--space-2); }
 .imprimable .logo { height: 32px; }
 
-/* Filet gauche de 3 px dans la couleur de l'état, comme l'Encart de la charte */
+/* Filet gauche de 3 px dans la couleur de l'état */
 .carte.etat-vert { border-left: 3px solid var(--vert); }
-.carte.etat-ambre { border-left: 3px solid var(--ambre); }
-.carte.etat-urgent { border-left: 3px solid var(--violet-profond); }
-.carte.etat-violet { border-left: 3px solid var(--violet); }
+.carte.etat-ambre { border-left: 3px solid var(--jaune); }
+.carte.etat-urgent { border-left: 3px solid var(--rose); background: var(--rose-pale); }
+.carte.etat-violet { border-left: 3px solid var(--encre); }
 .carte.etat-eteint { border-left: 3px solid var(--filet-fort); }
 .carte.etat-eteint h3, .carte.etat-eteint p { color: var(--encre-sourde); }
-tr.etat-urgent td:first-child { border-left: 3px solid var(--violet-profond); padding-left: var(--space-2); }
-tr.etat-ambre td:first-child { border-left: 3px solid var(--ambre); padding-left: var(--space-2); }
+tr.etat-urgent td:first-child { border-left: 3px solid var(--rose); padding-left: var(--space-2); }
+tr.etat-ambre td:first-child { border-left: 3px solid var(--jaune); padding-left: var(--space-2); }
 
-/* Étiquettes de filière */
-.filiere { display: inline-block; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; padding: 4px 6px; border-radius: var(--radius-xs); vertical-align: middle; white-space: nowrap; }
-.filiere.f-biomed { background: var(--violet-nuit); color: var(--papier); }
-.filiere.f-bioalc { background: var(--encre); color: var(--papier); }
-.filiere.f-commun { background: var(--pierre); color: var(--encre-sourde); }
+/* Étiquettes de filière, comme les étiquettes de campus de la brochure */
+.filiere { display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; padding: 4px 6px; vertical-align: middle; white-space: nowrap; }
+.filiere.f-biomed { background: var(--encre); color: var(--papier); }
+.filiere.f-bioalc { background: var(--papier); color: var(--encre); box-shadow: inset 0 0 0 1px var(--encre); }
+.filiere.f-commun { background: var(--sable); color: var(--encre-sourde); }
 
 /* Pied de page et légende */
-.pied { margin-top: var(--space-7); border-top: var(--filet-fin); padding-top: var(--space-3); }
-.pied-ligne { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); font-size: 11px; color: var(--encre-faible); margin-top: var(--space-3); }
-.pied-num { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--violet-profond); }
+.pied { margin-top: var(--space-7); border-top: var(--filet-gras); padding-top: var(--space-3); }
+.pied-ligne { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); margin-top: var(--space-3); }
+.pied-num { font-family: var(--font-mono); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; color: var(--encre); }
 .legende summary { cursor: pointer; }
 .legende-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-2) var(--space-5); margin-top: var(--space-3); font-size: 14px; color: var(--encre-sourde); }
 .legende-grille p { margin: 0; }
@@ -1445,7 +1464,7 @@ if (typeof module !== 'undefined') module.exports = LaboReferentiel;
   // Logo officiel (design system) : fichier à côté de la page, ou image intégrée dans Page.html.
   var LOGO = typeof LOGO_DATA !== 'undefined' ? LOGO_DATA : 'logo-aurlom.png';
   function logo(h) { return '<img class="logo" src="' + LOGO + '" alt="aurlom" height="' + (h || 28) + '">'; }
-  // Étiquette de filière : BIOMED violet nuit, BIOALC encre, Commun pierre.
+  // Étiquette de filière : BIOMED aplat noir, BIOALC contour noir, Commun sable.
   function tagFiliere(f) {
     var l = LaboCore.filieresDe({ filiere: f });
     if (!l.length) return '<span class="filiere f-commun">Commun</span>';
@@ -1467,7 +1486,7 @@ if (typeof module !== 'undefined') module.exports = LaboReferentiel;
       var champ = '';
       if (o.saisie) champ = '<label class="champ"><span>' + esc(o.saisie) + '</span><input id="boite-v" ' + (o.nombre ? 'type="number" step="any" inputmode="decimal"' : '') + ' value="' + esc(o.defaut === undefined ? '' : o.defaut) + '"></label>';
       if (o.choix) champ = '<div class="cases" style="grid-template-columns:1fr">' + o.choix.map(function (c, i) { return '<label class="case"><input type="radio" name="boite-c" value="' + esc(c) + '"' + (i === 0 ? ' checked' : '') + '><span>' + esc(c) + '</span></label>'; }).join('') + '</div>';
-      d.innerHTML = '<p>' + esc(message) + '</p>' + champ + '<p class="petit" id="boite-err" style="color:var(--violet-profond)"></p>' +
+      d.innerHTML = '<p>' + esc(message) + '</p>' + champ + '<p class="petit" id="boite-err" style="color:var(--rose-texte)"></p>' +
         '<div class="actions"><button type="button" class="btn" data-r="non">Annuler</button><button type="button" class="btn plein" data-r="oui">' + esc(o.ok || 'Confirmer') + '</button></div>';
       document.body.appendChild(d);
       function fermer(oui) {
@@ -1746,7 +1765,7 @@ if (typeof module !== 'undefined') module.exports = LaboReferentiel;
     var labo = r === 'technicienne' || r === 'aide_laborantine';
     function fiche(t, etapes, ouvert) {
       return '<details class="carte"' + (ouvert ? ' open' : '') + '><summary><h3 style="margin:0">' + esc(t) + '</h3></summary><ol class="guide">' +
-        etapes.map(function (e) { return '<li>' + e + '</li>'; }).join('') + '</ol></details>';
+        etapes.map(function (e) { return '<li><span>' + e + '</span></li>'; }).join('') + '</ol></details>';
     }
     var h = titre('Guide', 'Mode d\'emploi', 'Les étapes de ton poste (' + esc(c.roles[r]) + '). Les noms en gras sont ceux des onglets et des boutons. Une question ? Le directeur peut t\'accompagner en voyant le site comme toi.');
     var f = [];
@@ -1998,7 +2017,7 @@ if (typeof module !== 'undefined') module.exports = LaboReferentiel;
     var st = ST_DEM[d.statut] || [d.statut, ''];
     var etatD = { demandee: 'ambre', prise_en_charge: 'violet', prete: 'vert', realisee: 'eteint', annulee: 'eteint' }[d.statut] || '';
     if (d.statut === 'demandee' && (hors || j <= 2) && d.date_tp >= auj) etatD = 'urgent';
-    var h = carte(etatD, ' id="' + esc(d.id) + '"') + '<div class="tete"><div><p class="label">' + tagFiliere(d.filiere) + ' <span style="color:var(--violet-profond)">' + esc(jourLisible(d.date_tp)) + ' · ' + esc(d.creneau) + '</span></p>' +
+    var h = carte(etatD, ' id="' + esc(d.id) + '"') + '<div class="tete"><div><p class="label">' + tagFiliere(d.filiere) + ' <span style="color:var(--rose-texte)">' + esc(jourLisible(d.date_tp)) + ' · ' + esc(d.creneau) + '</span></p>' +
       '<h3 style="margin-top:4px">' + esc(d.titre) + '</h3></div><div>' + badge(st[0], st[1]) +
       (d.date_tp >= auj && d.statut !== 'annulee' ? ' ' + badge(j === 0 ? 'Aujourd\'hui' : 'J-' + j, j <= 2 ? 'encre' : '') : '') +
       (hors ? ' ' + badge('Demandée à J-' + d.delai_jours, 'urgent') : '') + '</div></div>' +
@@ -2006,7 +2025,7 @@ if (typeof module !== 'undefined') module.exports = LaboReferentiel;
       (d.competence ? '<p class="petit sourd">' + esc(d.competence) + '</p>' : '') +
       (tpRef(d.tp_ref) ? '<p class="petit"><b>TP de référence :</b> ' + esc(tpRef(d.tp_ref).intitule) + ' <span class="mono sourd">' + esc(tpRef(d.tp_ref).codes) + '</span></p>' : '') +
       '<div class="encart" style="white-space:pre-wrap"><span class="label" style="display:block">Besoin</span>' + esc(d.besoin) + '</div>' +
-      (peut('preparerTP') && ['annulee', 'realisee'].indexOf(d.statut) === -1 ? '<details><summary class="petit" style="cursor:pointer;color:var(--violet-profond);font-weight:700">Vérifier le stock pour ce TP</summary>' +
+      (peut('preparerTP') && ['annulee', 'realisee'].indexOf(d.statut) === -1 ? '<details><summary class="petit" style="cursor:pointer;color:var(--rose-texte);font-weight:700">Vérifier le stock pour ce TP</summary>' +
         listeMateriel(String(d.besoin).split(/\n|;|,(?![^(]*\))/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 2; }).slice(0, 25), { act: 'commanderDemandeItem', id: d.id }) + '</details>' : '') +
       '<p class="petit">Enseignant·e : <b>' + esc(d.prof_nom) + '</b> · Préparation : ' + (d.prepa_nom ? '<b>' + esc(d.prepa_nom) + '</b>' : badge('Non attribuée', 'ambre')) + ' · <span class="mono sourd">' + esc(d.id) + '</span></p>';
     var a = [];
@@ -2162,7 +2181,7 @@ if (typeof module !== 'undefined') module.exports = LaboReferentiel;
         return '<li>' + esc(it) + ' ' + badge(st.txt, st.cls) +
           (st.manque && peut('proposerCommande') ? ' <button class="btn lien petit" data-act="commanderSeq" data-id="' + esc(p.id) + '" data-item="' + esc(it) + '">Proposer une commande</button>' : '') + '</li>';
       }).join('');
-      return carte(enCours ? 'violet' : (p.fin < auj ? 'eteint' : '')) + '<div class="tete"><div><p class="label">' + tagFiliere(p.filiere) + ' <span style="color:var(--violet-profond)">' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + '</span></p>' +
+      return carte(enCours ? 'violet' : (p.fin < auj ? 'eteint' : '')) + '<div class="tete"><div><p class="label">' + tagFiliere(p.filiere) + ' <span style="color:var(--rose-texte)">' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + '</span></p>' +
         '<h3 style="margin-top:4px">' + esc(p.titre) + '</h3></div><div>' + (enCours ? badge('En cours', 'violet') : badge('Du ' + dateCourte(p.debut) + ' au ' + dateCourte(p.fin))) + '</div></div>' +
         (p.tp ? '<p class="petit"><b>Tronc commun :</b> ' + esc(p.tp) + '</p>' : '') +
         (p.renforcement ? '<p class="petit sourd"><b>Renforcement :</b> ' + esc(p.renforcement) + '</p>' : '') +

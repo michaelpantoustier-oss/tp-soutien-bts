@@ -26,7 +26,7 @@ def main():
     page = ['<!DOCTYPE html>', '<html lang="fr">', '<!-- Généré par outils/construire_page.py : ne pas modifier à la main. -->', '<head>', '<base target="_top">', '<meta charset="UTF-8">',
             '<meta name="robots" content="noindex, nofollow, noarchive">',
             '<link rel="preconnect" href="https://fonts.googleapis.com">',
-            '<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,700;1,900&family=Hanken+Grotesk:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">',
+            '<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">',
             '<style>', lire("style.css"), '</style>', '</head>', '<body>',
             '<main class="page" id="app"><p class="vide">Chargement…</p></main>',
             '<section class="imprimable" id="imprimable" aria-hidden="true"></section>',

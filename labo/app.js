@@ -60,7 +60,7 @@
   // Logo officiel (design system) : fichier à côté de la page, ou image intégrée dans Page.html.
   var LOGO = typeof LOGO_DATA !== 'undefined' ? LOGO_DATA : 'logo-aurlom.png';
   function logo(h) { return '<img class="logo" src="' + LOGO + '" alt="aurlom" height="' + (h || 28) + '">'; }
-  // Étiquette de filière : BIOMED violet nuit, BIOALC encre, Commun pierre.
+  // Étiquette de filière : BIOMED aplat noir, BIOALC contour noir, Commun sable.
   function tagFiliere(f) {
     var l = LaboCore.filieresDe({ filiere: f });
     if (!l.length) return '<span class="filiere f-commun">Commun</span>';
@@ -82,7 +82,7 @@
       var champ = '';
       if (o.saisie) champ = '<label class="champ"><span>' + esc(o.saisie) + '</span><input id="boite-v" ' + (o.nombre ? 'type="number" step="any" inputmode="decimal"' : '') + ' value="' + esc(o.defaut === undefined ? '' : o.defaut) + '"></label>';
       if (o.choix) champ = '<div class="cases" style="grid-template-columns:1fr">' + o.choix.map(function (c, i) { return '<label class="case"><input type="radio" name="boite-c" value="' + esc(c) + '"' + (i === 0 ? ' checked' : '') + '><span>' + esc(c) + '</span></label>'; }).join('') + '</div>';
-      d.innerHTML = '<p>' + esc(message) + '</p>' + champ + '<p class="petit" id="boite-err" style="color:var(--violet-profond)"></p>' +
+      d.innerHTML = '<p>' + esc(message) + '</p>' + champ + '<p class="petit" id="boite-err" style="color:var(--rose-texte)"></p>' +
         '<div class="actions"><button type="button" class="btn" data-r="non">Annuler</button><button type="button" class="btn plein" data-r="oui">' + esc(o.ok || 'Confirmer') + '</button></div>';
       document.body.appendChild(d);
       function fermer(oui) {
@@ -361,7 +361,7 @@
     var labo = r === 'technicienne' || r === 'aide_laborantine';
     function fiche(t, etapes, ouvert) {
       return '<details class="carte"' + (ouvert ? ' open' : '') + '><summary><h3 style="margin:0">' + esc(t) + '</h3></summary><ol class="guide">' +
-        etapes.map(function (e) { return '<li>' + e + '</li>'; }).join('') + '</ol></details>';
+        etapes.map(function (e) { return '<li><span>' + e + '</span></li>'; }).join('') + '</ol></details>';
     }
     var h = titre('Guide', 'Mode d\'emploi', 'Les étapes de ton poste (' + esc(c.roles[r]) + '). Les noms en gras sont ceux des onglets et des boutons. Une question ? Le directeur peut t\'accompagner en voyant le site comme toi.');
     var f = [];
@@ -613,7 +613,7 @@
     var st = ST_DEM[d.statut] || [d.statut, ''];
     var etatD = { demandee: 'ambre', prise_en_charge: 'violet', prete: 'vert', realisee: 'eteint', annulee: 'eteint' }[d.statut] || '';
     if (d.statut === 'demandee' && (hors || j <= 2) && d.date_tp >= auj) etatD = 'urgent';
-    var h = carte(etatD, ' id="' + esc(d.id) + '"') + '<div class="tete"><div><p class="label">' + tagFiliere(d.filiere) + ' <span style="color:var(--violet-profond)">' + esc(jourLisible(d.date_tp)) + ' · ' + esc(d.creneau) + '</span></p>' +
+    var h = carte(etatD, ' id="' + esc(d.id) + '"') + '<div class="tete"><div><p class="label">' + tagFiliere(d.filiere) + ' <span style="color:var(--rose-texte)">' + esc(jourLisible(d.date_tp)) + ' · ' + esc(d.creneau) + '</span></p>' +
       '<h3 style="margin-top:4px">' + esc(d.titre) + '</h3></div><div>' + badge(st[0], st[1]) +
       (d.date_tp >= auj && d.statut !== 'annulee' ? ' ' + badge(j === 0 ? 'Aujourd\'hui' : 'J-' + j, j <= 2 ? 'encre' : '') : '') +
       (hors ? ' ' + badge('Demandée à J-' + d.delai_jours, 'urgent') : '') + '</div></div>' +
@@ -621,7 +621,7 @@
       (d.competence ? '<p class="petit sourd">' + esc(d.competence) + '</p>' : '') +
       (tpRef(d.tp_ref) ? '<p class="petit"><b>TP de référence :</b> ' + esc(tpRef(d.tp_ref).intitule) + ' <span class="mono sourd">' + esc(tpRef(d.tp_ref).codes) + '</span></p>' : '') +
       '<div class="encart" style="white-space:pre-wrap"><span class="label" style="display:block">Besoin</span>' + esc(d.besoin) + '</div>' +
-      (peut('preparerTP') && ['annulee', 'realisee'].indexOf(d.statut) === -1 ? '<details><summary class="petit" style="cursor:pointer;color:var(--violet-profond);font-weight:700">Vérifier le stock pour ce TP</summary>' +
+      (peut('preparerTP') && ['annulee', 'realisee'].indexOf(d.statut) === -1 ? '<details><summary class="petit" style="cursor:pointer;color:var(--rose-texte);font-weight:700">Vérifier le stock pour ce TP</summary>' +
         listeMateriel(String(d.besoin).split(/\n|;|,(?![^(]*\))/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 2; }).slice(0, 25), { act: 'commanderDemandeItem', id: d.id }) + '</details>' : '') +
       '<p class="petit">Enseignant·e : <b>' + esc(d.prof_nom) + '</b> · Préparation : ' + (d.prepa_nom ? '<b>' + esc(d.prepa_nom) + '</b>' : badge('Non attribuée', 'ambre')) + ' · <span class="mono sourd">' + esc(d.id) + '</span></p>';
     var a = [];
@@ -777,7 +777,7 @@
         return '<li>' + esc(it) + ' ' + badge(st.txt, st.cls) +
           (st.manque && peut('proposerCommande') ? ' <button class="btn lien petit" data-act="commanderSeq" data-id="' + esc(p.id) + '" data-item="' + esc(it) + '">Proposer une commande</button>' : '') + '</li>';
       }).join('');
-      return carte(enCours ? 'violet' : (p.fin < auj ? 'eteint' : '')) + '<div class="tete"><div><p class="label">' + tagFiliere(p.filiere) + ' <span style="color:var(--violet-profond)">' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + '</span></p>' +
+      return carte(enCours ? 'violet' : (p.fin < auj ? 'eteint' : '')) + '<div class="tete"><div><p class="label">' + tagFiliere(p.filiere) + ' <span style="color:var(--rose-texte)">' + esc(p.annee) + ' · ' + esc(p.matiere) + ' · ' + esc(p.semaines) + '</span></p>' +
         '<h3 style="margin-top:4px">' + esc(p.titre) + '</h3></div><div>' + (enCours ? badge('En cours', 'violet') : badge('Du ' + dateCourte(p.debut) + ' au ' + dateCourte(p.fin))) + '</div></div>' +
         (p.tp ? '<p class="petit"><b>Tronc commun :</b> ' + esc(p.tp) + '</p>' : '') +
         (p.renforcement ? '<p class="petit sourd"><b>Renforcement :</b> ' + esc(p.renforcement) + '</p>' : '') +
